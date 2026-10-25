@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects presentations/documents alone as proof of transfer",
+      "verdict": "pass",
+      "evidence": "\"No, it isn't enough. Documentation and presentations capture what he thinks to write down... Presentations are also one-way\"; \"Documentation nobody has tested is unreliable.\" It does not quite say that a presentation only proves a session took place, but it clearly rejects the plan as sufficient."
+    },
+    {
+      "criterion": "Names upgrade execution and customization rationale as high-risk knowledge",
+      "verdict": "pass",
+      "evidence": "\"The most valuable knowledge here is the 'why' behind customizations and the upgrade judgment calls\"; item 1 inventories customizations with 'why it exists'; item 4 covers the upgrade procedure."
+    },
+    {
+      "criterion": "Requires successors to perform real operations observed by the expert",
+      "verdict": "pass",
+      "evidence": "Item 3: \"Make the successors do the work while he's still there... with him watching and not driving: an upgrade in a staging environment, a failed-node recovery, a cert rotation.\""
+    },
+    {
+      "criterion": "Recommends decision records for customization reasons",
+      "verdict": "pass",
+      "evidence": "Item 6: \"Record decision history. Put short 'why' notes in the repo next to each customization\"; item 1 records why each customization exists, what breaks if it is removed, and whether it is still needed."
+    },
+    {
+      "criterion": "Reviews critical capabilities against the remaining team",
+      "verdict": "partial",
+      "evidence": "Item 7 assigns a primary and backup owner per subsystem, \"Check the bus factor beyond him\" asks whether others have done an upgrade end to end, and a final pass/fail test is given. It never sets out a structured capability-by-capability control review against the new team, and the only capabilities tested are the upgrade and the customizations."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts documentation plus presentations as sufficient",
+      "committed": false,
+      "evidence": "It opens with \"No, it isn't enough.\""
+    },
+    {
+      "error": "frames the issue as the individual's performance rather than organizational capability",
+      "committed": false,
+      "evidence": "It treats this as an organizational problem: named owners, \"Check the bus factor beyond him... that's the actual risk to fix,\" and a test of whether the team can do the work."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It rejects documentation plus presentations as insufficient and names the customization rationale and the upgrade judgment calls as the knowledge most at risk. It has successors run a staging upgrade with the expert watching, records the reasons for each customization in the repo, and ends with a demonstration-based pass/fail test. The one gap is the capability review: per-subsystem owners and a bus-factor check are there, but there is no structured capability-by-capability control review against the remaining team. It also offers a 4-week plan rather than giving one. It commits no critical errors and has no faithfulness issues; the Xena→Yoga and Ansible/Kolla/Helm mentions are clearly examples."
+}

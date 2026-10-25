@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Prefers project tools over direct SQL where available",
+      "verdict": "pass",
+      "evidence": "\"Do the work through service APIs and the project tools, in batches. Use direct SQL only for the residue the APIs cannot clear\". It lists reset state, openstack port delete, cinder reset-state, nova-manage placement heal_allocations and archive_deleted_rows."
+    },
+    {
+      "criterion": "Requires backup, small increments and verification",
+      "verdict": "pass",
+      "evidence": "The prerequisites call for a \"Row-level backup of every row to be changed, plus a full dump of each DB, verified restorable\". It also asks for a \"Pilot with 3–5 category-A instances\" and SQL \"per record\" \"with a backup and a verification after each\", and it has a full Verification section."
+    },
+    {
+      "criterion": "Requires confirming records against real hypervisor/network/storage state",
+      "verdict": "pass",
+      "evidence": "Inventory step: \"whether the hypervisor has the guest (virsh) and its disks\", \"ports, including OVN logical ports\" and \"volume attachments, BDMs and Cinder backend exports\". Also: \"Never treat a volume as detached before the backend and hypervisor confirm it.\""
+    },
+    {
+      "criterion": "Mentions Placement allocation reconciliation",
+      "verdict": "pass",
+      "evidence": "\"Placement allocations keep consuming capacity on the compute hosts\", \"nova-manage placement audit\" and \"heal_allocations\". Verification includes \"Placement allocations match actual instances\"."
+    },
+    {
+      "criterion": "Flags the irreversibility and blast radius",
+      "verdict": "pass",
+      "evidence": "\"One transaction per DB gives no cross-DB atomicity and no rollback after commit\" and \"Commit is irreversible\". The Blast radius gate is marked fail: \"All 300 in one go, no pilot, no batches\". There is also a Scope and blast radius section."
+    },
+    {
+      "criterion": "Proposes a staged plan with a dry run",
+      "verdict": "pass",
+      "evidence": "A staged plan: read-only inventory with A/B/C classification (a dry-run listing), then fix the cause, then API cleanup, then a pilot, then batches, then residue SQL. It also asks for a \"Rehearsal on a restored copy\" and stops if \"affected row counts differ from the approved list\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the bulk SQL script in one go",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready.\" Option (a) is \"Rejected for now: no recovery, no pilot, DB-only fix.\""
+    },
+    {
+      "error": "omits the backup requirement",
+      "committed": false,
+      "evidence": "Requires row-level backups and full dumps that are verified restorable, plus a backup before each per-record SQL change."
+    },
+    {
+      "error": "ignores Placement allocations",
+      "committed": false,
+      "evidence": "Placement allocations appear in the risks, the inventory step (placement audit), the remediation step (heal_allocations) and the verification step."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It says the bulk SQL script is not ready, insists on project tools and APIs before direct SQL, and requires backups, a pilot, batches and per-record SQL with verification after each change. It checks each record against the hypervisor, OVN and Cinder backend before acting, and treats Placement and nova_api consistency explicitly. It flags that the change is irreversible and has a wide blast radius, and it gives a staged plan with a read-only inventory and a rehearsal. It also covers decision roles and verification. It commits none of the critical errors. It cites no book passages, and its claims about the user's environment are presented as unknowns or are hedged."
+}

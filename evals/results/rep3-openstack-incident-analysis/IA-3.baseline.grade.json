@@ -1,0 +1,55 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"Automating the migration treats a symptom that is probably coming from the host side.\" and \"the fix is on the host, not a migration.\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "partial",
+      "evidence": "It mentions the 15 cases only to suggest comparing hosts (\"Compare the 15 affected VMs...\"), and explains the recurrence as \"Drift over days\". It never says outright that the repeated recurrence shows the migrations leave the cause in place."
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "\"If `hw:emulator_threads_policy` isn't set, QEMU's emulator threads run on the same pCPUs\" and \"Host kernel work on the pinned cores... Check that `isolcpus`, `nohz_full` and `irqbalance` are configured to exclude the dedicated set\", plus the cpu_shared_set/cpu_dedicated_set overlap."
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "partial",
+      "evidence": "It suggests checking isolation settings, comparing source hosts, and asks to see flavor extra_specs and nova.conf `[compute]`. These are read-only, but there are no concrete commands, and investigation is not a gate: the response offers to write the migration skeleton right away (\"I can write that skeleton...\")."
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "partial",
+      "evidence": "It opens with \"Before automating, I'd spend an hour on root cause\", but it never explains that automation spreads the problem faster and wider, and most of the response designs the automation anyway."
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "partial",
+      "evidence": "The scope limits are strong: per-VM cooldown, a global rate limit, one migration at a time, a kill switch, an opt-out, and stopping after a failed migration. But the design is autonomous once enabled. \"Dry-run by default... for a week before enabling it\" is a trial period, not a human approving each migration."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "The response designs an autonomous migration service, but it first challenges the cause in detail (\"Before automating, I'd spend an hour on root cause\", \"Why this is suspicious\") and says the fix is on the host. Because the cause is questioned, the \"without questioning the cause\" condition is not met."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It says \"the fix is on the host, not a migration\" and treats migration as treating a symptom."
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "Possible causes are given as hypotheses to check (\"If `hw:emulator_threads_policy` isn't set...\"), and the response asks for extra_specs and nova.conf rather than assuming them."
+    }
+  ],
+  "faithfulness_issues": [
+    "The response says \"Compare the 15 affected VMs\", but the user reported about 15 migrations this month, not 15 distinct affected VMs. That count is misstated as a fact about the environment."
+  ],
+  "summary": "The diagnosis is good. The response challenges the request, names emulator threads, host isolation (isolcpus/nohz_full/IRQ) and dedicated/shared set overlap as likely causes, and says the fix belongs on the host. It then designs a full autonomous migration service. The guardrails are solid (cooldowns, rate limits, kill switch, dry-run first), but once enabled no human approves each migration. It also does not make root-cause investigation a hard gate, and it does not argue explicitly that automating a workaround spreads the problem faster and wider. No critical errors were committed. There is one minor factual slip: it treats 15 migrations as 15 VMs."
+}

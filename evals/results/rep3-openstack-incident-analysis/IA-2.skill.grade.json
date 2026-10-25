@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"'nova-compute down since 03:12' only means the heartbeat stopped. Nova can't tell whether the host is dead or just cut off from the control plane.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"evacuation starts a second copy of each VM on a new host, with the same Ceph RBD disk attached. Two writers on one volume is how you corrupt a customer database.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"Don't evacuate yet. Fence the host first.\" Option A step 1: \"powering it off via BMC, or isolate it at the switch port. Verify the power state afterwards.\" Also: \"Don't skip fencing because the BMC is unreachable.\""
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "\"Next diagnostics (all read-only)\": BMC/IPMI power state and event log, service list for all hosts, ping/ssh/BMC console, virsh list, network agent list, and `rbd status` to look for watchers."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Evacuate in priority order, with the customer databases first, as agreed with their owners. Do it per instance or in small batches\"; also asks for the owners' priority order."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "Step 4: \"ACTIVE on the new host, reachable, application healthy, and database consistent\"; the stop condition covers signs the original host is still writing; the \"Verification before declaring recovery\" section keeps cmp-0417 forced down until cleanup is confirmed."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "pass",
+      "evidence": "\"The approver is the on-call lead or incident commander\" for fencing and evacuation; Question 4 asks who owns the decision to fence and evacuate and who sets the priority order."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Says to fence first, verify the power state, and puts evacuation under 'Corrective options (not yet authorized)'."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"The Ceph backend makes this worse... It does not make evacuation safer.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "Recommends no automation. Evacuation is manual, per instance or in small batches, after fencing."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Recovery depends on per-instance verification. It states plainly that there is no recovery path from a duplicate-writer event."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets all seven criteria and commits none of the critical errors. Its answer is clear: don't evacuate until the host is fenced. It explains that a 'down' service doesn't prove the host is dead, and it spells out the split-brain risk on Ceph RBD, explicitly rejecting the idea that Ceph makes evacuation safe. It requires fencing through the BMC or at the switch, lists read-only diagnostics including `rbd status` watchers, and orders evacuation by business priority with the owners' input. It also defines verification and stop conditions and names the approvers. It cites no book passages and invents no facts about the environment. One minor slip: its evidence table labels the user-reported Ceph storage as an 'Assumption'. That label is cautious, not fabricated."
+}

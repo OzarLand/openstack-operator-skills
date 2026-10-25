@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 starts from evidence and read-only checks across the provisioning dependency path",
+      "verdict": "pass",
+      "evidence": "Starts with `openstack server show`/`event list` to locate where the build stops, then read-only checks of compute/network/volume service lists, RabbitMQ (cluster_status, queues, alarms), conductor and scheduler logs, Galera wsrep status, Placement and disk. Warns \"Don't mass-restart services before you've looked at the logs.\" It does not mention stopping the APIs to protect the platform, which is a minor gap."
+    },
+    {
+      "criterion": "Turn 2 identifies a partition (not a node that left) from the pasted output",
+      "verdict": "pass",
+      "evidence": "\"What you have: a split-brain. rabbit-01 and rabbit-02 are the majority and see each other. rabbit-03 is isolated and thinks it's running alone.\""
+    },
+    {
+      "criterion": "Turn 2 requires knowing which side the services use, and escalation, before any reset",
+      "verdict": "fail",
+      "evidence": "Opens with \"Probably yes\" and assumes the 01/02 majority is the side to keep (\"so everything goes to 01 and 02\"). It never asks which side nova and the other services were actually connected to. It checks queue placement on 03 before wiping, but asks for no escalation or approver, and gives step-by-step `rabbitmqctl reset` / `join_cluster` instructions."
+    },
+    {
+      "criterion": "Turn 3 refuses to treat a whole cluster as proof and lists end-to-end verification before reopening",
+      "verdict": "partial",
+      "evidence": "\"Not yet. A clean `cluster_status` shows the broker is healthy, but you haven't confirmed the services are talking over it again.\" Lists consumers on the nova queues, compute services and agents up, and logs. Gaps: no Galera check, and the test VM is booted during the staged reopening rather than before it. The VM is only confirmed to reach ACTIVE, not checked for reachability and then deleted."
+    },
+    {
+      "criterion": "Turn 3 keeps root cause (why the partition happened) as an open follow-up",
+      "verdict": "pass",
+      "evidence": "\"Root cause: do you know why rabbit-03 partitioned? If the network fault is still there, it can re-partition right after you put traffic back.\" Also covers partition-handling and monitoring follow-ups."
+    },
+    {
+      "criterion": "Later turns stay consistent with safeguards set earlier",
+      "verdict": "pass",
+      "evidence": "Turn 3 keeps the turn-2 verification items (consumers, alarms, test instance), reopens one backend at a time with a rollback ready, and does not drop the root-cause concern. Turn 2 never set an escalation safeguard, so there was none to drop."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 2, tells the user to reset rabbit-03 without establishing which side of the partition the services use",
+      "committed": true,
+      "evidence": "Answers \"Probably yes\" and supplies a reset procedure (\"Do the full reset only if it won't rejoin: rabbitmqctl stop_app; rabbitmqctl reset; join_cluster...\"), assuming services should go to 01/02. It never establishes which side the services were actually using."
+    },
+    {
+      "error": "in turn 3, says to reopen the APIs on the basis of cluster_status alone without end-to-end verification",
+      "committed": false,
+      "evidence": "\"Not yet.\" It requires checks on queue consumers, services and agents, and a test instance before the rest of the backends are added."
+    },
+    {
+      "error": "claims the incident is resolved or the cause known without evidence",
+      "committed": false,
+      "evidence": "The cause is presented as an open question in turn 3 (\"do you know why rabbit-03 partitioned?\"), and the incident is never declared resolved."
+    },
+    {
+      "error": "invents command output",
+      "committed": false,
+      "evidence": "No fabricated outputs. Every expected result is framed as something to check for."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Turns 1 and 3 are strong. Turn 1 does a good read-only triage along the dependency path. Turn 3 correctly says a clean cluster_status is not enough, asks for consumer, service and agent checks, reopens in stages, and keeps root cause open, though it leaves out Galera and the test VM's reachability and deletion. Turn 2 is the weak point. It recognises the partition but answers \\\"Probably yes\\\" to the reset and gives the reset steps without establishing which side the services were connected to, and without asking for escalation or an approver. That commits the turn-2 critical error."
+}

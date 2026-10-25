@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"Yes, backporting is the right call. For an unmaintained series, a local backport is the standard way to handle an OSSA.\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "partial",
+      "evidence": "Item 6 'Record provenance' covers the upstream commit ID, the OSSA/CVE number and notes on adaptations, and item 5 covers testing. It never asks for an owner, a 'why not upgrade' justification or an exit condition."
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "partial",
+      "evidence": "It says \"each one adds to the cost of diverging from upstream\" but opens that point with \"a seventh backport on an unmaintained series is not a problem in itself\". That downplays the accumulation instead of naming it as a sign the series is too old."
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "pass",
+      "evidence": "\"It's worth putting a date on your upgrade path, or on adopting a vendor-maintained series.\" It does not suggest reviewing the exit conditions of the existing backports."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "fail",
+      "evidence": "It never asks whether the distribution or vendor already ships this fix. 'Vendor-maintained series' comes up only as a future migration option."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": true,
+      "evidence": "It approves outright (\"Yes, backporting is the right call\"). It does require tests, but at no point does it require an owner or an exit condition for the backport."
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "It plays the signal down (\"not a problem in itself\") but still brings up divergence cost and recommends putting a date on the upgrade path or moving to a vendor-maintained series."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The technical guidance on backporting is solid: confirm the series is affected, look for missing prerequisites, check overlap with the existing backports, check for cross-repo changes, test, and record provenance. The response still gives an unconditional yes without requiring an owner or an exit condition, which commits the first critical error. It plays down the lifecycle signal of seven accumulated backports, though it does recommend dating the upgrade. It also never checks whether the distribution already ships the fix."
+}

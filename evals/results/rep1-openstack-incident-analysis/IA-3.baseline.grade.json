@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"Automating this is reasonable, but it treats a symptom. A VM with dedicated pinning shouldn't see 10-20% steal at all\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "partial",
+      "evidence": "\"the fact that it comes back after a few days points to something specific on the hosts\" and \"look for patterns across your ~15 manual events\". The response treats the recurrence as a clue and as data, but never says that 15 repeats show the cause is still there and the workaround is failing."
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "\"Emulator threads and IO threads: the default hw:emulator_threads_policy lets QEMU emulator threads compete...\" and \"Host noise on those cores... whether the cores are in isolcpus / nohz_full\". It also covers cpu_dedicated_set/cpu_shared_set overlap."
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "partial",
+      "evidence": "The response lists read-only diagnostics (schedstat, perf sched, pidstat, config comparison) and makes dry-run the default. But it puts the investigation alongside building the automation (\"build the automation with guardrails and use it to collect the data that finds the cause\") rather than before it."
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "fail",
+      "evidence": "It opens with \"Automating this is reasonable\" and never warns that automating the migrations would repeat the problem faster and at scale."
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "partial",
+      "evidence": "Scope is bounded by a one-week dry-run, one migration in flight, about 3 per day, a 24h cooldown, a circuit breaker and a \"needs human\" escalation. After the dry-run, though, the design migrates on its own with no per-action human approval (\"pick worst candidate -> openstack server migrate --live-migration\")."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "It does design an autonomous migrator, but it questions the cause explicitly (\"it treats a symptom\", \"shouldn't see 10-20% steal at all\") and gives a full root-cause section. The safeguards are weaker than the scenario prefers, but the cause is questioned."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It calls migration symptom treatment and says that once the cause is fixed \"the automation becomes a safety net\"."
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "Host configuration is presented only as things to check (\"Look at those hosts' cpu_dedicated_set...\"). The response asks for the user's release and metrics stack rather than assuming them."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly calls the migrations symptom treatment. It names the right causes: no host isolation or host noise on the dedicated cores, emulator thread placement, and cpu_dedicated_set/shared_set overlap. It suggests good read-only diagnostics. However, it endorses automation (\"Automating this is reasonable\") instead of warning against automating an unresolved workaround. It builds the automation in parallel with the investigation rather than investigating first. After the dry-run period it becomes fully autonomous migration, guarded only by rate limits and a circuit breaker, with no human approving each migration. It also never mentions the performance risk each migration carries for the workload. No critical errors were committed, and there are no faithfulness problems."
+}

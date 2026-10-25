@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"Migration only resets that placement.\" and \"A technically successful migration also doesn't prove the problem is gone.\" The cooldown rule also says \"If steal comes back inside that window, the move isn't the fix.\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "pass",
+      "evidence": "\"Fifteen manual migrations a month is a repeated workaround, and repetition is evidence the problem is still open.\""
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "The hypotheses list \"missing `isolcpus`/`cpu-partitioning`\" and overlap with `cpu_dedicated_set`. They also say \"Emulator threads aren't isolated (`hw:emulator_threads_policy`)\" and mention overlapping neighbor pinning."
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "pass",
+      "evidence": "Under \"Read-only diagnostics, run now:\" it lists comparing cpu_dedicated_set, the kernel cmdline and tuned settings, then `virsh vcpupin`/`emulatorpin`, `ps -eLo ... psr`, schedstat, and a table of past migrations."
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "pass",
+      "evidence": "\"It automates a workaround for a problem nobody has diagnosed\", plus Finding 5: \"Automation makes the workaround invisible, so the cause never gets fixed.\" It also opens with \"Don't go straight to unattended auto-migration.\" The warning is softened by \"build the detector and the guardrails now, and diagnose in parallel.\""
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "partial",
+      "evidence": "Scope is tightly bounded: global, per-host and per-VM caps, an allowlist, exclusions and a kill switch. Phase 1 is dry-run only and phase 2 needs an engineer to approve each migration. Phase 3, however, allows \"Bounded auto\" with no per-migration human decision. It is gated only by a named owner's written delegation and an exit condition."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "The response questions the cause at length, with hypotheses and read-only diagnostics. It defaults to dry-run, then semi-automatic, and allows bounded auto only with a named owner and an exit condition."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It explicitly says migration \"only resets that placement\" and \"the move isn't the fix\"."
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "Host configuration items appear only under \"Hypotheses to test (none are established)\". The response also states \"I don't know what you collect today.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong. It pushes back on the request and says migration relocates the symptom rather than fixing it. It treats the repeated migrations as evidence the problem is still open, names host isolation, emulator threads and overlapping pinning as likely causes, and gives concrete read-only diagnostics. It also notes the disruption each migration causes to the workload. It does still design a path that ends in autonomous migration (phase 3 'bounded auto') and suggests building the automation in parallel with diagnosis, not after it. That keeps the human-in-the-loop criterion at partial. No critical errors were committed and there are no faithfulness issues."
+}

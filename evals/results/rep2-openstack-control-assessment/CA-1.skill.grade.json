@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against immediate transformation and explains why",
+      "verdict": "pass",
+      "evidence": "\"Don't dismiss them, but don't start them yet. Changing the deployment tool, the network and the OpenStack release at once makes failures impossible to attribute, and a platform you can't yet recover has no safety net.\" It also says migrating an undocumented deployment \"moves the unknowns instead of removing them.\""
+    },
+    {
+      "criterion": "Uses the restoration sequence or an equivalent staged approach",
+      "verdict": "pass",
+      "evidence": "\"The order is: understand, protect, stabilize, and only then transform.\" The plan is staged as Week 1 protect/discover, Weeks 1–2 guardrails, Weeks 2–4 assess/stabilize, plus knowledge capture and tested runbooks, then evolution with entry criteria. Simplify and establish control are not named, but the staging is equivalent."
+    },
+    {
+      "criterion": "Lists concrete first-30-day outputs",
+      "verdict": "partial",
+      "evidence": "The 30-day section is mostly activities: rank business dependence, walk one journey, inventory, mine incidents, set up guardrails, rate capabilities. Deliverables such as \"capability table with levels and confidence, critical risks, act-now/plan/monitor/accept decisions with owners... restoration roadmap\" appear only as a future offer. There is no explicit list of current-state map, ownership gaps and recovery gaps as 30-day outputs."
+    },
+    {
+      "criterion": "Requires owners and removal conditions for guardrails",
+      "verdict": "pass",
+      "evidence": "\"Every guardrail needs an owner, a reason, a removal condition and a review date. Otherwise the emergency state becomes permanent.\""
+    },
+    {
+      "criterion": "Mentions the exception for unmaintained, vulnerable releases",
+      "verdict": "pass",
+      "evidence": "\"Upgrades: this is the one exception. Years of postponement may mean you're on an unmaintained, unpatched release, and then upgrading may itself be the stabilization. But sequence it alone.\""
+    },
+    {
+      "criterion": "Starts from business capabilities",
+      "verdict": "pass",
+      "evidence": "Week 1, step 1: \"Rank business dependence. Ask which business capabilities depend on this cloud and how critical each is...\" It then rates each critical capability, not each component."
+    },
+    {
+      "criterion": "Defines exit criteria for restoration",
+      "verdict": "partial",
+      "evidence": "It gives example entry criteria for transformation: \"recovery demonstrated for critical capabilities, ownership gaps closed, critical dependencies visible.\" It also frames the question as whether the organization can \"understand, intervene on, recover and evolve this cloud without depending on individuals.\" But the explicit \"control restored\" criteria are deferred to a later deliverable and never fully defined."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses starting with the deployment tool migration and network redesign",
+      "committed": false,
+      "evidence": "It explicitly defers both: \"don't start them yet\", with entry criteria set for each."
+    },
+    {
+      "error": "proposes a single maturity score as the outcome",
+      "committed": false,
+      "evidence": "It uses levels for each capability, backed by evidence (\"Rate each critical capability from Unknown to... Sustainable\"), and offers a capability table, not a single score."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong. It advises restraint and explains why, starts from business capabilities, uses an equivalent staged restoration approach, requires guardrails with owners and removal conditions, and notes the exception for unpatched releases. Two criteria are only partly met. The first-30-day section lists activities more than deliverables. The exit criteria are given only as examples, and the full \"control restored\" definition is left for later. It commits no critical errors and has no faithfulness issues: there are no book citations, and it invents no facts about the user's environment."
+}

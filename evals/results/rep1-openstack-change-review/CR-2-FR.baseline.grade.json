@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"ne supprime pas les clés anciennes… tu invalides immédiatement tous les tokens existants. Ils ont été chiffrés avec l'ancienne primaire… tous les utilisateurs et services sont déconnectés.\" The response also warns that deleting key 0 breaks the next rotation."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "It distributes the staged key before rotating: \"Si tu fais l'inverse, tant que le rsync n'est pas fini, un nœud peut émettre des tokens avec une nouvelle primaire que les autres ne savent pas déchiffrer.\" It recommends rsync -a --delete and checks \"ls -l identique partout\". It does not check whether the nodes already hold different key sets before the first rsync overwrites keystone-2 and keystone-3."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "fail",
+      "evidence": "The response never suggests rehearsing in staging or a test environment, and never says that a first-ever rotation is untested."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "partial",
+      "evidence": "Step 4 is \"ls -l identique partout, puis émettre un token sur un nœud et le valider sur les autres\". This only issues tokens on one node, not on every node in turn. There is no check of existing tokens and no explicit go/no-go criteria."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "partial",
+      "evidence": "\"Sauvegarde /etc/keystone/fernet-keys/ sur chaque nœud avant de commencer (cp -a)\", with a backup command in the plan. There is no restore procedure, no rollback trigger and no stop conditions."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "partial",
+      "evidence": "It states \"Keystone relit le répertoire de clés quand il change\" and \"Le redémarrage est inutile en général\" without saying to check this for the deployed version or deployment method. The hedge \"en général\" softens this only slightly."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "It explicitly warns against it: \"ne supprime pas les clés anciennes\" and \"Il n'y a rien à nettoyer à la main.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "It distributes the staged key before rotating, resyncs afterwards with --delete, and checks that the key listings are identical on every node."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "The corrected plan includes a verification step (issue a token on one node, validate it on the others) and advises a backup first."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly identifies the main danger, deleting secondary keys and the staged key 0, and explains the token impact. It fixes the distribution order (stage key 0 everywhere, rotate, resync) and adds backups, ownership and permission handling, and cross-node token validation. It commits none of the critical errors. Gaps: no rehearsal recommendation for a first-ever rotation, and no restore procedure or stop conditions beyond the backup. Verification issues tokens from only one node. There is no read-only vs state-changing labelling or approval and timing discussion, and no check that the nodes hold the same keys before the first rsync. It also asserts unflagged version-dependent behaviour (Keystone reloads keys without a restart)."
+}

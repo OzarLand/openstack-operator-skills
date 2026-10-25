@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"The cause isn't understood, and the migrations are masking it... Automating that makes the workaround run faster and hide the cause better.\" It also says \"Migration changes which host and which pCPUs the VM gets.\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "pass",
+      "evidence": "\"Repeating a workaround is evidence there's a real problem. Repeated recovery isn't stability.\" It also proposes tabulating the ~15 manual cases to look for clustering."
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "\"Host processes or IRQs landing on cores that are meant to be isolated... `cpu_dedicated_set` not matching `isolcpus` or the systemd `CPUAffinity`\" and \"Emulator or I/O threads competing with vCPU threads (check `hw:emulator_threads_policy`)\". Overlapping pinning between the shared and dedicated sets is also listed."
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "pass",
+      "evidence": "The section \"Read-only diagnostics to run first\" covers virsh vcpupin/emulatorpin, isolcpus, IRQ affinity, mpstat and perf sched, and states \"All of these are read-only. If the pattern turns out to be one host or one core range, the fix is a config change, not a migration job.\""
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "pass",
+      "evidence": "\"My recommendation is to semi-automate this first, not to build auto-migrate yet.\" It also says full automation \"only makes sense after the cause is understood, or after a decision to accept the workaround for a set period.\""
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "pass",
+      "evidence": "The semi-automated design uses \"--dry-run\" as the default and \"needs `--confirm` to act\", with a human approving each proposal. The optional fully automatic path is conditional and bounded by opt-in scope, rate limits, a per-VM cooldown with escalation, a kill switch and stop conditions, and states \"Resuming is a new human decision.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "The response challenges the cause first and recommends semi-automation with human approval. Full automation appears only as a conditional, later option that requires the cause to be understood or an explicit time-limited acceptance of the workaround, and it comes with extensive safeguards."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It explicitly calls migration a workaround that is \"masking\" the cause, and says \"the fix is a config change, not a migration job.\""
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "The causes are labeled \"These are hypotheses, not findings.\" It asks the user for the measurement method, release, storage and case data instead of assuming them."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all six criteria and commits none of the critical errors. It challenges the request, treats the repeated migrations as evidence of an unresolved cause, and names host isolation mismatches, emulator thread placement and overlapping pinning as hypotheses. It proposes concrete read-only diagnostics and recommends detect-and-propose semi-automation with human confirmation. Full automation is allowed only conditionally and under strict bounds. One minor technical imprecision falls outside the faithfulness scope: it lists hugepage instances among those to exclude as non-live-migratable. It also notes, though only briefly, that each migration carries workload risk. There are no book citations and no invented environment facts."
+}

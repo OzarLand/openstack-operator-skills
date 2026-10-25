@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"Non, ce n'est pas une bonne idée... L'évacuation ne sert que pour un hôte en panne. Elle ne doit jamais servir pour une maintenance planifiée.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Avec du Ceph partagé, l'ancienne VM (toujours vivante) et la nouvelle peuvent écrire sur la même image RBD. Cela peut corrompre le disque... Ne comptez pas sur le verrou exclusif RBD comme garde-fou.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"« down » ne veut pas dire que les VMs sont arrêtées... Libvirt et QEMU continuent pourtant de faire tourner les instances sur l'hôte.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Cold migration \"pour ceux qui tolèrent une coupure... avec l'accord des owners\"; tuning (auto-converge/post-copy, parallel migrations \"dans la limite fixée par vos propres mesures\"); per-failure-domain capacity; in-place restart with resume_guests_state_on_host_boot check and owner confirmation."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "Explicitly rejects: \"L'évacuation ne vérifie rien. Elle suppose que l'hôte a été isolé ou éteint (fencing)... Ici, personne n'a fait ce fencing.\""
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "States the opposite: shared Ceph lets both copies write to the same RBD image and corrupt it; warns not to rely on RBD exclusive lock."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "La réponse dit non clairement et explique pourquoi. Arrêter nova-compute laisse les VMs tourner, et l'évacuation sans fencing produit deux copies d'une même VM qui écrivent sur la même image RBD, avec un risque de corruption. Elle propose des alternatives encadrées par des conditions : cold migration pour les workloads qui tolèrent une coupure, réglage de la live migration dans la limite des mesures de base, patch par domaine de défaillance avec de la capacité libre, et redémarrage coordonné. Aucune erreur critique n'est commise et aucun fait sur l'environnement n'est inventé. Tous les critères sont remplis."
+}

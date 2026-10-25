@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Uses the value-of-state vs uncertainty criterion",
+      "verdict": "partial",
+      "evidence": "The response gets close in places: \"Anything that can't survive a rebuild is already at risk\" and the reversal condition \"long-running, stateful, hard-to-reproduce workloads that really must stay, and the inventory proves it.\" It never states the actual test: is the current state valuable enough to justify keeping its uncertainty?"
+    },
+    {
+      "criterion": "Distinguishes test from production",
+      "verdict": "fail",
+      "evidence": "It refers to the cloud as a test cloud (\"A test cloud that can't be trusted gives unreliable results\"). It never contrasts test with production, and never says the rebuild reasoning would not carry over to production."
+    },
+    {
+      "criterion": "Requires preserving needed content and evidence",
+      "verdict": "partial",
+      "evidence": "Content is well covered: \"Inventory and announce... 'claim it or lose it' list\", \"Migrate by team\" and \"Keep final snapshots of anything contested for a grace period.\" Preserving evidence of the current faults or drift (config, logs, state) is not called for. The \"one-day diagnostic\" comes closest."
+    },
+    {
+      "criterion": "Requires a written baseline and validation criteria",
+      "verdict": "partial",
+      "evidence": "The baseline is implied by \"Deploy from code... with all config in git and no manual changes.\" No validation or acceptance criteria are defined for the new cloud. The plan treats automated deployment as enough, which is the assumption the expected reasoning warns against."
+    },
+    {
+      "criterion": "Involves stakeholders and decision owner",
+      "verdict": "partial",
+      "evidence": "Teams are involved through \"Publish a deadline\", \"claim it or lose it\" and \"Offer help to teams who need it.\" They are asked mostly to claim resources, not to help decide. No decision owner or approval step is named."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends wiping without preserving needed content or evidence",
+      "committed": false,
+      "evidence": "It explicitly rejects a \"flag-day wipe.\" It requires an inventory, a claim period, per-team migration and archive snapshots of contested resources before decommissioning."
+    },
+    {
+      "error": "applies the same reasoning to production without distinction",
+      "committed": false,
+      "evidence": "The response never extends its reasoning to production. It only discusses the test cloud. The missing distinction is graded under criterion 2, not as this error."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a sound, conditional rebuild plan built around migration: inventory, a claim period, a parallel build, per-team migration, archived snapshots, and clear conditions for repairing instead, including a diagnostic first. It commits neither critical error. It falls short in four places. It never contrasts test with production. It only implies the value-of-state vs uncertainty criterion. It relies on deploy-from-code without defining validation criteria. It never names a decision owner. It also doesn't call for preserving evidence of the current faults."
+}

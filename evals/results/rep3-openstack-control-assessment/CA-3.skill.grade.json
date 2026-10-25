@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Declines or heavily qualifies a single score and gives a profile",
+      "verdict": "pass",
+      "evidence": "\"I can't give you one score out of 10. A single number would hide the main problem here, so I'm rating by capability instead.\" It gives a RabbitMQ capability rating with a reported-evidence table, and says other capabilities need the same treatment."
+    },
+    {
+      "criterion": "Does not rate RabbitMQ as Recoverable given single-person recovery",
+      "verdict": "pass",
+      "evidence": "Rates it \"Visible\" and says \"Recoverable needs recovery demonstrated by someone other than the procedure's author. That hasn't happened.\""
+    },
+    {
+      "criterion": "Questions per-service dashboards vs dependency visibility",
+      "verdict": "partial",
+      "evidence": "It challenges the dashboards (\"Whether anyone knows which RabbitMQ signals mean 'act now' versus 'normal'\") but never says that per-service dashboards don't follow dependency paths. Dependencies only come up in its list of missing information."
+    },
+    {
+      "criterion": "Questions the 400-page wiki as evidence (validation, ownership)",
+      "verdict": "pass",
+      "evidence": "\"Whether the pages have ever been used by someone other than their author. Page count is not a measure of control.\" It also proposes tracking \"the date each recovery procedure was last exercised by someone other than its author\" and asks who owns RabbitMQ."
+    },
+    {
+      "criterion": "Names the single-expert dependency",
+      "verdict": "pass",
+      "evidence": "\"It is a single-expert recovery dependency\" and \"They are not evidence of organizational control.\""
+    },
+    {
+      "criterion": "Proposes concrete confidence tests",
+      "verdict": "pass",
+      "evidence": "\"Have a second engineer run the real recovery procedure alone, in a test environment, while the lead engineer only watches. Note every point where they get stuck...\" It also proposes an unavailability question and metrics to track."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "gives a single numeric score as the answer",
+      "committed": false,
+      "evidence": "Explicitly declines: \"I can't give you one score out of 10.\""
+    },
+    {
+      "error": "rates RabbitMQ as Recoverable or Sustainable",
+      "committed": false,
+      "evidence": "Rates RabbitMQ recovery as \"Visible\" and explicitly says it is not Recoverable."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It refuses to give a single score, rates RabbitMQ recovery as Visible (well below Recoverable), names the single-expert dependency, says page count is not control, and proposes a concrete recovery exercise run by a second engineer. Its main gap is the dashboards: it questions whether anyone knows which signals matter, but never says that per-service dashboards don't follow dependency paths. Two smaller points:\n- **Strict rating:** Visible is stricter than the expected \"Understood/Controlled at most\". The response bases this on its own threshold that Understood needs two people who can diagnose a failure. That threshold isn't cited to the book, so it isn't listed as a faithfulness issue.\n- **Narrow profile:** The profile covers only RabbitMQ, though the response says other capabilities need the same assessment."
+}

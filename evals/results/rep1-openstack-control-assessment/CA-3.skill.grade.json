@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Declines or heavily qualifies a single score and gives a profile",
+      "verdict": "pass",
+      "evidence": "\"I can't give you a single score out of 10, and a number would mislead you here. Control maturity is a profile...\" It then gives a per-level table for RabbitMQ recovery and asks for what it needs to build the full per-capability table."
+    },
+    {
+      "criterion": "Does not rate RabbitMQ as Recoverable given single-person recovery",
+      "verdict": "pass",
+      "evidence": "\"Level: Understood at best, probably only Visible. It is not Recoverable.\" Recoverable is marked \"Not met\" because the three recoveries were all done by the lead engineer."
+    },
+    {
+      "criterion": "Questions per-service dashboards vs dependency visibility",
+      "verdict": "partial",
+      "evidence": "It questions the dashboards: \"They show you can see problems, not that you understand them... I don't know if the alerts have owners.\" The table lists \"dependencies mapped\" as part of Visible. But it never says outright that per-service dashboards don't follow dependency paths."
+    },
+    {
+      "criterion": "Questions the 400-page wiki as evidence (validation, ownership)",
+      "verdict": "pass",
+      "evidence": "\"400 runbook pages: This says nothing about quality. I'd ask how many have been run by someone other than the author, and when. A large wiki can create false confidence.\" This covers validation. Ownership is only implied."
+    },
+    {
+      "criterion": "Names the single-expert dependency",
+      "verdict": "pass",
+      "evidence": "\"A critical messaging dependency... has one person who can recover it... The risk is that recovery depends on them alone.\""
+    },
+    {
+      "criterion": "Proposes concrete confidence tests",
+      "verdict": "pass",
+      "evidence": "Two tests: a second engineer walks through the runbook without performing it, then a second engineer runs the recovery in staging while the lead observes. Also the question \"what happens if the lead engineer is unavailable next week?\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "gives a single numeric score as the answer",
+      "committed": false,
+      "evidence": "It explicitly declines to score: \"I can't give you a single score out of 10\"."
+    },
+    {
+      "error": "rates RabbitMQ as Recoverable or Sustainable",
+      "committed": false,
+      "evidence": "\"It is not Recoverable.\" Both Recoverable and Sustainable are marked \"Not met\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It refuses a single score and explains why maturity is a per-capability profile. It rates RabbitMQ recovery at most Understood, not Recoverable, and names the single-expert dependency as the main gap. It challenges the 400-page wiki as evidence and proposes concrete tests in which a second engineer performs the recovery. One weakness: it questions the dashboards for missing owners and context, but never says outright that per-service dashboards aren't the same as dependency-path visibility. It commits no critical errors, and it doesn't present any invented environment details as fact."
+}

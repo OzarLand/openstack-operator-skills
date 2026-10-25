@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "pass",
+      "evidence": "\"'Not in the running list' doesn't tell you why. The cause could be a crashed process, a network partition...\" The Decision section also gives node down/crashed and network partition as separate branches with different actions."
+    },
+    {
+      "criterion": "Requires cluster status from each node (especially rabbit-03) before acting",
+      "verdict": "partial",
+      "evidence": "It asks for cluster_status on rabbit-01 again, plus `rabbitmqctl -n rabbit@rabbit-03 status` and connectivity checks. It never asks for cluster_status as seen from rabbit-03 or from rabbit-02, and it doesn't say that each node's own view is needed to spot a partition."
+    },
+    {
+      "criterion": "Explains the risk of resetting the wrong node",
+      "verdict": "partial",
+      "evidence": "It explains that reset wipes rabbit-03's Mnesia data and that unreplicated classic queues would be lost. It does not cover the partition-specific risk of resetting the side that services are connected to. In the partition branch it says to 'restart the minority side' without warning that this discards that side's state."
+    },
+    {
+      "criterion": "States when the runbook is applicable",
+      "verdict": "pass",
+      "evidence": "\"Node is corrupted or diverged and the queue check shows nothing unreplicated that you need: the runbook is appropriate\". It also says a node that is merely down should just be started."
+    },
+    {
+      "criterion": "Includes escalation or decision owner for the partition case",
+      "verdict": "fail",
+      "evidence": "The partition branch reads only \"fix the network first, then restart the minority side according to your partition-handling policy\", with no escalation and no decision owner. Escalation appears only for the unreplicated-data case."
+    },
+    {
+      "criterion": "Defines verification after recovery (consumers reconnect)",
+      "verdict": "fail",
+      "evidence": "There are no post-recovery checks: nothing on consumers or OpenStack services reconnecting, queue health, or confirming cluster_status on all nodes after the rejoin."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "Opens with \"Not yet. Do a few read-only checks first\", tells the user to check the Network Partitions section, and allows the runbook only for the corrupted/diverged case."
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "Lists several possible causes and states that the alert alone doesn't tell you why."
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "No output is invented. It asks the user to paste the real outputs."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly refuses to run the reset blindly, lays out read-only diagnostics, names partition as a distinct cause, and limits the runbook to the corrupted/diverged node case with no unreplicated data at risk. It commits none of the critical errors. Its gaps: it doesn't ask for cluster_status from rabbit-03 and rabbit-02, and it doesn't explain the risk of resetting the side services are using in a partition. The partition branch also has no escalation or decision owner, and there is no verification step after recovery."
+}

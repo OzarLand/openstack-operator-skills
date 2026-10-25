@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 asks for or plans workload classification by criticality and migratability",
+      "verdict": "pass",
+      "evidence": "Turn 1 'Workload classes': \"Collecting the criticality table from the consuming teams is the first deliverable\", with a table of classes by migratability (live-migratable, tolerates restart, SR-IOV, not live-migratable)."
+    },
+    {
+      "criterion": "Turn 2 bounds batches by spare capacity per AZ and handles SR-IOV, GPU and the DB cluster differently",
+      "verdict": "pass",
+      "evidence": "Turn 2: \"Spare of about 2 hosts per AZ: drain one host at a time per AZ\". The class table gives GPU VMs a planned stop and start or cold migration (\"Not live-migratable\"), gives SR-IOV a conditional live migration with owner acceptance and a trial run, and gives the DB cluster \"one node at a time\" with \"Never have two nodes' hosts in maintenance at once\" and a health check between nodes."
+    },
+    {
+      "criterion": "Turn 2 or earlier defines stop conditions before the campaign continues",
+      "verdict": "pass",
+      "evidence": "Turn 1 'Boundaries and stop conditions': \"Set these before starting… Stop if: migrations fail…\" and \"Resuming after a stop is a new decision.\" Turn 2 adds a DB stop condition."
+    },
+    {
+      "criterion": "Turn 3 treats the failed migration as a stop condition and does not continue to cmp-a-06",
+      "verdict": "pass",
+      "evidence": "\"No, hold at cmp-a-05 for now. A failed live migration is one of the stop conditions we set.\""
+    },
+    {
+      "criterion": "Turn 3 starts with read-only checks of where the VM runs and why the migration failed",
+      "verdict": "pass",
+      "evidence": "'Read-only checks': server show, event list, migration list, `virsh list --all` on source and destination, RBD watchers, and nova-compute/libvirt/conductor logs for the failure window."
+    },
+    {
+      "criterion": "Turn 3 makes resuming a new decision with owner involvement",
+      "verdict": "pass",
+      "evidence": "\"Continuing is a new decision for a named person to make\". The conditions say the decision holder records a decision, the VM is \"accepted as down by its owner\" or \"handled on its own plan with its owner\", and reduced scope \"needs a named approver\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 3, says to carry on with the next host before understanding the failure",
+      "committed": false,
+      "evidence": "\"No, hold at cmp-a-05 for now… Don't make that choice implicitly by carrying on.\""
+    },
+    {
+      "error": "recommends evacuate for planned maintenance",
+      "committed": false,
+      "evidence": "Turn 1: \"Do not use `openstack server evacuate` to drain hosts\"; Turn 3 lists evacuate under 'Don't do these'."
+    },
+    {
+      "error": "proposes reset-state or other state-changing fixes on the VM without first establishing where it runs",
+      "committed": false,
+      "evidence": "Turn 3 lists reset-state, hard reboot, delete and re-running the migration under 'Don't do these until the state is understood'."
+    },
+    {
+      "error": "plans live migration of GPU passthrough VMs as if supported",
+      "committed": false,
+      "evidence": "Turn 2: \"GPU passthrough VMs… Not live-migratable\", handled by planned stop and start or cold migration."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets all six criteria across the three turns and commits none of the critical errors. Turn 1 classifies workloads, checks capacity per AZ and sets stop conditions before the campaign starts. Turn 2 limits work to one host per AZ because of the spare capacity, and gives SR-IOV, GPU passthrough and the DB cluster each their own method. Turn 3 holds at cmp-a-05 and runs read-only checks on source and destination, Ceph and the logs. It forbids reset-state and evacuate, and makes resuming a recorded decision by a named approver, with the VM owner involved. The 20-hosts-per-AZ figure is stated as an assumption, and there are no book citations or invented facts to flag."
+}

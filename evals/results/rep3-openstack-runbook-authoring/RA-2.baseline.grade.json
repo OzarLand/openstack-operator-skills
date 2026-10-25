@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Points out missing scope and decision points for different alarm types",
+      "verdict": "partial",
+      "evidence": "Concern 2, \"There's no diagnosis step\", says the alarm is \"usually a memory high-watermark or a disk-free limit\" and adds `rabbitmqctl status` to see which alarm fired. The outline adds \"clear the root cause (purge or fix consumers, free disk)\". It never says the runbook has no stated scope, never mentions partition or node-down alarms, and never asks for explicit branches per alarm type."
+    },
+    {
+      "criterion": "Flags simultaneous restart of all nodes/services as dangerous",
+      "verdict": "pass",
+      "evidence": "\"Restarting every RabbitMQ node together takes the cluster fully down... unable to rejoin\". It recommends restarting one node at a time. On services it warns that \"Restarting all nova-compute and neutron agents at once can cause a flood of reconnections\"."
+    },
+    {
+      "criterion": "Flags verification of the alarm rather than the capability",
+      "verdict": "partial",
+      "evidence": "Step 3 is criticised as \"too vague\", not as checking the wrong thing. The response does add capability checks: \"openstack compute service list\", \"openstack network agent list\" and \"Do a smoke test, such as booting a test instance.\""
+    },
+    {
+      "criterion": "Flags missing stop/escalation, owner and validation",
+      "verdict": "partial",
+      "evidence": "Escalation: \"Say what to do if the alarm returns (escalate...)\" and outline step \"(5) escalate if the alarm returns\". Owner: \"A timeout and an owner for each step.\" There is a failure path for a node that won't rejoin, but no explicit stop conditions or must-not-do list, and no validation date or history."
+    },
+    {
+      "criterion": "Gives findings before a rewritten version",
+      "verdict": "pass",
+      "evidence": "The findings come first (\"Main concerns\", \"Missing pieces\") and the \"Suggested outline\" follows. They are not in a table, and the rewrite is only an outline: a full draft is offered but not provided."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts the runbook as adequate",
+      "committed": false,
+      "evidence": "The response raises multiple major concerns and missing pieces, and proposes a restructured outline."
+    },
+    {
+      "error": "rewrites it while keeping 'restart all nodes' as an unconditional first step",
+      "committed": false,
+      "evidence": "The outline begins with \"(0) diagnose and record the alarm, (1) clear the root cause\" and then \"(2) restart RabbitMQ one node at a time, verifying after each\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The review is solid. It correctly flags the dangerous simultaneous restarts, the reconnect storms and the missing diagnosis step, and it adds capability checks, an escalation step and owners. It falls short in several places: it does not frame the problem as one runbook covering many alarm types, and it leaves out partition and node-down alarms. It also misses the validation date and history and gives no explicit stop or must-not-do conditions. It provides only an outline instead of a full restructured draft with decision points and TODOs, and its findings are not in a table. It commits no critical errors and has no faithfulness problems."
+}

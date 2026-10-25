@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Applies decision gates before comparing options",
+      "verdict": "partial",
+      "evidence": "The response does set a gate: restore drill \"is the gate for all upgrade work. If you can't restore, don't upgrade.\" But it compares and rejects the options in prose first (\"Why not both hops…\", \"Why not postpone…\"). There is no gates table or explicit gate pass/fail per option before the comparison, and no explicit security gate."
+    },
+    {
+      "criterion": "Links postponement's viability to a tested backport",
+      "verdict": "partial",
+      "evidence": "It rejects postponement partly because \"the series stays unmaintained and the backport is untested.\" It also requires staging tests of the backport. It never states the conditional rule that postponement passes only if a tested backport is credible. Its sensitivity bullet also allows deploying the backport \"even untested\"."
+    },
+    {
+      "criterion": "Identifies the recovery exercise as the first action or key uncertainty reducer",
+      "verdict": "pass",
+      "evidence": "\"Weeks 0–6, in parallel: re-prove control-plane recovery… This is the gate for all upgrade work.\" Also: \"An upgrade is the moment you most need a working control-plane restore.\""
+    },
+    {
+      "criterion": "Recognizes team readiness as a constraint",
+      "verdict": "pass",
+      "evidence": "\"The team has four people… no spare capacity to debug\". The Staffing section adds named owners plus a second person for key-person risk."
+    },
+    {
+      "criterion": "States what would change the ranking (sensitivity)",
+      "verdict": "pass",
+      "evidence": "The \"What would change my answer\" section covers exploitability, a failed restore drill, a hop-1 target near end of maintenance, and triage showing most patches can be dropped."
+    },
+    {
+      "criterion": "Assigns owner, review trigger or exit condition to retained deviations",
+      "verdict": "pass",
+      "evidence": "Backport: \"This is a bridge, not a destination. Its expiry is the moment hop 1 lands.\" Carried patches: \"write a test that pins its behavior\". It assigns a named owner for the Nova patches."
+    },
+    {
+      "criterion": "Frames the output as decision support for a named or to-be-named owner",
+      "verdict": "fail",
+      "evidence": "It opens with \"Recommendation: do the second option…\" and presents its own decision. It never identifies an accountable decision owner, never leaves the decision with them, and names no decision rights. The only owners named are for the runbook and the patches."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends postponement while carrying an untested backport without flagging the security gate",
+      "committed": false,
+      "evidence": "It rejects postponement (\"Open-ended postponement is the worst of the three\") and requires the backport to be tested in staging, plus compensating controls, as a time-boxed bridge."
+    },
+    {
+      "error": "presents a weighted score as the decision itself",
+      "committed": false,
+      "evidence": "The response contains no weighted scoring."
+    },
+    {
+      "error": "recommends the immediate double hop without addressing recovery capability",
+      "committed": false,
+      "evidence": "It explicitly rejects the double hop in one quarter because recovery is unproven, and makes the restore drill a gate."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a solid, practical recommendation: it rejects the double hop, gates the upgrade on a restore drill, treats the backport as a tested, time-boxed bridge with an exit condition, triages the patches, recognizes the staffing constraint and gives sensitivity conditions. Its weaknesses:\n- **Gates:** there is no explicit gates-first structure and no security gate tied to postponement.\n- **Postponement:** it never states that postponement is viable only with a credible tested backport.\n- **Decision ownership:** it makes the decision itself rather than framing its output as support for an accountable owner, and it names no decision rights.\n- **Missing information:** it never asks about business criticality, security deadline, vendor support path or decision owner, and it assumes a staging environment exists.\n\nNo critical errors were committed."
+}

@@ -1,0 +1,215 @@
+[
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-1",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "failure-patterns.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-1",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.438,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-2",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-2",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.786,
+      "critical_errors_committed": [
+        "approves evacuating before the host is confirmed powered off or isolated"
+      ]
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-3",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-automation-review"
+    ],
+    "triggered": false,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "operating-principles.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.917,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-3",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.75,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-4",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "failure-patterns.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-4",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.417,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-2-FR",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.786,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-2-FR",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.929,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-5",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.75,
+      "critical_errors_committed": [
+        "in turn 2, tells the user to reset rabbit-03 without establishing which side of the partition the services use"
+      ]
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-5",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "dependency-map.md",
+      "failure-patterns.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  }
+]

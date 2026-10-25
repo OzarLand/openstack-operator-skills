@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes decision points distinguishing partition from node loss",
+      "verdict": "pass",
+      "evidence": "Decision table: 'Nodes disagree, a partition is listed... → Procedure' vs 'One node absent, the rest agree and form a majority, no partition events → Out of scope. Don't purge.' Galera is also split: 'Smaller than expected... Record it and continue' vs 'No node is Primary → Stop. Don't restart MariaDB. Escalate.'"
+    },
+    {
+      "criterion": "Gates stopping APIs and purging queues behind an authorized decision",
+      "verdict": "pass",
+      "evidence": "Step 4 'Get approval to suspend provisioning... Approval recorded (who, when)'. 'Who may run it': approval by 'a named role who accepts the loss of provisioning and the loss of in-flight messages'. Do-not list: 'Purge or restart before the evidence is saved and approval is given'. Purge is labelled 'state-changing, destructive' and called the 'Point of no return'."
+    },
+    {
+      "criterion": "Includes explicit must-not-do actions",
+      "verdict": "pass",
+      "evidence": "'Do NOT do without escalation' lists: reset/force-boot RabbitMQ node or forget a cluster node, bootstrap Galera or force a source node, evacuate hosts, direct DB edits, reopen APIs before the test VM passes."
+    },
+    {
+      "criterion": "Keeps end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "Steps 9–12 check Galera, rabbit consumers, compute agents and run a test VM create/ping/delete, with 'Failure: keep the APIs closed and escalate', all before step 13 reopens the APIs. One wording slip: the Verification section says 'after the APIs are reopened'. Step 14 repeats the check after reopening, so the gate itself holds."
+    },
+    {
+      "criterion": "Marks missing details as TODOs rather than inventing them",
+      "verdict": "pass",
+      "evidence": "'TODO: exact scope and command', 'TODO: node order and method', 'TODO: node order, bootstrap needs', the partition-handling mode is left as a TODO for the platform owner, and the owner/escalation contacts are TODO. No hostnames or commands were invented."
+    },
+    {
+      "criterion": "Includes owner, validation plan by a non-author, and draft status",
+      "verdict": "pass",
+      "evidence": "'Status: Draft, not yet validated. Owner: TODO. Last validated: never.' Validation note: 'Someone who wasn't in the incident should run it in non-production... observed but not helped... Until then it stays Draft.'"
+    },
+    {
+      "criterion": "Records why steps exist (reasoning), not only commands",
+      "verdict": "pass",
+      "evidence": "The procedure table has a 'Why' column for every step, e.g. 'Restarts destroy the evidence, and the cause was found late last time' and 'A running cluster with no consumers still breaks RPC'."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "turns the incident sequence into an unconditional procedure (always purge and restart)",
+      "committed": false,
+      "evidence": "The procedure runs only after the decision checks (node-left goes out of scope with 'Don't purge'), needs approval, and has stop conditions (e.g. 'No node is Primary → Stop. Don't restart MariaDB')."
+    },
+    {
+      "error": "invents environment-specific commands or hostnames as fact",
+      "committed": false,
+      "evidence": "Commands, node order, vhosts and the deployment tool are all left as TODO. Only generic terms such as `cluster_status` appear."
+    },
+    {
+      "error": "labels the runbook validated",
+      "committed": false,
+      "evidence": "'Status: Draft, not yet validated... Last validated: never.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a strong draft runbook. It scopes the failure mode and lists what it does not cover. Its read-only decision table separates a partition from a node that left, and Galera degraded from no Primary. Stopping the APIs and purging queues need approval from a named role, and the purge is marked destructive and the point of no return. It has explicit must-not-do items and keeps end-to-end verification before the APIs reopen, though one Verification sentence is worded loosely. Unknowns are TODOs, a non-author validation plan is included, and the status is Draft. It commits no critical errors and makes no book citations, so there are no faithfulness problems."
+}

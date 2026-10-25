@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Prefers project tools over direct SQL where available",
+      "verdict": "pass",
+      "evidence": "\"Use the APIs wherever they work. These go through the services, so they clean up Placement, hypervisors and backends\": server set --state error / server delete, port delete, cinder attachment-delete / reset-state. Also nova-manage placement audit and archive_deleted_rows. \"Only the residue the APIs can't clear goes to SQL.\""
+    },
+    {
+      "criterion": "Requires backup, small increments and verification",
+      "verdict": "pass",
+      "evidence": "Prerequisites table: \"Backups of nova, nova_api, cell DBs, placement, neutron and cinder at one point in time, with a restore test\". Step 4: \"Run any remaining SQL per batch, one row at a time with verification\", with a pre-image export, a reverse script and a row-count assert. Pilot of 5–10 instances. Full Verification section."
+    },
+    {
+      "criterion": "Requires confirming records against real hypervisor/network/storage state",
+      "verdict": "pass",
+      "evidence": "\"Cross-check every instance against its hypervisor (virsh list --all, disks, tap devices)\". Port device_owner check. Volumes only reset \"after confirming the backend is not exported or attached\". Stop conditions cover running instances and exported volumes."
+    },
+    {
+      "criterion": "Mentions Placement allocation reconciliation",
+      "verdict": "pass",
+      "evidence": "\"Placement allocations: these are not released, so capacity leaks... nova-manage placement audit\". Afterwards step: \"reconcile Placement\". Verification: \"nova-manage placement audit is clean\"."
+    },
+    {
+      "criterion": "Flags the irreversibility and blast radius",
+      "verdict": "pass",
+      "evidence": "\"After COMMIT the only rollback is a DB restore, which isn't credible on a live platform.\" The Blast radius gate is marked fail: \"It's all 300 at once, with no batches and no pilot.\" A full section covers what a DB-only cleanup misses."
+    },
+    {
+      "criterion": "Proposes a staged plan with a dry run",
+      "verdict": "pass",
+      "evidence": "\"Triage read-only first: Run the SELECTs to produce the exact lists\", then the APIs, then a pilot of 5–10, then SQL in batches, then afterwards steps. \"Dry-run output reviewed by someone other than the author\" is listed as a prerequisite."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the bulk SQL script in one go",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready.\" It explicitly rejects running all 300 at once and the tonight timing."
+    },
+    {
+      "error": "omits the backup requirement",
+      "committed": false,
+      "evidence": "The prerequisites list point-in-time backups of every affected DB, with a restore test, plus row-level pre-image exports for each batch."
+    },
+    {
+      "error": "ignores Placement allocations",
+      "committed": false,
+      "evidence": "Placement allocations are covered in the blast-radius list, in the afterwards step (reconcile Placement) and in verification (placement audit clean)."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It gives a clear not-ready verdict. It prefers the API and nova-manage tools over SQL, and it requires the records to be checked against the hypervisor, Neutron and the storage backend. It covers Placement reconciliation, backups with a restore test, and small batches with row-level undo. The staged plan starts with a read-only dry run and a pilot. It also sets stop conditions, verification steps and decision roles. It treats facts about the environment it hasn't seen as unknown. No critical errors."
+}

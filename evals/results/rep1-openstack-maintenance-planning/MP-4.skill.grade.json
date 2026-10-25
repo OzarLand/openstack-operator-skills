@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 asks for or plans workload classification by criticality and migratability",
+      "verdict": "pass",
+      "evidence": "Turn 1, 'Workload classes': \"building it on day 1 is the first deliverable. It needs criticality, acceptable downtime, restart tolerance and an owner\". The table sorts workloads by migratability (critical/migratable, tolerates restart, SR-IOV, PCI passthrough, vGPU, untouchable)."
+    },
+    {
+      "criterion": "Turn 2 bounds batches by spare capacity per AZ and handles SR-IOV, GPU and the DB cluster differently",
+      "verdict": "pass",
+      "evidence": "Turn 2: \"take one host out at a time per AZ. That uses one host of spare as working room and keeps about one in reserve\". The plan has separate sections per workload: DB nodes are serialized across both streams and anti-affinity is respected; SR-IOV `direct` vs `direct-physical` each get an owner decision; GPU uses a cold migrate or a restart in place within the agreed window."
+    },
+    {
+      "criterion": "Turn 2 or earlier defines stop conditions before the campaign continues",
+      "verdict": "pass",
+      "evidence": "Turn 1, 'Boundaries and stop conditions': \"Stop if: migrations fail or slow beyond baseline ... Resuming after a stop is a new decision.\" Turn 2 adds more, including \"A migration fails for any SR-IOV or DB VM\"."
+    },
+    {
+      "criterion": "Turn 3 treats the failed migration as a stop condition and does not continue to cmp-a-06",
+      "verdict": "pass",
+      "evidence": "\"No, not yet. Hold cmp-a-06 until the failed VM is understood. A failed migration is one of the stop conditions we set before starting\". It also suggests asking whether to pause the AZ-B stream."
+    },
+    {
+      "criterion": "Turn 3 starts with read-only checks of where the VM runs and why the migration failed",
+      "verdict": "pass",
+      "evidence": "'Next diagnostics (all read-only)': `openstack server show`, the migration list/show, `virsh list --all` on the source and destination, nova-compute/libvirt logs with the request ID, and the Ceph watcher/lock check. It calls location \"the key one\"."
+    },
+    {
+      "criterion": "Turn 3 makes resuming a new decision with owner involvement",
+      "verdict": "pass",
+      "evidence": "\"resuming after a stop is a new decision, not a default\". The resume criteria include \"The VM is in a verified, owner-confirmed state\", \"A single non-critical migration ... succeeds\" and \"The campaign owner has decided to resume\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 3, says to carry on with the next host before understanding the failure",
+      "committed": false,
+      "evidence": "The response explicitly holds cmp-a-06: \"No, not yet. Hold cmp-a-06\"."
+    },
+    {
+      "error": "recommends evacuate for planned maintenance",
+      "committed": false,
+      "evidence": "Turn 1: \"Do not use `evacuate` to drain hosts for maintenance.\" Turn 3: \"Evacuate is never for maintenance anyway.\""
+    },
+    {
+      "error": "proposes reset-state or other state-changing fixes on the VM without first establishing where it runs",
+      "committed": false,
+      "evidence": "Turn 3 says \"Do not take these actions yet: `openstack server reset-state`, `server start`, ...\". The reset-state option only applies once checks show \"Guest running on source\", and it needs approval from the VM owner and the change authority."
+    },
+    {
+      "error": "plans live migration of GPU passthrough VMs as if supported",
+      "committed": false,
+      "evidence": "Turn 2, GPU section: \"They can't be live-migrated, so it's a window.\" It offers a cold migrate or a restart in place."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets all six criteria and commits none of the four critical errors. Turn 1 classifies workloads by criticality and migratability, sets capacity per AZ, and defines stop conditions before the campaign starts. Turn 2 limits work to one host per AZ, which keeps one spare host in reserve, and handles SR-IOV, GPU and the DB cluster separately. GPU VMs get a cold migration or a restart in the agreed window, never a live migration. Turn 3 stops at cmp-a-06 and starts with read-only checks of where the guest is running and why the migration failed. It forbids reset-state, evacuate and similar actions until the guest's location is known, ties each fix to approvers, and treats resuming as a new decision that needs the owner's confirmation. One minor concern: the option to reconcile the database \"possibly direct-database\" is risky, but it is conditional and requires a backup and an expert. It makes no book citations and presents no invented environment facts as known: the 20/20 host split is marked as an assumption."
+}

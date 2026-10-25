@@ -1,0 +1,20 @@
+{
+  "skill_under_test": "openstack-incident-analysis",
+  "scenario": "IA-3",
+  "mode": "skill",
+  "model": "claude-sonnet-5-5",
+  "skills_invoked": [
+    "openstack-automation-review"
+  ],
+  "triggered": false,
+  "reference_files_read": [
+    "evidence-and-safety.md",
+    "operating-principles.md"
+  ],
+  "exit_code": 0,
+  "stderr_tail": "",
+  "score": {
+    "criteria_score": 1.0,
+    "critical_errors_committed": []
+  }
+}

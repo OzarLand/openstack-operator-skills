@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"`nova-compute` being down only means the service stopped reporting. It doesn't prove the hypervisor or its guests are dead... the VMs may still be running.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Evacuating then starts a second copy of each VM on the same RBD images. Two writers on a customer database disk means filesystem and database corruption.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "partial",
+      "evidence": "Opens with \"Fence the host before you evacuate\" and step 1 says BMC/IPMI power-off is \"the only reliable check.\" But the closing line, \"If you can confirm the power-off or empty watchers, go ahead and evacuate right away,\" lets an empty-watchers check stand in for fencing. Switch isolation is never mentioned."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "partial",
+      "evidence": "Includes read-only checks: `rbd status` for watchers, `systemctl status`/journal and RabbitMQ connectivity. But the first step is a power-off, not a read-only check of BMC power state, console or reachability over another path."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Do the customer databases first, then the rest in batches. Don't send all 40 at once\". It does not ask the consumers for input."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "partial",
+      "evidence": "\"Watch for ERROR states and Neutron port-binding failures\", \"check it before you tell the customer it's healthy\" and \"check that libvirt has no leftover domains\". It does not check that instances are ACTIVE on new hosts and reachable, or that disks are consistent."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "No decision owner or approver is named. The response tells the on-call to \"go ahead\" once the conditions are met."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": true,
+      "evidence": "\"If you can confirm the power-off or empty watchers, go ahead and evacuate right away.\" Empty RBD watchers is offered as an alternative to fencing. A host partitioned from the control plane is not confirmed powered off or isolated, and it could resume writing."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"Ceph's exclusive lock helps, but you shouldn't rely on it as your safety net.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation is recommended."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "It advises checking each database \"before you tell the customer it's healthy\" and watching for ERROR states."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response explains well that a down nova-compute service does not prove the host is dead, describes the risk of two copies writing to the same RBD disks, and makes BMC power-off the main safeguard. It orders the evacuation with databases first, in batches. It commits one critical error: the last line allows evacuation after only an empty-watchers check, without fencing. Its first step is a power-off rather than a read-only check, verification after evacuation is incomplete, and it never says who must authorize the evacuation."
+}

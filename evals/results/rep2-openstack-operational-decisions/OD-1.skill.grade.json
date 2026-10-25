@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Applies decision gates before comparing options",
+      "verdict": "pass",
+      "evidence": "A 'Gates' table lists, for each option, the gate it fails today and what would satisfy it, e.g. Option 1 'No credible recovery path, unbounded blast radius...'. It concludes that 'Both options 2 and 3 therefore need the same missing conditions created before anything is chosen.' A qualitative trade-off table comes before it, but the choice is driven by the gates."
+    },
+    {
+      "criterion": "Links postponement's viability to a tested backport",
+      "verdict": "pass",
+      "evidence": "Gate for option 3: 'Insufficient evidence for the backport, and no end date' → 'Backport tested in staging, with a dated exit condition'. Option 3 risk: 'you carry an untested local security change on an unmaintained series'."
+    },
+    {
+      "criterion": "Identifies the recovery exercise as the first action or key uncertainty reducer",
+      "verdict": "pass",
+      "evidence": "Readiness phase step 3: 'Run a control-plane recovery exercise ... Until this works, no upgrade hop is ready, because you couldn't recover from a failed one.' The evidence table says 'In practice, recovery is unproven.' The gates name recovery as the blocking condition for option 2."
+    },
+    {
+      "criterion": "Recognizes team readiness as a constraint",
+      "verdict": "pass",
+      "evidence": "'unproven recovery, orphaned Nova patches and a smaller team all hit the same change'; 'Change capacity is reduced'; 'If ... the team cannot carry even one hop in the next two quarters, say so and bring in outside help'; 'The decision becomes how to buy capability'."
+    },
+    {
+      "criterion": "States what would change the ranking (sensitivity)",
+      "verdict": "pass",
+      "evidence": "The 'What would change this recommendation' section covers four cases: a critical, remotely exploitable advisory; vendor or hardware support ending; Nova patches turning out to be upstreamed or trivial; and the recovery exercise failing."
+    },
+    {
+      "criterion": "Assigns owner, review trigger or exit condition to retained deviations",
+      "verdict": "pass",
+      "evidence": "Backport: 'give it an owner and an exit condition. The exit condition is the first hop.' Interim exposure: 'a named owner for the interim exposure'. Patches: 'each remaining patch has a recorded reason', classified as drop, upstream or replace, or still needed."
+    },
+    {
+      "criterion": "Frames the output as decision support for a named or to-be-named owner",
+      "verdict": "pass",
+      "evidence": "'An authorized owner, such as the platform or service owner, has to accept the interim security exposure and the timeline. Someone must be named as accountable. I don't know who that is, so please fill it in.' Closes with 'Decision support only.'"
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends postponement while carrying an untested backport without flagging the security gate",
+      "committed": false,
+      "evidence": "Rejects open-ended postponement. Requires the backport to be tested in staging, with an owner, an exit condition and compensating controls."
+    },
+    {
+      "error": "presents a weighted score as the decision itself",
+      "committed": false,
+      "evidence": "No weighted score is given. A weighted comparison is only offered as an optional extra."
+    },
+    {
+      "error": "recommends the immediate double hop without addressing recovery capability",
+      "committed": false,
+      "evidence": "Explicitly rejects option 1: 'It can't be satisfied within a quarter.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong response. It recommends the progressive path, gated behind a readiness phase. That phase covers a recovery exercise, a tested backport with an owner and an exit condition, and triage of the Nova patches. The response applies gates per option, treats the team as a constraint, includes sensitivity cases, and leaves the decision with an accountable owner who is still to be named. It commits none of the critical errors and has no faithfulness issues: there are no book citations, and the only reference it points to is releases.openstack.org. One minor point: the response does not cite the book at all and does not give an explicit structured dimension scoring, but its qualitative trade-offs are an acceptable substitute."
+}

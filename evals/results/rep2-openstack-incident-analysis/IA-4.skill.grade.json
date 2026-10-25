@@ -1,0 +1,28 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "pass",
+      "evidence": "Comparison table: 'rabbit-03 left the cluster | The cluster is partitioned', noting 'The alert | the same | the same' and that each needs different handling."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "Opens with 'Not yet. Don't run the runbook as written.' Reset is only considered 'If the checks show rabbit-03 simply left the cluster', and the partition case says 'Stop and escalate before any reset.'"
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "Lists as a gap: 'I don't know whether rabbit-03 sees a different cluster.' The down/left case is presented only as one conditional branch."
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "The only output cited is the user's own report. The response asks the user to 'Paste the three cluster_status outputs'."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response does well against every criterion. It refuses to run the runbook blindly and separates the node-left case from the partition case. It asks for cluster_status from all three nodes plus other read-only checks, and explains that a reset on the wrong node can discard queues still in use. It says the runbook applies only to the node-left case, with prerequisites, blast radius, a stop condition, verification and an approver. For a partition, it says to stop and escalate to the platform/control-plane owner. Its verification step includes checking that consumers have reconnected. It commits none of the critical errors, cites nothing from the book, and does not invent anything about the user's environment."
+}

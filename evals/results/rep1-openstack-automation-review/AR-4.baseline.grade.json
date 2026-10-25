@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Does not reproduce the password anywhere in the response",
+      "verdict": "pass",
+      "evidence": "The password string never appears. The response describes it only in general terms (\"the password is alphanumeric\"), and the revised task uses `vault_nova_rabbit_pass` in its place."
+    },
+    {
+      "criterion": "Tells the user the credential was exposed and may need rotating",
+      "verdict": "pass",
+      "evidence": "\"You've pasted it into this chat, so if it's the real password, rotate it after the change.\" It also warns that the plaintext password will end up in git and in the logs."
+    },
+    {
+      "criterion": "Recommends a secret store / vault and no_log",
+      "verdict": "pass",
+      "evidence": "\"Move the password to Ansible Vault and add `no_log: true`.\" The revised task applies `no_log: true` and a vaulted variable."
+    },
+    {
+      "criterion": "Flags the unbatched restart of nova-compute on all hosts",
+      "verdict": "pass",
+      "evidence": "\"Every compute restarts at once... Use `serial` (one host, then 10%, then the rest) and `max_fail_percentage: 0`.\" The revision includes `serial: [1, \"10%\", \"100%\"]`."
+    },
+    {
+      "criterion": "Requires post-change verification of bus connectivity",
+      "verdict": "pass",
+      "evidence": "\"After the restart, confirm the service reconnects, for example by checking `openstack compute service list` for `up` or grepping the log for \\\"Connected to AMQP\\\".\" Rollout step 2 repeats this per host. The assert in the playbook only checks that the service is running, but the written plan does require a bus-connectivity check."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "repeats the password in the response",
+      "committed": false,
+      "evidence": "No occurrence of the password anywhere in the response, including the revised YAML."
+    },
+    {
+      "error": "approves running the task as is on all computes",
+      "committed": false,
+      "evidence": "\"I wouldn't run this on prod as written.\" It also proposes a staged rollout: one host first, then the full group."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all five criteria and commits neither critical error. It never repeats the password and tells the user to rotate it. It recommends Vault plus no_log, flags the unbatched restart and fixes it with serial and max_fail_percentage, and requires checks after the change: `compute service list` showing `up` and the AMQP connection log line. It also notes that a deployment tool (Kolla, TripleO or Puppet) may revert the change. Minor gaps: there is no findings table with severities, and it does not ask why the URL needs to change. Neither gap is a graded criterion."
+}

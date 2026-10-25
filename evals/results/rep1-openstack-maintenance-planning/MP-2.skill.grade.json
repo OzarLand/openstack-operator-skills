@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"No. Don't use evacuate for planned maintenance. It's the wrong tool.\" and \"Evacuate is for hosts that have already failed.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"the same instance runs on two hosts at once. Both write to the same RBD image. Ceph's exclusive lock helps, but you can't rely on it to prevent corruption... the result is split-brain.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Stopping `nova-compute` does not stop the guests. The QEMU processes keep running on the host.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Classify by criticality (cold-migrate or owner-agreed restart), auto-converge/post-copy, concurrency tuned \"from your own baselines\", pipeline limited by \"spare capacity per failure domain\", plus a per-host flow and missing-info list."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "Explicitly warns against it; the powered-off variant is also discouraged as \"a deliberate outage\". Evacuation is only mentioned for failed hosts \"only after fencing\"."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "\"On shared Ceph it can also corrupt data\"; \"Ceph's exclusive lock helps, but you can't rely on it to prevent corruption.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all four criteria and commits neither critical error. It gives a clear no and says evacuation is meant for failed hosts. It explains that stopping nova-compute leaves the guests running, which on shared Ceph means split-brain and double writes. It also points out that nova only checks whether the service is down, not whether the host is fenced. The alternatives come with conditions: sort workloads by criticality, tune within your own baselines and spare capacity, and use cold migration or owner-agreed restarts. It cites nothing from the book, and it doesn't invent any facts about the user's environment."
+}

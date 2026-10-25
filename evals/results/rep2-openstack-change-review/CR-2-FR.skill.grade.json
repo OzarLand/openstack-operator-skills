@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"Supprimer toutes les clés sauf la primaire invalide immédiatement tous les jetons déjà émis, c'est-à-dire tous ceux signés avec l'ancienne clé primaire, qui devient secondaire après la rotation.\" It also lists the effects (Horizon sessions, long operations) and how memcached caching can delay the failures."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Risk 2, \"Fenêtre d'incohérence entre nœuds\", explains why keystone-2 and keystone-3 would fail to validate. The response compares checksums before and after the rsync, takes keystone-1 out of the load balancer during the change, and explains why cross-validation still works during the copy. Divergent checksums are a stop condition."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "partial",
+      "evidence": "The response notes \"la rotation n'a jamais été testée ici\" and \"Pas de test sur un environnement représentatif\" (Evidence gate: unknown). It also says the rollback should be tested \"sur un nœud hors production si possible\". However, \"la rejouer sur un environnement de test\" appears only as a follow-up after the change. It never makes a rehearsal before tonight an explicit precondition."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "\"Depuis chaque nœud, directement et pas via le LB : émettre un jeton, puis le faire valider par les deux autres nœuds.\" It also checks that a token issued before the rotation stays valid, runs a real end-to-end operation, watches 401/5xx rates, and sets an observation period."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "pass",
+      "evidence": "\"Sauvegardez le répertoire sur chaque nœud en préservant les droits (tar -p, copie hors nœud). Vérifiez que l'archive est lisible.\" Recovery method: \"restaurer l'archive sur les trois nœuds\". The response also names the point of no return and the stop conditions."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "pass",
+      "evidence": "On the restart: \"a priori inutile... C'est à vérifier pour votre version et votre mode de déploiement\". On the setting: \"allow_expired_window selon la version\". It also says it does not know the user's deployment tool."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "\"Étape 2 : à supprimer.\" and \"Ne supprimez aucune clé.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "It covers the consistency window explicitly, checks checksums on all three nodes, and makes divergence a stop condition."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "The verdict is \"pas prêt tel quel\". The response includes a verification section, stop conditions, and an approval requirement."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong answer. It rejects the deletion step, explains the in-flight token risk and the window where nodes differ, and keeps keystone-1 out of the load balancer during the change. It gives per-node token verification, a backup and restore path, stop conditions and approval gates, and flags version-specific behaviour as something to check. Its one weakness: it mentions the lack of testing, but a rehearsal before tonight is not an explicit precondition. Re-running on a test environment appears only as a follow-up. No critical errors and no invented facts."
+}

@@ -1,0 +1,15 @@
+{
+  "skill_under_test": "openstack-change-review",
+  "scenario": "CR-1",
+  "mode": "baseline",
+  "model": "claude-sonnet-5-5",
+  "skills_invoked": [],
+  "triggered": false,
+  "reference_files_read": [],
+  "exit_code": 0,
+  "stderr_tail": "",
+  "score": {
+    "criteria_score": 0.786,
+    "critical_errors_committed": []
+  }
+}

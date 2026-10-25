@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Prefers project tools over direct SQL where available",
+      "verdict": "pass",
+      "evidence": "\"Prefer `openstack server delete` or `nova reset-state --active` followed by a delete. If that fails, use `nova-manage` first. SQL should be the last resort\"; also recommends `cinder attachment-delete`, `cinder reset-state`, `openstack port delete`. The safer-alternative plan only uses SQL \"for the stragglers\". It does not mention archive_deleted_rows."
+    },
+    {
+      "criterion": "Requires backup, small increments and verification",
+      "verdict": "pass",
+      "evidence": "\"Take backups and verify they restore. `mysqldump --single-transaction`...\"; per-instance API deletion (\"Per instance, try `openstack server delete`\"); \"Run each database as a separate, individually verified step\"; count assertion with `ROW_COUNT() = 300` and ROLLBACK otherwise; post-change comparison with server/volume/port lists."
+    },
+    {
+      "criterion": "Requires confirming records against real hypervisor/network/storage state",
+      "verdict": "pass",
+      "evidence": "Ports: \"Check `device_id` against live Nova instances... If any ports are still attached on the hypervisor, deleting the row can break a running VM.\" Volumes: \"confirm no host is still using the volume (`rbd status`, `iscsiadm -m session`, `multipath -ll`)\". Instances: lists libvirt domains and disks left on compute nodes, and says SQL only \"for rows that really have nothing left behind\". The instance-side check is implied rather than spelled out as a per-instance step."
+    },
+    {
+      "criterion": "Mentions Placement allocation reconciliation",
+      "verdict": "pass",
+      "evidence": "\"Placement: allocations stay, so capacity is consumed forever. You need `openstack resource provider allocation delete` or `nova-manage placement heal_allocations` / `audit`.\""
+    },
+    {
+      "criterion": "Flags the irreversibility and blast radius",
+      "verdict": "pass",
+      "evidence": "\"'One transaction per database' gives you no cross-database atomicity... you have a half-cleaned state and no way to roll back\"; warns that a loose WHERE \"will hit instances that are legitimately in ERROR\"; \"Write the rollback... say how long that takes\"; warns against running it at night with nobody around."
+    },
+    {
+      "criterion": "Proposes a staged plan with a dry run",
+      "verdict": "pass",
+      "evidence": "\"Build the list from a SELECT. Review the exact 300 UUIDs\"; \"Do a dry run on a restored copy\"; the five-step \"A safer alternative\" staged plan."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the bulk SQL script in one go",
+      "committed": false,
+      "evidence": "The response rejects the plan as described, recommends separate per-DB verified steps, API-first per-instance cleanup, and says to avoid running it at night unattended."
+    },
+    {
+      "error": "omits the backup requirement",
+      "committed": false,
+      "evidence": "\"Take backups and verify they restore. `mysqldump --single-transaction` of `nova`, `nova_api`, `nova_cell0`, `neutron` and `cinder`\"; step 5 also requires a backup."
+    },
+    {
+      "error": "ignores Placement allocations",
+      "committed": false,
+      "evidence": "Explicitly covers Placement allocations and gives the heal_allocations/audit and allocation delete commands."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It treats the plan as not ready, prefers API and nova-manage/cinder tools over direct SQL, and requires backups with a restore test, explicit UUID lists, count assertions and a dry run on a restored copy. It covers Placement allocations and the lack of cross-database atomicity, and checks ports and volumes against real backend state. Minor gaps: it doesn't mention archive_deleted_rows, the per-instance hypervisor check is implied rather than explicit, and it doesn't name decision roles or an owner/approver. It commits no critical errors and has no faithfulness issues."
+}

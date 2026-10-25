@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"Yes, that's the normal approach. When upstream has stopped maintaining a series, carrying a minimal backport yourself is the practical option\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "partial",
+      "evidence": "The response asks to record \"the OSSA/CVE number, the upstream commit hashes, and what you changed from the original\" and asks for unit, regression and functional tests. It never asks for an owner or for why the team isn't upgrading instead. Its only gesture at an exit condition is implicit: \"easier to rebase or drop when you move to a maintained series\"."
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "pass",
+      "evidence": "\"Seven security patches on an EOL series is also a sign that an upgrade is worth scheduling. Each new OSSA will cost more to backport as the code drifts.\""
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "partial",
+      "evidence": "The response only says an upgrade \"is worth scheduling\", in one closing sentence. It doesn't put the upgrade on a roadmap, give a timeline or ask for a lifecycle decision, and it doesn't ask to review the exit conditions of the six existing backports."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "fail",
+      "evidence": "The response never asks whether the distribution or vendor already ships the fix."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": true,
+      "evidence": "The response opens with \"Yes, that's the normal approach\" and approves the backport. It requires testing, but it never asks for an owner or an explicit exit condition before shipping. The checklist is about technical hygiene, not accountability or the exit-condition safeguard the scenario requires."
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "It names the lifecycle signal directly: \"Seven security patches on an EOL series is also a sign that an upgrade is worth scheduling.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response accepts the security backport as legitimate and gives solid technical guidance on cherry-picking, testing, and checking for conflicts with the six existing backports. It also notes that seven backports point to a needed upgrade. However, the approval comes without asking for an owner or an explicit exit condition, so it commits the first critical error. The upgrade recommendation is thin: one sentence, with no roadmap and no review of the existing backports' exit conditions. It never checks whether the distribution already ships the fix. It cites no book passages and invents no facts about the user's environment."
+}

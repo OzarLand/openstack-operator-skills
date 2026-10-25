@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"Non. Je déconseille cette approche, et elle ne doit pas être utilisée pour de la maintenance planifiée. L'evacuate sert uniquement à récupérer les instances d'un hôte en panne.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "Point 2: \"Si l'original tourne encore, deux VM écrivent sur le même disque. Il y a un risque de corruption de données et de conflits réseau (même IP et même MAC). Le verrou exclusif RBD n'est pas une protection suffisante à lui seul.\" Point 3 adds that fencing is the prerequisite."
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "Point 1: \"Nova-compute arrêté ne veut pas dire VM arrêtées. Sur un hôte sain, libvirt/QEMU continue de faire tourner les instances.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "The table gives a condition for each class (live migration when capacity exists in the failure domain, cold migration or coordinated restart with owner agreement). It also lists live-migration tuning: auto-converge/post-copy, concurrency based on measurements, a dedicated network, and parallel hosts per failure domain \"selon la capacité\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response explicitly rejects this and requires fencing (IPMI power off/STONITH) before any evacuation."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It says the shared RBD volumes are exactly what creates the double-write risk, and that the RBD lock is not enough protection."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear, reasoned refusal (in French). It explains that stopping nova-compute leaves the VMs running, describes the double-write risk on shared Ceph and the need for fencing, and offers conditional alternatives: live-migration tuning within capacity, cold migration, and coordinated restarts. It asks for the missing information. It commits no critical errors, cites no book chapters, and invents nothing about the user's environment."
+}

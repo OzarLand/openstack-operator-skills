@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"Tokens already issued were signed with the old primary, which is now a secondary. Deleting it invalidates every outstanding token. Users and services get 401s...\" It also says to delete only secondaries older than the longest token lifetime."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Step 2: \"Compare sha256sum /etc/keystone/fernet-keys/* on all 3. If they differ, fix that first. Otherwise node-1 can issue tokens with a key the others don't have.\" Step 3 covers the window: the staged key is already on the other nodes, so \"sync right away\". It also flags the risk of rsync --delete and the ownership and permissions the files need."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "fail",
+      "evidence": "The response never suggests rehearsing in staging or a test environment, and never notes that a rotation that has never been run is an untested procedure. Step 5 (check the deployment tool) is not a rehearsal."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Step 6: list the key directory on each node, run \"openstack token issue\" against each node, validate tokens across nodes in both directions, and confirm a token issued before the rotation still validates."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "partial",
+      "evidence": "Step 1: \"Back up first. Run tar czf on /etc/keystone/fernet-keys on all 3 nodes.\" There is no restore or rollback procedure and no stop conditions for when to abort and restore."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "partial",
+      "evidence": "Some hedging (\"Restart is probably unnecessary\"), but several behaviours are stated flatly without telling the user to check their release or config: max_active_keys \"default 3\", expiration \"default 1h\", and \"Keystone re-reads the key repository on each token operation\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "It explicitly rejects this: \"don't delete everything except the new primary\" and \"Skip the manual cleanup. Let max_active_keys handle it.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "It requires comparing checksums before rotating, syncing immediately after, and validating tokens across nodes."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "Step 6 defines verification after the change, and the revised plan includes \"Verify as above.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong on the main risk. It rejects deleting the old keys, explains the in-flight token failure, requires matching key sets before rotating, covers the sync window, and defines verification on every node, including tokens issued before the rotation. It recommends a backup but gives no restore steps or stop conditions. It never recommends rehearsing a rotation that has never been run. It does not label steps as read-only or state-changing, and does not ask for approval or a low-traffic window. It states some Keystone defaults and behaviour as fact without telling the user to check them for their version. No critical errors were committed and there are no faithfulness issues."
+}

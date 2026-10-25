@@ -1,0 +1,78 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "pass",
+      "evidence": "'Requirement vs strategy' section: 'Fixed: every compute host has the kernel and QEMU fix within 3 weeks. Security owns this.' / 'To design: how to do it safely...'"
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "pass",
+      "evidence": "'Collect the criticality table (shared template) from the consuming teams, by project, in week 1.' Per-host step 1: 'Confirm the host's instances are classified and owners informed.' Restarts require 'Project owner' sign-off. Silent tenants default to live migration, not restart."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "'Your batch size per AZ can't exceed the spare in that AZ'. The capacity table works per AZ under a stated assumption ('about 100 hosts per AZ (even split)... The split of free capacity across AZs is unknown'). Gaps list asks for 'Free capacity per AZ and per aggregate'."
+    },
+    {
+      "criterion": "Handles SR-IOV instances by release: live migration with a brief interface interruption (owner agreement) where supported, restart or cold migration otherwise",
+      "verdict": "pass",
+      "evidence": "SR-IOV `direct` port: 'Live migration if the release is Train or later, NIC and driver support is verified, and the owner accepts a brief interface loss'. PCI passthrough flavors and direct-physical: 'Cold migration or coordinated restart'. The OpenStack release is requested in Gaps."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "pass",
+      "evidence": "'Live migration from newer QEMU to older isn't supported. Patch a landing zone first and move VMs only toward patched hosts.' The Sequencing section has a 'Landing zone' step."
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "'A host reboot doesn't patch a running VM's QEMU unless that VM moved or restarted. Track patch status per instance'. Completion criteria: 'Every instance is migrated or restarted since the patch, or listed as an exception'."
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "pass",
+      "evidence": "Dedicated 'Stop conditions' section (failing or slowing migrations, AZ reserve breach, unreachable decision owner, etc.; 'resuming is a new decision') and a dedicated 'Completion criteria' section."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "'Never use evacuation for maintenance. It is for failed hosts only.'"
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "'Plan on not being able to live-migrate everything within 3 weeks at this spare.' It lists levers such as restart in place, temporary capacity and exceptions."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "The restart class requires 'Tenant states acceptable downtime and window' and 'Project owner' sign-off. Silent tenants default to live migration."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "Explicitly forbids it: 'Never use evacuation for maintenance.'"
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "Point 4 under 'What matters most' and the completion criteria require per-instance tracking."
+    },
+    {
+      "error": "classes all SR-IOV instances as requiring a restart without considering the release",
+      "committed": false,
+      "evidence": "direct ports can be live-migrated on Train or later; only direct-physical and PCI passthrough need cold migration or restart."
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "Per-AZ figures are explicitly labelled assumptions ('Assumptions: about 100 hosts per AZ (even split)... The split of free capacity across AZs is unknown'), and actual per-AZ capacity is requested in Gaps."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A thorough plan that matches the scenario closely. It keeps the security requirement fixed and sizes capacity per AZ under clearly labelled assumptions. It treats SR-IOV differently by release and port type, explains the landing zone and the newer-to-older QEMU migration constraint, and tracks protection per instance rather than per host. It also excludes evacuation and defines stop conditions, decision rights, completion criteria and follow-up. No critical errors were committed, and it makes no unsupported book citations or invented environment facts."
+}

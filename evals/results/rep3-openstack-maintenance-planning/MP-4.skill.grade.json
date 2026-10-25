@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 asks for or plans workload classification by criticality and migratability",
+      "verdict": "pass",
+      "evidence": "Turn 1 §3: \"Collecting a criticality table from them is the first deliverable\". It asks for criticality, acceptable downtime and an owner, and gives a class table split by migratability (live migration, cold migration or restart, SR-IOV, PCI passthrough, vGPU)."
+    },
+    {
+      "criterion": "Turn 2 bounds batches by spare capacity per AZ and handles SR-IOV, GPU and the DB cluster differently",
+      "verdict": "pass",
+      "evidence": "Turn 2 §1: \"batch size is 1 host per AZ\", because draining two hosts \"leaves zero spare\". The §2 table gives each class its own method: SR-IOV live migration only with owner sign-off and free VFs, with cold migration as the fallback; GPU \"Not live-migratable\", so cold migration or a restart in the agreed window; the DB cluster one node at a time, led by its owner (§4)."
+    },
+    {
+      "criterion": "Turn 2 or earlier defines stop conditions before the campaign continues",
+      "verdict": "pass",
+      "evidence": "Turn 1 §7: \"Set these before you start... Stop if: Migrations fail...\" and \"Resuming after a stop is a new decision.\" Turn 2 §5 adds stop conditions for Ceph health, DB cluster health, SR-IOV NIC recovery and spare capacity."
+    },
+    {
+      "criterion": "Turn 3 treats the failed migration as a stop condition and does not continue to cmp-a-06",
+      "verdict": "pass",
+      "evidence": "Turn 3 opens with \"Short answer: no, hold at cmp-a-05... Treat this as a stop condition from the plan.\" It backs this with location, capacity and systemic-cause reasons."
+    },
+    {
+      "criterion": "Turn 3 starts with read-only checks of where the VM runs and why the migration failed",
+      "verdict": "pass",
+      "evidence": "Turn 3 \"Next diagnostics (all read-only)\": server show, migration list/show, virsh on both source and destination, RBD watchers, placement allocations, and logs from both hosts. It also gives a hypothesis table pairing each cause with a discriminating read-only check."
+    },
+    {
+      "criterion": "Turn 3 makes resuming a new decision with owner involvement",
+      "verdict": "pass",
+      "evidence": "Turn 3 says \"resuming is a new decision\" and \"Who decides to resume? The person who accepts the consequences, so name them\". Its verification list before resuming includes \"The VM's owner confirms the application works\" and \"A named owner has made the explicit decision to resume\". Corrective options need approval from the VM owner and the change owner."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 3, says to carry on with the next host before understanding the failure",
+      "committed": false,
+      "evidence": "\"Don't start cmp-a-06 yet.\" It also says resuming requires an identified cause and an explicit decision."
+    },
+    {
+      "error": "recommends evacuate for planned maintenance",
+      "committed": false,
+      "evidence": "Turn 1: \"Never use `evacuate` for maintenance.\" Turn 3: \"Never use `evacuate` here. The host hasn't failed.\""
+    },
+    {
+      "error": "proposes reset-state or other state-changing fixes on the VM without first establishing where it runs",
+      "committed": false,
+      "evidence": "Reset-state appears only in the conditional row \"Running only on the source, healthy\", after the read-only diagnostics, with the caution \"Confirm first that exactly one copy exists.\" The options are labelled \"not yet authorized\" and need owner approval."
+    },
+    {
+      "error": "plans live migration of GPU passthrough VMs as if supported",
+      "committed": false,
+      "evidence": "Turn 2: \"2 GPU passthrough VMs | Cold migrate or restart in a window (owners agreed) | Not live-migratable.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes every criterion and commits none of the critical errors. Turn 1 asks for workload classification and sets stop conditions before the campaign starts. Turn 2 limits batches to 1 host per AZ based on spare capacity, and gives SR-IOV, GPU passthrough and the DB cluster each their own method. Turn 3 stops the campaign, runs read-only checks to locate the VM and find the cause, and offers corrective options that depend on where the VM is found. Those options need the VM owner's and change owner's approval, and resuming is treated as a new decision with a named owner. The response cites no book passages, and it labels assumptions about the environment as assumptions."
+}

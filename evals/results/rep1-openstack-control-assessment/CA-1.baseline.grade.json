@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against immediate transformation and explains why",
+      "verdict": "pass",
+      "evidence": "\"Don't start with the deployment tool or the networking redesign. You don't yet know what the system does...\" and \"changing two foundations at once, with no baseline.\""
+    },
+    {
+      "criterion": "Uses the restoration sequence or an equivalent staged approach",
+      "verdict": "pass",
+      "evidence": "Phases run Weeks 1–2 \"Find out what you have\", then Weeks 2–4 \"Make the incidents legible\", then Months 2–3 \"Fix the top causes and de-risk upgrades\", then evolution only after a gate. That roughly covers discover/protect/assess/stabilize/recover knowledge/evolve. Simplify and establish-control are not explicit stages, but the sequence is an equivalent staged approach."
+    },
+    {
+      "criterion": "Lists concrete first-30-day outputs",
+      "verdict": "partial",
+      "evidence": "Weeks 1–4 produce an inventory, a list of single points of failure, verified backups, an incident classification and triage runbooks. These are activities, not framed as deliverables. There is no explicit current-state map, ownership-gap list, recovery-gap list or control roadmap."
+    },
+    {
+      "criterion": "Requires owners and removal conditions for guardrails",
+      "verdict": "fail",
+      "evidence": "The only guardrail-like item is \"some restarts need an explicit 'ask first' rule\", plus a migration gate. The response never assigns an owner to a guardrail or says when one should be removed."
+    },
+    {
+      "criterion": "Mentions the exception for unmaintained, vulnerable releases",
+      "verdict": "partial",
+      "evidence": "\"check which release you're on against its EOL status, because that determines how urgent security patching is\" and \"A deployment-tool migration may well turn out to be the right way to do upgrades\". It never says that, if the release is unpatched, upgrading it may itself be the stabilization step."
+    },
+    {
+      "criterion": "Starts from business capabilities",
+      "verdict": "fail",
+      "evidence": "Discovery starts from components (release, Neutron driver, Galera, RabbitMQ, Ceph). Business capabilities and how critical they are never come up."
+    },
+    {
+      "criterion": "Defines exit criteria for restoration",
+      "verdict": "partial",
+      "evidence": "The gate is \"no major migration until incident rate is down, backups are tested, and a staging upgrade has succeeded\". That is a partial exit criterion, but it does not define what \"control restored\" means."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses starting with the deployment tool migration and network redesign",
+      "committed": false,
+      "evidence": "It explicitly defers both: \"Only then, evaluate the tooling and networking proposals with real data.\""
+    },
+    {
+      "error": "proposes a single maturity score as the outcome",
+      "committed": false,
+      "evidence": "There is no maturity score anywhere. The outcomes are incident reduction, tested backups and a successful staging upgrade."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is restrained and well staged. It firmly delays the tooling and networking rewrites, explains why, and channels the new engineers into investigation work and written proposals. It commits no critical errors and has no faithfulness problems. Its gaps: it starts from components rather than business capabilities, gives guardrails no owners or removal conditions, frames the first-30-day outputs as activities rather than the expected deliverables, mentions the unpatched-release exception only weakly, and its exit criteria are only a partial migration gate."
+}

@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"Non, je déconseille. `evacuate` est fait pour un hôte déjà mort, pas pour un hôte qu'on met en maintenance.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Il suppose que l'hôte est mort et recrée chaque instance ailleurs, sur le même disque RBD... deux VM actives sur le même volume Ceph. C'est un split-brain, avec un risque réel de corruption de données. Le verrou exclusif RBD n'est pas une garantie sur laquelle s'appuyer.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Arrêter `nova-compute` n'arrête pas les VM. Les processus QEMU continuent de tourner sur l'hôte.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "partial",
+      "evidence": "Covers live-migration tuning (post-copy, auto-converge, bandwidth, dedicated network), max_concurrent_live_migrations with batching, cold migrate \"pour les VM qui tolèrent une courte coupure\", and stopping/cold-migrating non-critical VMs. Conditions are given for downtime tolerance, but nothing ties parallel draining to destination capacity or network headroom (\"videz plusieurs hôtes en même temps, par lots\" has no capacity check)."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "It rejects the idea outright. The only fallback requires fencing first: \"Si vous voulez quand même évacuer, il faut fencer l'hôte... Coupez-le par IPMI/BMC, ou au minimum arrêtez toutes les VM, avant d'évacuer\". It also notes that `--down` \"ne fence rien\"."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It says shared Ceph is where the split-brain happens and that the RBD exclusive lock should not be relied on."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a strong, correct answer. It gives a clear no and explains why: evacuate is only for failed hosts, stopping nova-compute leaves the QEMU processes running, and the result is two running copies writing to the same RBD disk, a split-brain with real risk of data corruption. It does not commit either critical error. The fallback evacuation path requires fencing first. The alternatives are reasonable and some come with conditions, such as downtime tolerance for cold migration. The one gap is that more parallel migrations are not tied to a capacity check, so that criterion is partial. It cites nothing from the book and invents nothing about the user's environment."
+}

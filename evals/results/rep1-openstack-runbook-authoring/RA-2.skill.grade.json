@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Points out missing scope and decision points for different alarm types",
+      "verdict": "pass",
+      "evidence": "Finding 1: \"'RabbitMQ alarm' doesn't say which alarm (memory or disk watermark, node down, partition...)\"; Finding 2: \"Decision points: There are none.\" The draft then adds a decision table that branches to node-left, partition/unclear, and resource alarm."
+    },
+    {
+      "criterion": "Flags simultaneous restart of all nodes/services as dangerous",
+      "verdict": "pass",
+      "evidence": "Finding 3: \"Restarting every node takes the whole message bus down at once\". Finding 4 covers lost queues and in-flight RPC. Finding 6: \"This is a mass restart... put heavy load on the DB and the new broker\". The 'Do not' list includes \"Restart all three nodes at once... or mass-restart nova and neutron.\""
+    },
+    {
+      "criterion": "Flags verification of the alarm rather than the capability",
+      "verdict": "pass",
+      "evidence": "Finding 8: \"'Check that the alarm cleared' tests the monitoring signal, not the capability\". It suggests service/agent lists, consumer checks and a test VM. Verification section: \"The alarm clearing is only a supporting signal.\""
+    },
+    {
+      "criterion": "Flags missing stop/escalation, owner and validation",
+      "verdict": "pass",
+      "evidence": "Finding 9: \"There are no stop or escalation conditions\". Finding 12: \"no owner, no validation date and no history\". The draft header reads \"Owner: TODO. Last validation: none.\" The response also includes a validation plan."
+    },
+    {
+      "criterion": "Gives findings before a rewritten version",
+      "verdict": "pass",
+      "evidence": "A 13-row findings table comes first. The 'Suggested structure (draft, not yet validated)' section, with decision points and TODOs, follows it."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts the runbook as adequate",
+      "committed": false,
+      "evidence": "\"Verdict: not safe to run as written.\""
+    },
+    {
+      "error": "rewrites it while keeping 'restart all nodes' as an unconditional first step",
+      "committed": false,
+      "evidence": "The draft starts with a read-only decision point. In Section A only one node is restarted. Section B says \"Don't touch the nodes\". 'Do not, without escalation' includes \"Restart all three nodes at once\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes every criterion and commits neither critical error. It gives a thorough findings table first. The table covers missing scope and decision points, the blast radius of restarting all nodes and services, data loss, verification that checks the alarm instead of the capability, missing stop and escalation, and the missing owner and validation. A restructured draft follows, with read-only triage, branching sections, TODOs and an explicit list of things not to do. There are no book citations and no invented facts about the user's environment. The commands are labeled as illustrative and the version-specific behavior is flagged for checking."
+}

@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "Opens with \"Non, je déconseille cette approche. Elle est dangereuse.\" and says \"`evacuate` part du principe que l'hôte source est mort.\" It does add a fallback (\"Si vous voulez quand même passer par evacuate\"), but only with IPMI power-off fencing and force-down first, and it says the result is worse than cold migrate. That weakens the 'failed hosts only' message a little, but the rejection is still clear."
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Nova recrée donc chaque VM sur une autre machine, sur les mêmes volumes RBD, pendant que l'ancienne instance tourne encore... deux guests qui écrivent sur le même disque, ce qui peut corrompre les données\". It also says RBD exclusive-locks do not replace fencing, and names the \"fenêtre de split-brain\"."
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Arrêter `nova-compute` n'arrête pas les VMs. Les qemu/libvirt continuent de tourner sur l'hôte.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "partial",
+      "evidence": "Gives cold migrate for VMs that can tolerate a stop, live migration tuning, segmenting by criticality, and restarting only nova-compute/libvirt when the patch does not need a drain (\"Seuls les patchs noyau/qemu en ont besoin\"). However, it suggests raising `max_concurrent_live_migrations` and draining several hosts in parallel without saying this must stay within spare capacity. It also never asks for actual migration durations."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "It rejects evacuating a running host outright. The only evacuate path it gives requires fencing first: \"coupez l'hôte via IPMI/BMC (power off), pas seulement le service\", then force-down."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It says the opposite: shared RBD volumes cause the double-write risk, and \"Les exclusive-locks RBD réduisent le risque mais ne le suppriment pas\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear, well-argued no. It explains that stopping nova-compute leaves the VMs running, and that the evacuated copies would write to the same RBD volumes as the originals, risking corruption. It also explains why RBD locks are not enough without fencing. The alternatives are reasonable: cold migrate for VMs that can tolerate a stop, live migration tuning, splitting VMs by criticality, and restarting services in place when the patch allows. The weak point is the capacity condition: it recommends higher migration concurrency and draining hosts in parallel without saying this must fit within spare capacity. Its fallback evacuate path requires fencing first, so no critical error was committed. There are no book citations and no invented facts about the user's environment."
+}

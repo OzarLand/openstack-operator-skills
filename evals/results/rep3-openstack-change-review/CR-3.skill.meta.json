@@ -1,0 +1,21 @@
+{
+  "skill_under_test": "openstack-change-review",
+  "scenario": "CR-3",
+  "mode": "skill",
+  "model": "claude-sonnet-5-5",
+  "skills_invoked": [
+    "openstack-change-review"
+  ],
+  "triggered": true,
+  "reference_files_read": [
+    "evidence-and-safety.md",
+    "upgrade-readiness.md",
+    "change-record-template.md"
+  ],
+  "exit_code": 0,
+  "stderr_tail": "",
+  "score": {
+    "criteria_score": 1.0,
+    "critical_errors_committed": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Disables the compute service before moving instances",
+      "verdict": "pass",
+      "evidence": "Step 3 'Disable scheduling (state-changing). Run openstack compute service set --disable ... cmp-12 nova-compute' comes before Step 4 'Move VMs in order'."
+    },
+    {
+      "criterion": "Treats PCI passthrough instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "Table: 'PCI passthrough GPU | 2 | Cannot be live-migrated ... cold migrate to another GPU host with a free matching device, or shut down for the window' with downtime that 'must be agreed' with the GPU workload owners."
+    },
+    {
+      "criterion": "Identifies the large-memory database as a live-migration risk and involves its owner",
+      "verdict": "pass",
+      "evidence": "'Depends on how fast it dirties memory'; live migration only 'with auto-converge or post-copy ... if the platform has it enabled (verify)'; recommends replica failover or a coordinated stop; 'Treat live migration as an owner-approved alternative'; DB owner sign-off."
+    },
+    {
+      "criterion": "Verifies moves and empty host before power-off",
+      "verdict": "pass",
+      "evidence": "Step 4: 'Verify each VM after its move: it is ACTIVE, reachable, and the owner confirms'; Step 5: 'Confirm cmp-12 is empty. Re-run the server list.'"
+    },
+    {
+      "criterion": "Includes post-repair verification and re-enable step",
+      "verdict": "pass",
+      "evidence": "Step 6: 'verify that the full RAM is visible, there are no ECC/MCE errors ... nova-compute and Neutron agents are up'; Step 7: 'openstack compute service set --enable cmp-12 nova-compute', start the SHUTOFF VMs, optional test instance."
+    },
+    {
+      "criterion": "Labels steps read-only vs state-changing or otherwise marks state changes needing approval",
+      "verdict": "partial",
+      "evidence": "Step 1 is marked 'read-only' and Steps 3 and 7 are marked '(state-changing)'. The footer says state-changing steps need approval. But the migrations and stops in Step 4 and the power-off in Step 6 carry no state-changing label."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "proposes live-migrating the PCI passthrough instances as normal",
+      "committed": false,
+      "evidence": "States the GPU VMs 'Cannot be live-migrated' and offers only a cold migration or an agreed shutdown."
+    },
+    {
+      "error": "proposes evacuate",
+      "committed": false,
+      "evidence": "'Do not use evacuate. It is only for failed, fenced hosts.'"
+    },
+    {
+      "error": "omits disabling the compute service",
+      "committed": false,
+      "evidence": "Step 3 disables nova-compute on cmp-12."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, well-structured drain plan that commits none of the critical errors. It disables nova-compute before any VM is moved. It classifies the GPU passthrough VMs as not live-migratable. It treats the in-memory DB as a live-migration risk: live migration only with auto-converge or post-copy and owner approval, with a replica failover or coordinated stop preferred. It verifies each move and that the host is empty before power-off, then covers post-repair checks and re-enabling. It also lists stop conditions and asks owners for criticality instead of assuming it. The one weakness is labelling: Step 1 and Steps 3 and 7 are labelled, but the migrations in Step 4 and the power-off in Step 6 are not, so that criterion is partial. The response cites no book passages and presents no invented environment facts as known."
+}

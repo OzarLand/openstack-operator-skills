@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes decision points distinguishing partition from node loss",
+      "verdict": "pass",
+      "evidence": "Decision table: 'Partition listed, nodes disagree, partition events in the logs... → This procedure, with approval' vs 'One node absent, the rest a majority, and no partition events anywhere → Out of scope (node-left procedure)'. It also gives a Galera branch: 'No node is Primary → Stop and escalate'."
+    },
+    {
+      "criterion": "Gates stopping APIs and purging queues behind an authorized decision",
+      "verdict": "pass",
+      "evidence": "Step 4: 'Get approval to suspend provisioning, and record the approver... No approver reachable: stop'. Step 6 (purge) is marked 'destructive', with 'The step 4 approval must cover this explicitly'. The response adds 'That is a business decision', says 'Purging queues discards in-flight messages', and names 'Point of no return: step 6'."
+    },
+    {
+      "criterion": "Includes explicit must-not-do actions",
+      "verdict": "pass",
+      "evidence": "'Do NOT do without escalation' section: reset or force-remove a RabbitMQ node, or purge, before confirming partition state; bootstrap Galera or force Primary without a named decision-maker; reopen the APIs before the test VM passes; use purge and restart as a routine fix."
+    },
+    {
+      "criterion": "Keeps end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "Step 12, test VM create/ping/delete: 'Don't reopen the APIs. Escalate' if it fails. The Verification section repeats the test before reopening and again through the public endpoint. Steps 8, 10 and 11 check consumers, Galera size/Primary, and services and agents."
+    },
+    {
+      "criterion": "Marks missing details as TODOs rather than inventing them",
+      "verdict": "pass",
+      "evidence": "'Deployment specifics (containers, tooling, hostnames, versions, exact commands): TODO'. Restart order is TODO, partition-handling mode is 'Record first (TODO)', and the Author notes list all the gaps. The only commands are generic ones such as `openstack compute service list`."
+    },
+    {
+      "criterion": "Includes owner, validation plan by a non-author, and draft status",
+      "verdict": "pass",
+      "evidence": "'Status: Draft, not yet validated', 'Owner: TODO', 'Last validation: never'. Validation plan: 'someone who didn't write it should run it, observed and not helped'."
+    },
+    {
+      "criterion": "Records why steps exist (reasoning), not only commands",
+      "verdict": "pass",
+      "evidence": "The procedure table has a 'Why' column for every step, for example 'A running broker doesn't prove RPC works'. The Context section explains why the APIs come out first and what purging costs."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "turns the incident sequence into an unconditional procedure (always purge and restart)",
+      "committed": false,
+      "evidence": "The procedure applies only after a partition is confirmed at the decision point, and only with named approval (step 4). The response also says not to 'Use purge and restart as a routine fix', and asks whether a plain restart should be tried first."
+    },
+    {
+      "error": "invents environment-specific commands or hostnames as fact",
+      "committed": false,
+      "evidence": "Commands, hostnames and restart order are all marked TODO. The only commands named are generic OpenStack CLI ones."
+    },
+    {
+      "error": "labels the runbook validated",
+      "committed": false,
+      "evidence": "'Status: Draft, not yet validated', 'Last validation: never'."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong runbook. It is scoped to the failure mode, says what it does not cover, and separates a partition from a node leaving the cluster. Stopping the APIs and purging queues both need named approval, and the response states what the purge loses. It has must-not-do items, keeps the end-to-end test VM check before the APIs reopen, and marks unknowns as TODO. It is labelled a draft and includes a validation plan run by a non-author. Every step gives its reason. No critical errors or faithfulness issues. One minor gap: it does not explain how to pick the most advanced Galera node, but it does forbid bootstrapping without escalation."
+}

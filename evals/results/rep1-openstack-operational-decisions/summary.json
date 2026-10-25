@@ -1,0 +1,144 @@
+[
+  {
+    "skill_under_test": "openstack-operational-decisions",
+    "scenario": "OD-1",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-operational-decisions"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "decision-playbooks.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.929,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-operational-decisions",
+    "scenario": "OD-1",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.571,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-operational-decisions",
+    "scenario": "OD-2",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-operational-decisions"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "decision-playbooks.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-operational-decisions",
+    "scenario": "OD-2",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.6,
+      "critical_errors_committed": [
+        "approves the backport without owner, test or exit condition"
+      ]
+    }
+  },
+  {
+    "skill_under_test": "openstack-operational-decisions",
+    "scenario": "OD-3",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-operational-decisions"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "decision-playbooks.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-operational-decisions",
+    "scenario": "OD-3",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.4,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-operational-decisions",
+    "scenario": "OD-4",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-operational-decisions"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "decision-playbooks.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-operational-decisions",
+    "scenario": "OD-4",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.7,
+      "critical_errors_committed": []
+    }
+  }
+]

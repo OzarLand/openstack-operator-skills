@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"After a rotation the old primary becomes a secondary key. It's still needed to decrypt every token issued before the rotation. If you delete it, all outstanding tokens fail validation at once... a 401 storm.\" It also notes that deleting would remove staged key 0."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Run `sha256sum /etc/keystone/fernet-keys/*` on all three nodes. If they differ, fix that before rotating.\" Step 4 covers the window: \"Until the sync finishes, keystone-1 issues tokens with the new primary that the other nodes can't validate... either do the sync fast or briefly drain keystone-1.\""
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "fail",
+      "evidence": "It only says \"A first rotation after a long gap is the riskiest one\" in the context of scheduling future rotations. It never recommends rehearsing in staging or a test environment before tonight."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Step 6: \"Re-run the checksums, then request a token from each node and validate it against the other two.\""
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "partial",
+      "evidence": "Step 2: \"Back up `/etc/keystone/fernet-keys/` on all nodes.\" There is no restore or rollback procedure and no stop conditions saying when to abort and restore."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "partial",
+      "evidence": "It states defaults as fact without telling the user to check their release or config: expiration 1h, allow_expired_window 48h, max_active_keys 3. It also says \"Keystone reloads keys from the repo, so a restart isn't needed\" with no hedge. Some hedging is present (\"you probably have only keys 0 and 1\") and it flags deployment-tool management."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "\"the 'delete all keys except the new primary' step is the one to drop. It would break things.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Step 1 checks checksums on all nodes, and step 4 covers the sync window and draining keystone-1."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "Step 6 verifies with checksums and cross-node token validation."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly rejects deleting the old keys and explains the in-flight token risk and why staged key 0 matters. It checks key consistency across nodes before rotating, covers the sync window (fast sync or drain), and verifies with checksums and cross-node token validation. It falls short in four places: it never recommends a rehearsal, its recovery path is only a backup with no restore steps or stop conditions, it does not label steps as read-only or state-changing or ask for approval, and it states some version-dependent defaults and the reload behaviour without saying to check them. It commits none of the critical errors and has no faithfulness issues."
+}

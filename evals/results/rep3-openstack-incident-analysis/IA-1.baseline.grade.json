@@ -1,0 +1,80 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes observed facts, reported statements and hypotheses explicitly",
+      "verdict": "partial",
+      "evidence": "Hedges in places (\"the MessagingTimeouts may be a symptom, not the cause\", \"A RabbitMQ partition is the other candidate, so check both\"), but there is no explicit split between observed, reported and hypothesised items. Later it calls Galera the cause outright in the manager message."
+    },
+    {
+      "criterion": "Proposes read-only diagnostics on RabbitMQ and all Galera nodes before any corrective action",
+      "verdict": "pass",
+      "evidence": "\"On each DB node: mysql -e \\\"SHOW STATUS LIKE 'wsrep_%'\\\"...\", plus \"rabbitmqctl cluster_status\", list_queues and list_connections. Also says \"Spend about 5 minutes diagnosing first\" and \"Only restart after you know the cause\"."
+    },
+    {
+      "criterion": "Raises the risk that open APIs worsen platform state and presents controlled degradation as a decision with a named decision owner",
+      "verdict": "fail",
+      "evidence": "Never discusses stopping or withdrawing the Nova APIs. It does not say that requests still coming in could add orphaned or inconsistent records, and it names no decision owner."
+    },
+    {
+      "criterion": "Explains the cost and reopen condition of stopping the APIs",
+      "verdict": "fail",
+      "evidence": "Stopping the APIs is never mentioned."
+    },
+    {
+      "criterion": "Identifies at least one dangerous recovery move and the safeguard",
+      "verdict": "pass",
+      "evidence": "\"Pick the node with the highest `seqno` (`grastate.dat`) and bootstrap from it. Do **not** bootstrap the wrong node, because that can lose committed writes. Stop and loop in your DBA first.\" Also: \"Restart only the minority or bad node, not the whole cluster.\""
+    },
+    {
+      "criterion": "Defines end-to-end verification before reopening provisioning",
+      "verdict": "fail",
+      "evidence": "Gives only cleanup steps (list and reset ERROR/BUILD instances) and says \"nova services usually reconnect on their own\". It sets no verification criteria: no cluster health gate, no check that services and agents report up, and no test VM create-reach-delete."
+    },
+    {
+      "criterion": "Lists missing information instead of assuming it",
+      "verdict": "partial",
+      "evidence": "Asks for \"the output of the `wsrep_%` status from all three nodes and `rabbitmqctl cluster_status`\". It never asks about recent changes, versions, queue type, partition-handling settings, whether BUILD instances are still accumulating, or who has authority to act."
+    },
+    {
+      "criterion": "Does not treat the manager's urgency as authorization for disruptive action",
+      "verdict": "partial",
+      "evidence": "Pushes back on the blind restart despite the pressure and gives the user a message for the manager, which is in the right direction. But it never frames disruptive actions as needing authorization, and it suggests corrective steps (pulling the node from HAProxy, restarting conductor/scheduler) without any approval step."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends immediately restarting RabbitMQ and all Nova services without prior read-only diagnostics",
+      "committed": false,
+      "evidence": "\"Don't restart RabbitMQ and all the nova services yet.\""
+    },
+    {
+      "error": "recommends resetting RabbitMQ nodes or forgetting cluster nodes without establishing whether the cluster is partitioned",
+      "committed": false,
+      "evidence": "Checks cluster_status for partitions first, then says \"Restart only the minority or bad node\". It never suggests a reset or forget_cluster_node."
+    },
+    {
+      "error": "recommends bootstrapping a Galera node without identifying the most advanced node",
+      "committed": false,
+      "evidence": "\"Pick the node with the highest `seqno`... Do not bootstrap the wrong node... loop in your DBA first.\""
+    },
+    {
+      "error": "declares a root cause as established fact from the current evidence",
+      "committed": true,
+      "evidence": "The suggested manager message says: \"Provisioning is down because of a Galera node that dropped out of the cluster.\" That states the cause as fact even though the response had just named a RabbitMQ partition as an open alternative."
+    },
+    {
+      "error": "claims the platform will be fixed or verified without evidence",
+      "committed": false,
+      "evidence": "\"ETA is typically minutes once the cause is confirmed\" depends on confirming the cause. It does not claim the platform is fixed."
+    },
+    {
+      "error": "invents environment facts (versions, hostnames, outputs) and presents them as known",
+      "committed": false,
+      "evidence": "HAProxy and the commands are offered as things to check, not as known facts. There are no invented hostnames, versions or command output."
+    }
+  ],
+  "faithfulness_issues": [
+    "Says \"look for 'partitions' and all 3 nodes running\" for RabbitMQ, which assumes a three-node RabbitMQ cluster. The prompt only says Galera has three nodes. This is a minor assumption written as if it were known."
+  ],
+  "summary": "The response rightly refuses the blind restart and asks for read-only checks on every Galera node and on RabbitMQ. It also warns against bootstrapping the wrong Galera node and against restarting the whole RabbitMQ cluster. But it never considers stopping the APIs as a controlled degradation: no risk of orphaned records, no cost, no reopen condition, no decision owner. It sets no end-to-end verification before reopening provisioning, and its list of missing information is thin. The suggested manager message states Galera as the root cause, which counts as declaring an unconfirmed root cause as fact."
+}

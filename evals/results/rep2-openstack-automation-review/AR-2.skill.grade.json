@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags rebooting without draining instances as blocking",
+      "verdict": "pass",
+      "evidence": "Finding #2, **Blocking**, `reboot` task: \"It reboots hosts that still have running VMs, with no drain\" → \"Disable scheduling and live migrate or coordinate the VMs off each host first.\" The Safeguards table also flags the drain/disable step as missing."
+    },
+    {
+      "criterion": "Flags lack of batching (serial) as a blast-radius problem",
+      "verdict": "pass",
+      "evidence": "Finding #1, **Blocking**, \"no `serial`\": \"All compute hosts can reboot together, causing a full tenant outage.\" The 'Scope and blast radius' section says that the default forks of 5 is no protection and that nothing makes the waves follow failure domains."
+    },
+    {
+      "criterion": "Flags ignore_errors and missing stop conditions",
+      "verdict": "pass",
+      "evidence": "Finding #3, **Blocking**: \"A failed update does not stop the reboot, and the failure is hidden\". It suggests removing ignore_errors and adding `any_errors_fatal` or `max_fail_percentage: 0`. The Safeguards table lists stop conditions as missing."
+    },
+    {
+      "criterion": "Flags unpinned updates as uncontrolled change",
+      "verdict": "pass",
+      "evidence": "Finding #5, Major, `name: '*'`, `state: latest`: \"An unreviewed update set, which can include kernel, QEMU, libvirt, OVS...\". It recommends checking excludes and version locks, testing on a canary host and capturing the update list. The Decisions table says to \"Pin or review the update set\"."
+    },
+    {
+      "criterion": "Requires post-reboot verification",
+      "verdict": "pass",
+      "evidence": "Finding #4: \"After reboot, assert kernel version, that nova-compute and libvirt are active, that the compute service shows `up` and enabled, and that the network agent is up... Ideally, boot and delete a test VM on the host\". The sketch also has post_tasks."
+    },
+    {
+      "criterion": "Refers to a maintenance plan based on criticality and capacity",
+      "verdict": "pass",
+      "evidence": "Decisions table: \"Decide beforehand per workload: live migrate, cold migrate or coordinated restart\". Finding #1 sizes batches by \"the number your spare capacity allows\". Finding #2 says \"Planning that needs workload classification\". It points to the openstack-maintenance-planning skill and asks about \"spare capacity... per failure domain, and which workloads can't tolerate a restart\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the playbook on production as is",
+      "committed": false,
+      "evidence": "\"Verdict: not safe to run on prod as written.\""
+    },
+    {
+      "error": "ignores the lack of instance draining",
+      "committed": false,
+      "evidence": "Finding #2 is marked Blocking for reboots with no drain. The drain/disable step is also listed as missing in the Safeguards table, and the sketch includes pre_tasks to disable and drain each host."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. The verdict is clearly 'not safe'. It marks three findings as blocking: no serial, no drain and ignore_errors. Unpinned updates and the missing post-reboot verification are Major findings. It suggests a safer structure with serial, max_fail_percentage, pre/post checks and disable/drain steps, and it ties the drain method to workload criticality and spare capacity. It does not mention that QEMU/libvirt updates only protect instances that are migrated or restarted afterwards, though the scoring criteria don't require that. It makes no book citations and invents nothing about the environment: assumptions are labelled as such, and the forks default of 5 is a correct Ansible fact. Neither critical error was committed."
+}

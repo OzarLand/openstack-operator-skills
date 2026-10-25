@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Marks absence of fencing as blocking",
+      "verdict": "pass",
+      "evidence": "Item 1 under 'Must fix': 'No fencing, so you risk split-brain and data corruption… Only evacuate once the power-off is confirmed.' The sketch also skips any host where fencing fails: `if not fence(svc.host): … continue`."
+    },
+    {
+      "criterion": "Explains why a down service is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"`state == 'down'` only means the `nova-compute` agent stopped reporting. It does not mean the host or its VMs are dead. The usual causes are a RabbitMQ blip, a hung agent, or a network partition… the guests keep running.\" It then describes two writers on Ceph/NFS and duplicate IPs/MACs."
+    },
+    {
+      "criterion": "Identifies mass-evacuation risk from control-plane/network failure (unbounded scope)",
+      "verdict": "pass",
+      "evidence": "Item 2, 'No blast-radius limit': 'If the controller loses RabbitMQ or the DB… every compute node looks `down` at once… try to evacuate the whole cloud.' It proposes a circuit breaker (more than 1 host or more than 5% down)."
+    },
+    {
+      "criterion": "Identifies missing dry run, logging, stop conditions",
+      "verdict": "pass",
+      "evidence": "Under 'Visibility': 'The script is silent. It needs logging and an alert… Add a `--dry-run` flag.' Stop conditions are covered by the circuit breaker (`if len(down) > MAX_DOWN: … sys.exit(1)`), the grace period and the flock lock (item 5)."
+    },
+    {
+      "criterion": "Recommends semi-automation or fencing precondition with bounded scope",
+      "verdict": "pass",
+      "evidence": "The sketch makes fencing a hard precondition and sets MAX_DOWN=1. It also says: 'If you have no way to power-cycle hosts out-of-band, I'd have the cron job alert and disable the host, and keep the evacuation manual or behind a confirmation.'"
+    },
+    {
+      "criterion": "Quotes or references specific lines of the script",
+      "verdict": "pass",
+      "evidence": "It references `state == 'down'`, the ordering of `evacuate_server` before `disable_service` (item 4) and the `disable_service(svc, host, binary)` signature, and it rewrites the loop."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the script with minor tweaks without adding fencing",
+      "committed": false,
+      "evidence": "Opens with 'Don't put this in cron yet' and lists fencing as the first must-fix. The sketch will not evacuate a host it could not fence."
+    },
+    {
+      "error": "suggests evacuating on heartbeat loss as acceptable practice",
+      "committed": false,
+      "evidence": "It says 'The logic is the right idea', but it only allows evacuation after a grace period, a blast-radius check and confirmed out-of-band fencing. Without fencing it recommends keeping evacuation manual."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong review. Its verdict is effectively 'not safe as written'. It treats missing fencing as blocking, explains correctly that a down service is not a dead host, flags mass evacuation when the control plane fails, and covers grace period, locking, error handling, dry run and logging. It proposes fencing as a precondition with bounded scope, and a manual or confirmation fallback when fencing is not available. Gaps: it does not use an explicit 'redesign' verdict with a severity table (it uses Must fix / Should fix tiers instead), and it does not raise ownership, testing or on-call process. It commits no critical errors and has no faithfulness problems."
+}

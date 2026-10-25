@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Prefers project tools over direct SQL where available",
+      "verdict": "pass",
+      "evidence": "\"Prefer the supported tools\": `nova reset-state --active` + `openstack server delete`, `nova-manage placement audit --verbose [--delete]`, `openstack port delete`, `cinder reset-state --attach-status detached`/`attachment-delete`; \"Use SQL only for what the APIs can't clear.\" It does not mention archive_deleted_rows or heal_allocations."
+    },
+    {
+      "criterion": "Requires backup, small increments and verification",
+      "verdict": "pass",
+      "evidence": "\"Take a fresh dump of all three DBs, plus `nova_api`, and confirm you can restore it\"; \"A canary. Do 3 to 5 instances first ... then verify Placement, the hypervisor, Neutron and Cinder\"; row-count assertions with ROW_COUNT()."
+    },
+    {
+      "criterion": "Requires confirming records against real hypervisor/network/storage state",
+      "verdict": "pass",
+      "evidence": "Point 5: \"some of those instances may have running guests or hold volumes with data. Verify per instance.\" Point 4 checks the storage backend export/mapping and that volumes are not on live instances. Point 3 says to check the ports' hosts and the OVN/OVS backend."
+    },
+    {
+      "criterion": "Mentions Placement allocation reconciliation",
+      "verdict": "pass",
+      "evidence": "\"Placement allocations, which are the biggest hidden problem. The resource providers keep counting the usage...\"; recommends `nova-manage placement audit`."
+    },
+    {
+      "criterion": "Flags the irreversibility and blast radius",
+      "verdict": "pass",
+      "evidence": "Point 1: no atomicity across three DBs, so a partial failure leaves \"a new inconsistent state\". Point 4: \"the riskiest part ... two writers and data corruption\". Point 3: \"you delete live ports\". It asks for a rollback plan. It never says the change is irreversible in so many words."
+    },
+    {
+      "criterion": "Proposes a staged plan with a dry run",
+      "verdict": "pass",
+      "evidence": "\"A dry run. Run the script's `SELECT` equivalents and review the exact lists ... Have a second person sign off\", then a 3–5 instance canary before the rest, and explicit ID lists in WHERE clauses."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the bulk SQL script in one go",
+      "committed": false,
+      "evidence": "Says \"the plan has structural problems whatever the SQL says\" and requires a dry run, a canary and the supported tools before tonight. It does not approve the script."
+    },
+    {
+      "error": "omits the backup requirement",
+      "committed": false,
+      "evidence": "\"Backups. Take a fresh dump of all three DBs, plus `nova_api`, and confirm you can restore it.\""
+    },
+    {
+      "error": "ignores Placement allocations",
+      "committed": false,
+      "evidence": "Calls Placement allocations \"the biggest hidden problem\" and recommends `nova-manage placement audit`."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It rejects the one-shot cross-DB script on structural grounds and covers Placement, related-row orphans, Neutron backend state and the Cinder backend connection risk. It requires backups with a restore test, a SELECT dry run with a second reviewer, a 3–5 instance canary with verification, explicit ID lists, and supported tools before SQL. It has some gaps. It never states a clear \"not ready as written\" verdict. It does not mention archive_deleted_rows or heal_allocations. Decision roles go no further than a second-person sign-off, with no named owner or approver. No critical errors were committed, and there are no faithfulness issues."
+}

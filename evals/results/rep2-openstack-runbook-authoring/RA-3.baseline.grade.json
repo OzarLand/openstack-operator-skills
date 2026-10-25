@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+      "verdict": "pass",
+      "evidence": "Step 3 reads grastate.dat on all nodes, explains seqno -1 and safe_to_bootstrap, and runs `mysqld --wsrep-recover` to get 'Recovered position'. Step 4 checks the uuid matches and picks the highest seqno."
+    },
+    {
+      "criterion": "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+      "verdict": "pass",
+      "evidence": "Rule 1 says: 'Bootstrap the node with the most recent data... Any transactions that exist only on a node with a higher seqno are lost.' Step 4 also lists escalation stop conditions."
+    },
+    {
+      "criterion": "Adds a decision point distinguishing full outage from partial failure",
+      "verdict": "pass",
+      "evidence": "Step 1, 'Confirm it's a full outage', says: 'If any node is still Primary, stop. This isn't a full outage. Restart the failed nodes normally.' It also covers the network-partition case."
+    },
+    {
+      "criterion": "Includes end-to-end verification",
+      "verdict": "pass",
+      "evidence": "Step 6 checks size 1, Primary, Synced and ready, then runs a sanity query. Step 8 checks the full cluster size and that all nodes are Synced, writes a test row and reads it from the other nodes, re-adds the load balancer, then re-enables application traffic and checks backups and monitoring. It does not check the OpenStack services specifically, but the verification is end to end."
+    },
+    {
+      "criterion": "Marks unknown specifics as TODOs",
+      "verdict": "partial",
+      "evidence": "Section 9 lists the unknowns: service names, paths, SST method, LB, approvals. Inline it only hedges with notes like '# or mysql / mysqld' and '# path varies'. The commands are written as defaults rather than explicit TODO placeholders, and a containerized deployment is never considered."
+    },
+    {
+      "criterion": "Proposes validation by a non-author while the expert is still available",
+      "verdict": "fail",
+      "evidence": "Section 9, 'To confirm with your DB expert before Friday', is only a list of questions to ask him. It does not propose a dry run or rehearsal by someone else with the expert observing."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "omits the safe_to_bootstrap / wsrep-recover identification step",
+      "committed": false,
+      "evidence": "Step 3 includes both the grastate.dat table and `--wsrep-recover`."
+    },
+    {
+      "error": "presents invented service names or paths as fact",
+      "committed": false,
+      "evidence": "Service names and paths come with alternatives and hedges ('or mysql / mysqld', 'path varies', 'MariaDB 10.4+: mariadbd'), and section 9 says to confirm the real names and paths."
+    },
+    {
+      "error": "does not propose a validation session before the expert leaves",
+      "committed": true,
+      "evidence": "The only thing tied to the expert's remaining time is a list of questions ('ask him now'). There is no validation session or rehearsal by a non-author."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The technical content is strong: the response covers seqno, safe_to_bootstrap and wsrep-recover, the data-loss risk, a check that this is a full outage, and step-by-step verification. Unknowns are collected in a confirmation list but are not marked as inline TODOs. The main gap is that it never proposes a validation session where someone other than the author runs the runbook while the departing expert observes. It only lists questions to ask him, so that critical error counts as committed."
+}

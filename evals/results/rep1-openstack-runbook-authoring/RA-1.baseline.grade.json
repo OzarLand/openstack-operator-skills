@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes decision points distinguishing partition from node loss",
+      "verdict": "fail",
+      "evidence": "Triage step 2 checks `rabbitmqctl cluster_status` for \"a non-empty partitions section, missing nodes\", but nothing branches on the result. Recovery is one linear sequence whether the cause is a partition or a node that left. Galera has no single-node vs quorum-loss branch, only the aside \"Only bootstrap... if the whole cluster is down.\""
+    },
+    {
+      "criterion": "Gates stopping APIs and purging queues behind an authorized decision",
+      "verdict": "fail",
+      "evidence": "The response states the impact (\"This causes an API outage... Purging queues discards in-flight RPC messages\"), but steps 1–2 are unconditional instructions (\"Stop the APIs\", \"Purge the RabbitMQ queues\"). No authorized owner or decision gate is named. The only communication item is \"Announce the incident\"."
+    },
+    {
+      "criterion": "Includes explicit must-not-do actions",
+      "verdict": "partial",
+      "evidence": "The only implicit guardrail is \"Only bootstrap from the most advanced node if the whole cluster is down.\" There is no must-not-do section. The response never warns against resetting RabbitMQ nodes during a partition before escalating, and it even suggests \"a reset\" as a purge method."
+    },
+    {
+      "criterion": "Keeps end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "Step 5 says \"Verify using the checklist below before reopening anything.\" The checklist covers Galera size and Primary status, RabbitMQ nodes and consumers, compute services, network agents, and a test VM create/ping/delete."
+    },
+    {
+      "criterion": "Marks missing details as TODOs rather than inventing them",
+      "verdict": "partial",
+      "evidence": "Some items are marked *verify* (the purge method, the Galera procedure, the cleanup), and the commands are described as \"generic examples\". Other gaps are not flagged: the deployment tool or containerization, who authorizes stopping the APIs, the partition handling setting, and how to identify the most advanced Galera node."
+    },
+    {
+      "criterion": "Includes owner, validation plan by a non-author, and draft status",
+      "verdict": "fail",
+      "evidence": "The runbook has no owner, no validation plan, and no draft or pending-validation marking."
+    },
+    {
+      "criterion": "Records why steps exist (reasoning), not only commands",
+      "verdict": "partial",
+      "evidence": "Some steps carry a reason: \"so no new requests arrive\", \"Purging queues discards in-flight RPC messages, so operations in progress will fail\", and the data-plane vs control-plane explanation. Most steps, such as restarting MariaDB and restarting the whole RabbitMQ cluster, have no rationale or link to the root cause."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "turns the incident sequence into an unconditional procedure (always purge and restart)",
+      "committed": true,
+      "evidence": "The Recovery section replays the incident sequence as fixed numbered steps: stop the APIs → purge the queues → restart the RabbitMQ cluster (all nodes) → restart MariaDB → verify → reopen. No decision point makes the purge or restarts depend on a diagnosis."
+    },
+    {
+      "error": "invents environment-specific commands or hostnames as fact",
+      "committed": false,
+      "evidence": "The response uses only standard generic commands (rabbitmqctl, the openstack CLI, wsrep variables) and calls them \"generic examples\". It names no hostnames."
+    },
+    {
+      "error": "labels the runbook validated",
+      "committed": false,
+      "evidence": "The runbook is never labelled validated. It also omits draft status."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response turns the incident notes into a tidy runbook with good triage checks and a verification checklist that must pass before the APIs reopen. However, it presents the incident's own sequence as an unconditional procedure: always purge and restart. It has no branch for partition vs node loss, no authorized decision gate for stopping the APIs or purging queues, no explicit must-not-do list, and no owner, validation plan or draft status. Some unknowns are marked *verify*, but many gaps are not flagged. The response does commit the critical error of making the sequence unconditional."
+}

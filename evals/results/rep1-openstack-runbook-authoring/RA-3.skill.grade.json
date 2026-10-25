@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+      "verdict": "pass",
+      "evidence": "Section A: A2 records `uuid`, `seqno`, `safe_to_bootstrap` from grastate.dat; A3 'For any node with `seqno: -1`, recover its position, e.g. `mysqld --wsrep-recover`'; A5 picks the highest seqno and prefers `safe_to_bootstrap: 1` on a tie."
+    },
+    {
+      "criterion": "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+      "verdict": "pass",
+      "evidence": "'Read first: bootstrapping the wrong node, or two nodes, silently discards committed data... Once that has happened you can't undo it.' The Do NOT list says: 'Bootstrap more than one node, or a node that isn't the highest-seqno candidate.'"
+    },
+    {
+      "criterion": "Adds a decision point distinguishing full outage from partial failure",
+      "verdict": "pass",
+      "evidence": "Decision table: 'At least one node is `Primary` → Stop, this isn't a full outage... No bootstrap.' Scope excludes 'One node down while the others are Primary' and network partitions."
+    },
+    {
+      "criterion": "Includes end-to-end verification",
+      "verdict": "pass",
+      "evidence": "B5 and D1 check cluster size, Primary, Synced and wsrep_ready. D2 checks the load balancer, D3 starts services, D4 'Create, reach and delete a test VM' (a capability check), and B6 sanity-checks recent data."
+    },
+    {
+      "criterion": "Marks unknown specifics as TODOs",
+      "verdict": "pass",
+      "evidence": "Many TODOs: the exact list of services to stop and the stop command, the local bootstrap command, SST method, load balancer, approver, backups. Paths and commands are marked as examples to verify, e.g. 'usually in the data dir, e.g. `/var/lib/mysql/`; verify'."
+    },
+    {
+      "criterion": "Proposes validation by a non-author while the expert is still available",
+      "verdict": "pass",
+      "evidence": "Validation plan: 'someone who didn't write this, and isn't the expert, runs it in a non-production Galera cluster while the expert observes without helping... Include a variant with one node missing and one with seqno `-1`.' This sits alongside 'Ask the expert before Friday', so the session happens while the expert is still there."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "omits the safe_to_bootstrap / wsrep-recover identification step",
+      "committed": false,
+      "evidence": "Steps A2, A3 and B3 explicitly cover safe_to_bootstrap and --wsrep-recover."
+    },
+    {
+      "error": "presents invented service names or paths as fact",
+      "committed": false,
+      "evidence": "Paths and commands are framed as examples: 'Commands and paths are examples to check', 'e.g. `/var/lib/mysql/`; verify', 'TODO: confirm the local command'. Kolla-Ansible is given only as an example."
+    },
+    {
+      "error": "does not propose a validation session before the expert leaves",
+      "committed": false,
+      "evidence": "The validation plan has a non-author run the runbook while the expert observes, and the runbook stays Draft until that is done."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a thorough runbook draft and meets every criterion. It covers grastate.dat seqno and safe_to_bootstrap, wsrep-recover when seqno is -1, a decision table that separates a full outage from a partial failure or partition, an approval gate, a must-not-do list that names the data-loss risk, verification from the cluster up to creating a test VM, and many TODOs for things specific to the user's environment. The validation plan has a non-author run the procedure while the expert observes. It commits none of the critical errors and has no faithfulness problems: it makes no book citations and presents no invented facts about the environment as known."
+}

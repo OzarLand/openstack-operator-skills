@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "Top risk 1: \"Deleting the old primary invalidates every token it signed... Keystone can't validate a token once its key is gone.\" Correction 1: \"Don't delete any keys.\""
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Correction 2: \"Check the nodes are in sync before you rotate... Compare sha256sum, owner, mode and file names\"; explains staged-key reasoning; rsync \"right after rotating, so that keystone-1 is the only node out of sync and only briefly\"; stop condition if keys differ."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "pass",
+      "evidence": "\"you've said the keys have never been rotated, so you've never tested that you can\"; prerequisite \"Rehearsal in a test or staging environment\"; \"a rehearsed daytime change is better.\""
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Verification: \"A token issued by each node (against the node directly, not the VIP) validates on every other node\", checksums match on all 3 nodes, pre-rotation token still validates, end-to-end workflow, observation period."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "pass",
+      "evidence": "Correction 4: \"Archive the key directory from all 3 nodes with permissions preserved (e.g. tar -p) and store it off-node\"; Recovery: \"restore the backed-up directory on all 3 nodes\", point of no return identified."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "pass",
+      "evidence": "\"Verify for your release.\" on key layout; \"Keystone doesn't need a restart ... in typical setups. Verify for your release and web server.\"; asks for config values."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "Explicitly rejects it: \"Don't delete any keys... Don't clean up by hand.\" Option A \"Rejected.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Pre-change checksum comparison, sync window discussion, cross-node token validation, stop condition on mismatch."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "Verification section and \"Don't call it done tonight, because the new state hasn't earned trust\"; stop conditions defined."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response that meets every criterion. It says the plan is not ready as written and rejects the manual key deletion because it would break tokens already issued. It requires the key sets to match on all nodes before rotation and keeps the gap during rsync short. It calls for rehearsal, backups and restore, verification on each node, stop conditions, and approval. It flags the version-dependent points as things to verify. No critical errors were committed, and it attributes no claims to the book and invents no facts about the environment."
+}

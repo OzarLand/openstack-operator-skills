@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "Top risk 1: \"With only the new primary, every token signed by the old keys fails validation at once. That includes tokens held by services, long-running automation, Horizon sessions...\" and point 1: \"Don't delete the old keys... Old keys are needed to decrypt tokens issued before the rotation, until those tokens expire.\""
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Risk 2: \"An rsync that fails partway, or a restart that happens before it completes, leaves nodes with different key sets... intermittent 401s.\" Point 5 compares current key sets; revised steps 1 and 6 compare checksums across nodes; first stop condition is \"Key sets differ across nodes after sync.\" Point 2 discusses the window, though its explanation of which key must be pre-distributed is muddled."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "pass",
+      "evidence": "Point 7: \"Nobody has shown that your platform can rotate. Rotate in a lab or staging environment first, using the same distribution mechanism.\" The Evidence gate is also marked \"No rehearsal described.\""
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Point 6: \"From each node, issue a token and validate it against each other node. A 3×3 matrix...\" It also checks that a pre-rotation token still validates, compares checksums, runs end-to-end service calls and watches 401s. Revised plan step 6 repeats this."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "pass",
+      "evidence": "Point 5: \"Copy /etc/keystone/fernet-keys/ from all three nodes, preserving permissions, and keep the copies off the node.\" The response also says: \"On a stop, don't delete anything. Restore the backed-up key set to every node, the same way for all three.\""
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "partial",
+      "evidence": "Gap 7 flags: \"Details of rotation and pruning vary, so check the upstream docs for your release.\" Kolla behaviour is marked unknown. However, point 4 says flatly that \"Keystone re-reads the key repository\" so no restart is needed. Point 2 confidently claims that nodes need the new staged key before the new primary is used, and that otherwise a node \"can't decrypt\" the token. This is inaccurate: the new primary was already the staged key 0 on consistent nodes. The new staged key only has to reach every node before the next rotation."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "The response rejects it explicitly: \"Don't delete the old keys\". Option (a) is listed as \"rejected, because it invalidates live tokens and removes the recovery path.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Consistency appears in risk 2, point 5, the checksum comparisons in steps 1 and 6, the 3×3 token matrix and the stop conditions."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "The verdict is \"Not ready\". The response sets up verification and stop conditions, and the decision record says \"not approved\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It gives a clear \\\"Not ready\\\" verdict and correctly identifies the in-flight token risk of deleting old keys. It addresses multi-node consistency, recommends rehearsal, defines a 3×3 cross-node validation matrix, requires an off-node backup with a restore path, and lists stop conditions. It also labels each step as read-only or state-changing and requires approval. It commits none of the critical errors and makes no book citations or invented environment facts. The main weakness is technical: point 2 gets the staged-key mechanics wrong. On consistent nodes the new primary is already present as the old staged key 0, so the new staged key only has to be distributed before the next rotation. That claim, and the unqualified \\\"no restart needed\\\" statement, are presented with more certainty than they deserve, so the version-caution criterion gets partial."
+}

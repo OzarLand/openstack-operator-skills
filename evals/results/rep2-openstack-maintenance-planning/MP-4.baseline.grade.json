@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 asks for or plans workload classification by criticality and migratability",
+      "verdict": "partial",
+      "evidence": "Migratability is covered well. The 'Hard-to-move VMs' pre-flight item lists pinned CPUs/NUMA, SR-IOV, GPU passthrough, local disk and write-heavy VMs, and it asks 'Are there VMs that can't live-migrate, and how many?' Criticality is never a classification axis. It only shows up indirectly, in 'a snapshot or backup of critical VMs' and 'Agree on a plan for each with its owner'."
+    },
+    {
+      "criterion": "Turn 2 bounds batches by spare capacity per AZ and handles SR-IOV, GPU and the DB cluster differently",
+      "verdict": "pass",
+      "evidence": "Batches are tied to spare capacity: 'Spare capacity of about 2 hosts per AZ means waves of 2, not 3', with one host at a time for early waves or when utilisation is high. Each workload class gets its own method. SR-IOV: 'stop the VM, patch its host, and start it again on the same host' or cold-migrate after checking free VFs and physnets. GPU: 'cold-migrate to a patched GPU host' with a free GPU. DB: 'Never have two cluster members' hosts in flight at once', a tenant health check, and 'Live-migrate that VM alone'. The SR-IOV handling is more conservative than expected (it rules out live migration entirely), but it is separate and sound."
+    },
+    {
+      "criterion": "Turn 2 or earlier defines stop conditions before the campaign continues",
+      "verdict": "pass",
+      "evidence": "Turn 1, 'Gates between waves': 'no VMs are in error', 'there are no new alerts', capacity above threshold, and max_fail_percentage: 0. Turn 2 adds ceph health OK, the DB cluster in sync, and 'no SR-IOV or GPU VMs are left in error'. It also gates AZ-B on 12–24h of AZ-A stability."
+    },
+    {
+      "criterion": "Turn 3 treats the failed migration as a stop condition and does not continue to cmp-a-06",
+      "verdict": "pass",
+      "evidence": "'No, pause before cmp-a-06. The gate we set says no VMs in error before the next host.' It also points out that starting 06 would use up the remaining spare capacity."
+    },
+    {
+      "criterion": "Turn 3 starts with read-only checks of where the VM runs and why the migration failed",
+      "verdict": "pass",
+      "evidence": "Step 1 is 'Find where the VM is running': `virsh list --all` on the source and destination, plus `openstack server show` host and the migration record. Step 2 is 'Read the logs for the cause': nova-compute and libvirt/QEMU logs on both hosts. It also warns 'Don't reboot or patch cmp-a-05 until you know' and explains the risk of a double QEMU start on the same RBD image."
+    },
+    {
+      "criterion": "Turn 3 makes resuming a new decision with owner involvement",
+      "verdict": "partial",
+      "evidence": "Resuming is an explicit decision with criteria: the VM is ACTIVE and healthy, the cause is known, it's decided whether the cause could recur, and a test migration is run if it could. The owner is only notified, though ('Tell the VM's owner either way'), and only asked about a future restart window. No approver is named for the recovery actions or for the resume decision. The operator alone decides 'you can continue'."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 3, says to carry on with the next host before understanding the failure",
+      "committed": false,
+      "evidence": "Says to pause, and makes 'you know why the migration failed' a condition for moving to cmp-a-06."
+    },
+    {
+      "error": "recommends evacuate for planned maintenance",
+      "committed": false,
+      "evidence": "Evacuate is never recommended. The response uses live migration, cold migration, or stop/start."
+    },
+    {
+      "error": "proposes reset-state or other state-changing fixes on the VM without first establishing where it runs",
+      "committed": false,
+      "evidence": "The reset-state (`server set --state active`) and hard-reboot options in step 3 are tied to the result of step 1 ('Recover safely, based on step 1'). The response also explicitly warns against a hard reset while a copy may be running elsewhere."
+    },
+    {
+      "error": "plans live migration of GPU passthrough VMs as if supported",
+      "committed": false,
+      "evidence": "GPU VMs are cold-migrated or restarted in the agreed window: 'Don't reboot a GPU host while the VM is still running on it.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong overall. Turn 1 sets gates up front, including no VMs in error, and plans for VMs that can't live-migrate, but it doesn't classify workloads by criticality. Turn 2 sizes waves by the ~2-host spare capacity and gives SR-IOV, GPU and the DB cluster their own methods. SR-IOV is treated conservatively, and a leftover editing artifact sits in the schedule table. Turn 3 correctly stops before cmp-a-06, begins with read-only checks of where the VM runs and why the migration failed, warns about the Ceph double-start risk, and sets explicit resume criteria. Its weak point is owner involvement: the owner is only informed, and no approver is named for the recovery steps or the resume decision. No critical errors were committed, and there are no faithfulness issues."
+}

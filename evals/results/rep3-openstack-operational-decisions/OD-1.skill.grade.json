@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Applies decision gates before comparing options",
+      "verdict": "pass",
+      "evidence": "A 'Gates' table ('Option | Gate failed | What would satisfy it') comes before the trade-off discussion ('Why option 1 is the worst choice') and the recommendation. The gates cover the recovery path, expertise, the mandatory security requirement and the missing end date."
+    },
+    {
+      "criterion": "Links postponement's viability to a tested backport",
+      "verdict": "pass",
+      "evidence": "Option 3 row: 'Mandatory security requirement: the advisory remains open and the fix is untested... A tested backport, compensating controls, and a dated exit. Without those it fails.' Phase 0 step 2 is 'Test the backport in staging.'"
+    },
+    {
+      "criterion": "Identifies the recovery exercise as the first action or key uncertainty reducer",
+      "verdict": "pass",
+      "evidence": "Phase 0 step 3: 'Run a control-plane recovery exercise... Have someone other than the author follow a written runbook... This one is non-negotiable, because it gates everything after it.' Recovery is also the first gate that options 1 and 2 fail."
+    },
+    {
+      "criterion": "Recognizes team readiness as a constraint",
+      "verdict": "pass",
+      "evidence": "'The people available to handle that have shrunk by a third'; option 3 is criticised because 'the team keeps shrinking'; 'That is a capacity decision, such as external help or more headcount'; 'if the team shrinks further... revisit the plan itself.'"
+    },
+    {
+      "criterion": "States what would change the ranking (sensitivity)",
+      "verdict": "partial",
+      "evidence": "The 'What would satisfy it' column and the review triggers ('reopen it if the vendor ships a fix, if exploitation is observed'; 'if the team shrinks further, or either hop gate keeps failing, revisit the plan') say what would change the plan. The response never states outright which evidence would reorder the options, for example a vendor fix making postponement viable. It also explicitly declines a weighted model with sensitivity."
+    },
+    {
+      "criterion": "Assigns owner, review trigger or exit condition to retained deviations",
+      "verdict": "pass",
+      "evidence": "Security exception: 'Name an owner and a review date... it needs an owner, a compensating control and an expiry.' Backport: 'Record who owns it, how it is tested, and that it is removed by the first hop'; 'Backport: removed at the first hop, no later.' Each patch in the triage gets an owner: 'who can read and test it.'"
+    },
+    {
+      "criterion": "Frames the output as decision support for a named or to-be-named owner",
+      "verdict": "pass",
+      "evidence": "'Decision rights' section: 'Go/no-go on each hop: a named owner with business authority'. Decision record: 'Owner: to be named.' Closing note: 'Decision support only. State-changing steps above require approval by the accountable owner.'"
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends postponement while carrying an untested backport without flagging the security gate",
+      "committed": false,
+      "evidence": "Option 3 fails the 'Mandatory security requirement' gate without a tested backport. The recommended path requires the backport to be tested in staging, with compensating controls and an expiry."
+    },
+    {
+      "error": "presents a weighted score as the decision itself",
+      "committed": false,
+      "evidence": "'I didn't use the weighted scoring model... the scores would only add false precision.' No score is given."
+    },
+    {
+      "error": "recommends the immediate double hop without addressing recovery capability",
+      "committed": false,
+      "evidence": "Option 1 is rejected: 'A failed control-plane upgrade is only survivable if you can recover, and you can't currently show that you can.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A strong, well-structured response. It applies gates before any comparison and fails postponement on the security gate unless the backport is tested, has compensating controls and has an exit date. It makes the recovery exercise a non-negotiable Phase 0 prerequisite and treats the shrunken team as a constraint. It assigns owners, expiries and exit conditions to the security exception and the backport, and leaves the decision with an owner who is still to be named. Its only weakness is sensitivity: it says what would satisfy each gate and lists review triggers, but it never states directly which evidence would reorder the options. It commits none of the critical errors, and there are no faithfulness issues."
+}

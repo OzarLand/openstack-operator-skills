@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"Si vous ne gardez que la nouvelle primaire : Tous les tokens en cours deviennent invalides : sessions Horizon, tokens de service... 401 en cascade.\" It also says any manual removal must wait longer than `[token] expiration` and keep the staged key."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Point 1 'Fenêtre d'incohérence' explains that tokens issued by keystone-1 are rejected on the other nodes until the rsync, and offers mitigations (take keystone-1 out of the LB, or chain rotate and rsync). Point 2 compares sha256sum across the 3 nodes before starting. The corrected plan checks checksums again after the rsync."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "fail",
+      "evidence": "The response never suggests rehearsing in staging or testing that rotation works before production. 'Pour la toute première rotation' only covers pre-syncing the existing keys."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Plan step 5: 'Contrôle des checksums et des droits' on all nodes. Step 6: 'test de validation de token croisé : émettre sur un nœud, valider sur les autres.'"
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "partial",
+      "evidence": "Point 3 backs up the key directory on every node (`cp -a /etc/keystone/fernet-keys /root/fernet-keys.bak-$(date +%F)`). But there is no explicit restore/rollback procedure and no stop conditions (for example, abort if checksums differ or cross-validation fails)."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "partial",
+      "evidence": "Some hedging ('en général', 'souvent', 'au besoin', deployment-tool caveats). But defaults (max_active_keys=3, expiration 1 h) and 'Keystone recharge les clés depuis le disque' are stated as fact, with no advice to check the deployed configuration or version."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "Heading 'Ne supprimez pas les anciennes clés'. Plan step 7: 'Aucune suppression manuelle.'"
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Covers the inconsistency window, pre-change checksum comparison across the 3 nodes, and post-rsync checksum control."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "Includes checksum checks and a cross-node token validation test before declaring success."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong on the main risk. It rejects the manual 'ménage' because deleting old keys breaks tokens in flight and drops the staged key. It handles multi-node consistency and the distribution window, recommends backups, and adds cross-node token validation. Gaps: it never recommends a rehearsal even though the platform has never rotated keys, and it gives no explicit rollback procedure or stop conditions beyond taking backups. It does not label steps as read-only vs state-changing or ask for change approval, and it states some defaults without advising a check of the actual configuration. No critical errors committed."
+}

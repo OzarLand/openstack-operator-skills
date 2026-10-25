@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Uses the value-of-state vs uncertainty criterion",
+      "verdict": "partial",
+      "evidence": "The response weighs uncertainty against the value of what's there: \"Unknown state is the real problem\", \"'Teams have stuff in there' is an argument about data, not about the cloud\", and it would keep repairing if there is \"long-running state that can't be recreated.\" It never states the criterion outright, i.e. whether the information in the current state is valuable enough to justify keeping its uncertainty."
+    },
+    {
+      "criterion": "Distinguishes test from production",
+      "verdict": "partial",
+      "evidence": "The reasoning is tied to a test cloud: \"A test cloud's value is that it's reproducible\" and \"Test instances are almost never irreplaceable.\" It also flags the exception \"Someone is using it as de facto staging.\" It never says that production would call for a different approach."
+    },
+    {
+      "criterion": "Requires preserving needed content and evidence",
+      "verdict": "partial",
+      "evidence": "Content is preserved through a per-project inventory (step 1), a claim deadline (step 2) and \"snapshotting claimed data\" (step 4). There is nothing about keeping diagnostic evidence of the current failures, and unclaimed resources are deleted by default."
+    },
+    {
+      "criterion": "Requires a written baseline and validation criteria",
+      "verdict": "partial",
+      "evidence": "There is a baseline of sorts: \"Build the new cloud declaratively ... all from git. Keep the config in version control.\" There are no validation criteria and no progressive validation. The response also suggests that automation is enough (\"You have no automation ... so a rebuild would reproduce the same drift\"), which is the opposite of the expected point that automated installation alone does not make a rebuild safe."
+    },
+    {
+      "criterion": "Involves stakeholders and decision owner",
+      "verdict": "partial",
+      "evidence": "Teams are involved through \"Announce a firm date ... with a deadline for teams to claim what they need\" and by migrating \"on their own schedule.\" No decision owner or approval step is named."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends wiping without preserving needed content or evidence",
+      "committed": false,
+      "evidence": "The response explicitly rejects a \"flag-day wipe\". It requires an inventory, a claim period and snapshots of claimed data before any rebuild, and prefers running the new cloud alongside the old one. It misses diagnostic evidence, but it does not recommend a wipe without preservation."
+    },
+    {
+      "error": "applies the same reasoning to production without distinction",
+      "committed": false,
+      "evidence": "The reasoning is specific to a test cloud (\"A test cloud's value is that it's reproducible\"), and the staging case is treated as a reason to keep repairing. Nothing in the response extends the advice to production."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a sound, test-specific recommendation to rebuild as a managed migration, with an inventory, a claim deadline, config kept in git and guardrails. It also lists conditions under which repair would be the better choice. It commits no critical errors. Every criterion is only partly met: the value-of-state criterion is implied rather than stated, there is no explicit contrast with production, diagnostic evidence is not preserved, there are no validation criteria (and it implies automation alone is enough), and no decision owner is named."
+}

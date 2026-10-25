@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects presentations/documents alone as proof of transfer",
+      "verdict": "pass",
+      "evidence": "Opens with \"No. Documentation plus two presentations is the minimum...\" and says \"Presentations transfer awareness, not ability\" and \"Don't measure by whether the documents and talks happened.\""
+    },
+    {
+      "criterion": "Names upgrade execution and customization rationale as high-risk knowledge",
+      "verdict": "pass",
+      "evidence": "Names \"how an upgrade actually runs through your deployment tooling\" and says \"The reasons behind customizations are the first thing to disappear.\""
+    },
+    {
+      "criterion": "Requires successors to perform real operations observed by the expert",
+      "verdict": "pass",
+      "evidence": "\"A successor runs a real routine operation, and ideally part of the next upgrade rehearsal in a staging or lab environment. The expert observes and corrects.\" It also warns that a named backup who never performs real operations does not remove the dependency."
+    },
+    {
+      "criterion": "Recommends decision records for customization reasons",
+      "verdict": "pass",
+      "evidence": "The \"customization register\" records for each patch \"why it exists, including the incident or bug behind it; what happens if it's removed; whether upstream now fixes it; who owns it, and whether to keep, upstream or retire it.\" That is a decision record in substance, even though it doesn't use the term."
+    },
+    {
+      "criterion": "Reviews critical capabilities against the remaining team",
+      "verdict": "pass",
+      "evidence": "\"List the capabilities the business depends on (VM creation and recovery, tenant networking, volumes, auth, upgrades). For each, ask who else could operate it, diagnose it and recover it today.\" It also gives week-3/4 demonstration checks of whether someone other than him can do each."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts documentation plus presentations as sufficient",
+      "committed": false,
+      "evidence": "The response explicitly says it is not enough: \"No... on its own it will probably miss the knowledge that matters most.\""
+    },
+    {
+      "error": "frames the issue as the individual's performance rather than organizational capability",
+      "committed": false,
+      "evidence": "\"Keep the framing about capability, not about him. The gap is an organizational one, and he's the one who can help close it.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response firmly rejects documentation plus presentations as enough. It names upgrade execution through the deployment tooling and the reasons behind customizations as the knowledge most at risk. It requires successors to do real operations, including an upgrade rehearsal, while the expert watches. It proposes a customization register that works as a set of decision records, a review of each critical capability against the remaining team, and demonstration-based checks by weeks 3–4. It frames the gap as organizational capability rather than the individual. It commits no critical errors, cites nothing from the book, and invents no facts about the user's environment."
+}

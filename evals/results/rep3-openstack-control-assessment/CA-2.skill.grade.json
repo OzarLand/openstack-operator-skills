@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects presentations/documents alone as proof of transfer",
+      "verdict": "pass",
+      "evidence": "\"Short answer: no.\" and \"Presentations are a weak transfer mechanism... Nobody finds out what's missing until they have to act\"; \"Documentation written by the expert alone is also unvalidated.\" It keeps the presentations only \"as an addition.\""
+    },
+    {
+      "criterion": "Names upgrade execution and customization rationale as high-risk knowledge",
+      "verdict": "pass",
+      "evidence": "Point 1 says \"Upgrades are something he does... running it through your deployment tooling.\" Point 2 says \"The reasons behind the customizations are the part most likely to vanish.\""
+    },
+    {
+      "criterion": "Requires successors to perform real operations observed by the expert",
+      "verdict": "pass",
+      "evidence": "\"Reverse the roles. Successors perform real operations (routine changes, an upgrade rehearsal in staging if you have one) while he watches and corrects.\""
+    },
+    {
+      "criterion": "Recommends decision records for customization reasons",
+      "verdict": "pass",
+      "evidence": "\"Customization register. For each local patch or config deviation, record why it exists, what it fixes, what happens if it's removed, and whether upstream has since fixed it.\" The register serves as decision records, though the response never uses that term."
+    },
+    {
+      "criterion": "Reviews critical capabilities against the remaining team",
+      "verdict": "pass",
+      "evidence": "\"Decide which capabilities the business can't lose, and list who else can operate, diagnose and recover each one today. Anything with 'only him' is your priority list.\" It also offers a \"capability-by-capability assessment showing where control is weakest.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts documentation plus presentations as sufficient",
+      "committed": false,
+      "evidence": "Opens with \"Short answer: no\" and says the presentations should not be \"the main transfer.\""
+    },
+    {
+      "error": "frames the issue as the individual's performance rather than organizational capability",
+      "committed": false,
+      "evidence": "Treats it as organisational capability and a management decision: \"Management should treat this as his main job... That is their decision, not his\"; \"Accept or fund the remaining gap... that is a business risk.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion and commits neither critical error. It firmly rejects documents plus presentations as enough, and names upgrade execution through the deployment tooling and the reasons for customizations as the knowledge most at risk. Its 4-week plan has successors do real operations, including an upgrade rehearsal, while the expert watches. It records the reasons for each customization in a register and reviews critical capabilities against who else can handle them. It also checks transfer by having someone else run failure walkthroughs and follow the runbooks. Minor gaps: it never explicitly says a presentation only proves a session took place, and it says \"register\" rather than \"decision records\". It invents no book citations or facts about the user's environment; tooling and staging are raised as questions."
+}

@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags rebooting without draining instances as blocking",
+      "verdict": "partial",
+      "evidence": "Item 4: \"No drain or health checks. If these nodes carry workloads, the playbook should drain them first (cordon/evacuate, or remove from the LB)\". The point is raised, but only as a conditional, generic one. It is not called blocking, and it never mentions the OpenStack-specific steps (disabling nova-compute, live-migrating instances). The sketch leaves draining as a comment placeholder."
+    },
+    {
+      "criterion": "Flags lack of batching (serial) as a blast-radius problem",
+      "verdict": "pass",
+      "evidence": "Item 2: \"No `serial`... every host updates and reboots at the same time... hypervisors running VMs, you lose all capacity at once. Use something like `serial: 1`\"."
+    },
+    {
+      "criterion": "Flags ignore_errors and missing stop conditions",
+      "verdict": "pass",
+      "evidence": "Item 1 says to remove ignore_errors because \"the play carries on and reboots anyway\". Item 3 adds `max_fail_percentage: 0` / `any_errors_fatal` \"so a bad patch stops the rollout\"."
+    },
+    {
+      "criterion": "Flags unpinned updates as uncontrolled change",
+      "verdict": "partial",
+      "evidence": "Only a pre-run checklist bullet: \"Confirm repos are pinned or mirrored, so you aren't pulling an unvetted latest.\" It is not raised as a finding, the sketch keeps `name: '*' state: latest`, and nothing explains that hosts can end up on different package versions."
+    },
+    {
+      "criterion": "Requires post-reboot verification",
+      "verdict": "pass",
+      "evidence": "Item 6: \"Set `reboot_timeout` and a `test_command`, and ideally verify key services and the kernel version afterwards\". The sketch includes `test_command: systemctl is-system-running --wait` and a placeholder for a health check."
+    },
+    {
+      "criterion": "Refers to a maintenance plan based on criticality and capacity",
+      "verdict": "fail",
+      "evidence": "The only related text is \"Confirm you have snapshots or backups, and a maintenance window.\" There is no maintenance plan based on instance criticality or spare capacity."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the playbook on production as is",
+      "committed": false,
+      "evidence": "Opens with \"Not as written. I'd fix a few things first.\""
+    },
+    {
+      "error": "ignores the lack of instance draining",
+      "committed": false,
+      "evidence": "Item 4 explicitly flags the missing drain (\"cordon/evacuate\"), though weakly and conditionally."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly says the playbook is not safe to run as written. It flags the missing serial batching, ignore_errors, the missing failure threshold and the missing post-reboot checks, and it supplies a reasonable safer playbook. Its main weakness is that it is generic rather than OpenStack-aware. Draining is treated as conditional and is never called blocking, and the nova-compute disable and live-migration steps are absent. Unpinned updates appear only as a checklist bullet. There is no maintenance plan by criticality or capacity, and the point that QEMU/libvirt updates only protect instances migrated or restarted afterwards is missing. No critical errors were committed, and there are no faithfulness issues."
+}

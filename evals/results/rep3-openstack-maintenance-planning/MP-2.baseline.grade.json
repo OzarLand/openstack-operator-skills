@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "partial",
+      "evidence": "Opens with \"No, not as described\" and says \"`evacuate` is built for dead hosts.\" But it then adds \"If you want to use evacuate anyway, do it correctly\", a fence-then-evacuate procedure for patching, and only calls that \"a heavy way to do routine patching\". This softens the expected position that evacuate is for failed hosts only."
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"You then have two live VMs writing to the same Ceph image, which is split-brain. RBD's exclusive lock and blocklisting reduce the risk, but they aren't a guarantee\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Stopping `nova-compute` doesn't stop the guests\" and \"Stopping the service leaves the libvirt/QEMU guests running on the host.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Live migration tuning: max_concurrent_live_migrations, auto-converge, post-copy, bandwidth. Parallel migration with the host disabled. \"Use cold migration for guests that tolerate a short outage.\" \"Patch several hosts at once if you have the spare capacity.\" It also asks for VM counts and current migration times. Capacity is stated as a condition for batching but not for raising concurrency."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response calls the colleague's procedure unsafe. Its alternative evacuate path requires fencing first: \"powering it off through IPMI/BMC. A hard power-off is the only real guarantee the guests are dead.\""
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "\"RBD's exclusive lock and blocklisting reduce the risk, but they aren't a guarantee, and you shouldn't build a patching process on them.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is accurate and safe. It explains that stopping nova-compute leaves the guests running, that evacuate would cause split-brain on shared Ceph, and that Ceph locking is not a safeguard. It offers sound alternatives, most of them with conditions. The rejection is marked down slightly because the response also gives a fenced evacuate procedure as an option for patching. That undercuts the expected position that evacuate is only for failed hosts. No critical errors were committed. There are no book citations, and no facts about the user's environment were invented."
+}

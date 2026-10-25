@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes decision points distinguishing partition from node loss",
+      "verdict": "pass",
+      "evidence": "The 'Decision point (do this first, read-only)' table sends 'one is absent, the rest are a majority, no partition listed' to 'Rejoin that node. Purge and restart are probably excessive.' It sends partition or no-majority cases to the procedure. It also handles autoheal separately."
+    },
+    {
+      "criterion": "Gates stopping APIs and purging queues behind an authorized decision",
+      "verdict": "pass",
+      "evidence": "'Approver for stopping the APIs, purging, and restarting RabbitMQ or MariaDB: TODO, a named role with authority to accept an API outage and lost in-flight operations.' Step 3 reads 'Get approval to stop the APIs... No approver reachable: do not proceed.' Step 5 is labelled 'destructive', and Context explains that purging discards in-flight messages. One gap: users are only notified at reopen, not when the APIs are stopped."
+    },
+    {
+      "criterion": "Includes explicit must-not-do actions",
+      "verdict": "pass",
+      "evidence": "The 'Do NOT do without escalation' list covers purging or resetting/forgetting a RabbitMQ node before the decision point, bootstrapping Galera, mass-restarting computes, reopening the APIs before the end-to-end test, and bulk-resetting instance states."
+    },
+    {
+      "criterion": "Keeps end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "Step 11 (end-to-end verification) comes before step 12 (reopen the APIs), with 'Fail: keep the APIs out'. The Verification section covers create to ACTIVE, ping and delete. The do-not list says 'Reopen the APIs before the end-to-end test passes.'"
+    },
+    {
+      "criterion": "Marks missing details as TODOs rather than inventing them",
+      "verdict": "pass",
+      "evidence": "The method, vhosts, node order, which APIs, the MariaDB procedure, the owner and the escalation contacts are all marked TODO. The response says 'All commands are examples to verify for your release and deployment tool.'"
+    },
+    {
+      "criterion": "Includes owner, validation plan by a non-author, and draft status",
+      "verdict": "pass",
+      "evidence": "'Status: Draft, not yet validated. Owner: TODO.' The validation plan reads 'someone who didn't write it walks it in non-production... It stays Draft until then.'"
+    },
+    {
+      "criterion": "Records why steps exist (reasoning), not only commands",
+      "verdict": "pass",
+      "evidence": "The Context section explains why the APIs are pulled ('stops new requests landing on a half-recovered bus') and what purging costs. It flags the RabbitMQ-before-MariaDB order as unexplained. The Follow-up section explains why the network should be treated as the cause."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "turns the incident sequence into an unconditional procedure (always purge and restart)",
+      "committed": false,
+      "evidence": "The procedure sits behind a read-only decision point that sends the single-node case to a rejoin. Purge and restart need per-step approval and have stop conditions."
+    },
+    {
+      "error": "invents environment-specific commands or hostnames as fact",
+      "committed": false,
+      "evidence": "The only commands are generic ones such as `rabbitmqctl cluster_status`, and they are flagged as examples to verify. There are no hostnames, and environment-specific steps are TODOs."
+    },
+    {
+      "error": "labels the runbook validated",
+      "committed": false,
+      "evidence": "'Draft, not yet validated... Last validation: never.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong runbook. It scopes the failure mode and says what it does not cover. A read-only decision point separates a partition from a single node leaving. Stopping the APIs and purging queues need an approver, and the loss of in-flight operations is stated. It has a must-not-do list, including no Galera bootstrap and no node reset before escalation, and runs end-to-end verification before reopening. Unknowns are TODOs, and it carries draft status with an owner placeholder and a validation plan by a non-author. It commits none of the critical errors. Minor gaps: users are not told when the APIs are stopped, and it is thinner on how to tell single-node Galera trouble from quorum loss."
+}

@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"Nova's 'down' only means the heartbeat stopped. It can't tell a dead host from one that is isolated from the control plane.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"evacuating starts a second copy of each VM on the same Ceph RBD images. With shared Ceph, two writers on one disk can corrupt the filesystem or the database.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"don't evacuate until cmp-0417 is confirmed powered off or fenced\"; step 1: \"Power off the host through the BMC, or isolate it at the switch. Verify the power state afterward.\""
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "\"Next diagnostics (all read-only)\": BMC power status, compute service list, ping on mgmt/storage IPs, switch port state, virsh list, rbd status watchers, BMC event log."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Evacuate instance by instance, not as a blind loop of 40. Start with the customer databases, in an order agreed with their owners. I can't infer which workloads matter most.\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Verification before declaring recovery\": ACTIVE on new host, reachable, owner-confirmed app consistency, rbd status watcher only from new host, cmp-0417 stays disabled/forced down."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "pass",
+      "evidence": "\"Approver: the platform on-call lead, plus the owners for the customer databases.\" Fencing \"needs the decision owner's approval\"; ownership is also listed as a gap."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "The response makes fencing plus verification of power state the blocking gate before forced-down and evacuation."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"Ceph makes the evacuation fast, but it also removes the safeguard that would stop a second writer.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "\"consider adding automated fencing (not evacuation alone)\""
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Recovery is conditional on per-VM verification and owner confirmation, and the response warns to \"Expect crash recovery after the unclean stop.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response that meets every criterion. It answers clearly: don't evacuate until the host is fenced. It explains why a 'down' status is ambiguous and how two copies of a VM on the same Ceph images could corrupt data. It gives specific read-only checks, including BMC power state, switch ports, virsh, and rbd status watchers. The order it sets is to fence, then force the service down, then evacuate in a priority order agreed with the customer-database owners. It includes stop conditions, verification and named approvers. It commits none of the critical errors. It cites no book passages and presents no invented facts about the environment as known."
+}

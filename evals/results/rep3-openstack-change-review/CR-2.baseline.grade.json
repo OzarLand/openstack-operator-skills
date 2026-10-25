@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"If you delete everything except the new primary, every existing token becomes invalid immediately... Services that cache tokens... will start getting 401s.\" It also says the old primary is \"still needed to decrypt every token issued before tonight.\""
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "partial",
+      "evidence": "Step 2 tells the user to confirm all three nodes match before starting. Step 4 syncs the whole directory with `rsync -a --delete`. The 'For later' section says to pick one node as the source of truth. However, the response never addresses the window between rotating keystone-1 and finishing the sync to keystone-2/3. It does not explain why the staged key 0 makes that window safe, and it gives no ordering or atomicity guidance for the rsync."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "fail",
+      "evidence": "Nowhere does the response suggest rehearsing in staging or a test environment, even though rotation has never been done."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Step 6: \"Request a token from each node. Then validate a token issued before the rotation against each node.\" It does not explicitly test issuing on one node and validating on another."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "partial",
+      "evidence": "Step 1: \"Back up first. On each node, run `tar czf` on `/etc/keystone/fernet-keys/`, keeping the ownership and permissions.\" There is no restore procedure and no stop or rollback conditions if verification fails."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "partial",
+      "evidence": "Version-dependent claims are stated as fact without advising the user to check them for their release: \"Keystone re-reads the key repository on each token operation\", \"max_active_keys (default 3)\", \"It must be at least 3\" (questionable), and \"[token] expiration, default 1 hour\". On the other side, it does hedge some points (\"probably have just 0 and 1\", \"if you want to be safe\") and offers to check the actual `ls -l` output."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "It explicitly rejects the step: \"The 'delete all keys except the new primary' step will break your cloud\" and \"Don't clean up tonight.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Step 2 requires confirming the three nodes match. Step 4 syncs the full directory with --delete. It advises a single source of truth."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "Step 6 requires verification by issuing and validating tokens against each node. The response offers to check the key-directory state before starting."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly rejects the plan to delete old keys and explains the in-flight token impact well. It gives a corrected sequence: back up, check the nodes match, rotate on one node, sync everything, restart one node at a time, then verify on each node. It commits none of the critical errors. It falls short in several places. It never recommends a rehearsal even though rotation has never been done. It does not explain the window during distribution or why the staged key 0 makes it safe. It has a backup but no restore procedure or stop conditions. It does not label steps as read-only or state-changing, and it does not ask for approval. It states some version-dependent details as fact, such as the claim that max_active_keys must be at least 3, without telling the user to verify them."
+}

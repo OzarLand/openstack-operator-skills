@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags rebooting without draining instances as blocking",
+      "verdict": "partial",
+      "evidence": "Main problem #4: \"No drain or health gate... (load balancer, scheduler, or hypervisor evacuation if these are virtualization hosts)\". The response raises it as a main problem, but only on the condition that these are hypervisors. It never says that rebooting nova compute hosts with running instances is blocking, and never names disabling nova-compute or live-migrating instances. In the safer playbook, the drain step is only a debug placeholder."
+    },
+    {
+      "criterion": "Flags lack of batching (serial) as a blast-radius problem",
+      "verdict": "pass",
+      "evidence": "#1: \"With no `serial`, Ansible patches and reboots the whole `compute` group in parallel... you could drop most of your capacity at the same moment. Add `serial`...\""
+    },
+    {
+      "criterion": "Flags ignore_errors and missing stop conditions",
+      "verdict": "pass",
+      "evidence": "#2: \"the play carries on and reboots a half-updated host. Remove it... use `max_fail_percentage` or `any_errors_fatal` so a bad run stops the rollout\". #4 also says: \"the next batch starts even if the first one came back broken.\""
+    },
+    {
+      "criterion": "Flags unpinned updates as uncontrolled change",
+      "verdict": "pass",
+      "evidence": "Smaller things: \"`state: latest` on `'*'` pulls in every update... pin the repo snapshot or use `security: true` so the result is reproducible and staging matches prod.\" It is rated as a minor issue, though, and the suggested playbook still uses `state: latest` on '*'."
+    },
+    {
+      "criterion": "Requires post-reboot verification",
+      "verdict": "pass",
+      "evidence": "#5: \"No reboot timeout and no post-reboot check... Add a `test_command` or a `wait_for`\". The playbook includes `test_command: systemctl is-system-running --wait` and a health-check step. It does not check instance state after the reboot."
+    },
+    {
+      "criterion": "Refers to a maintenance plan based on criticality and capacity",
+      "verdict": "partial",
+      "evidence": "The response covers capacity (\"drop most of your capacity\"), rolling by rack/AZ, a canary host, and staging. It never mentions a maintenance plan based on workload criticality, and never mentions the QEMU/libvirt consideration."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the playbook on production as is",
+      "committed": false,
+      "evidence": "Opens with \"Not as written. I'd fix a few things before running it on prod.\""
+    },
+    {
+      "error": "ignores the lack of instance draining",
+      "committed": false,
+      "evidence": "#4 \"No drain or health gate... hypervisor evacuation if these are virtualization hosts\". The point is weak and conditional, but it is raised."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a solid generic Ansible review. It correctly says the playbook is not safe as written and flags the missing serial, ignore_errors, the lack of stop conditions, unpinned updates and post-reboot checks. It gives a restructured playbook that uses serial and max_fail_percentage. However, it does not recognise that this is an OpenStack nova compute context. Draining is mentioned only conditionally, with no nova-compute disable or live-migration step. It misses the point about QEMU/libvirt updates, and it does not tie the work to a maintenance plan based on criticality. No critical errors were committed, and there are no faithfulness issues."
+}

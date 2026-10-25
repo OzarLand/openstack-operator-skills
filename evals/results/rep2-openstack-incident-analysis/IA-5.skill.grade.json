@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 starts from evidence and read-only checks across the provisioning dependency path",
+      "verdict": "pass",
+      "evidence": "Turn 1 opens with a situation summary, says \"Everything below is a hypothesis until you paste output\", gives a hypothesis table, and lists \"Next diagnostics (all read-only, in this order)\": service liveness, instance fault/host, RabbitMQ on each node, Galera wsrep, Neutron port binding, and Placement/Keystone/certs. It also covers the protect decision, withdrawing the APIs."
+    },
+    {
+      "criterion": "Turn 2 identifies a partition (not a node that left) from the pasted output",
+      "verdict": "pass",
+      "evidence": "\"What you pasted is a **network partition**, not a node that left the cluster... Each side reports a different view, which is the signature of a real partition. All three nodes are up, so nothing is dead.\""
+    },
+    {
+      "criterion": "Turn 2 requires knowing which side the services use, and escalation, before any reset",
+      "verdict": "pass",
+      "evidence": "\"Short answer: not yet\"; \"The decision rule is to establish which side the services use, then escalate before any node is reset.\" Check 1 is \"Which side do services use?\" (transport_url, list_connections). The options table allows a reset only \"after checks 1 to 3\" and says it \"Wipes its data, irreversible\". It also asks for a decision owner."
+    },
+    {
+      "criterion": "Turn 3 refuses to treat a whole cluster as proof and lists end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "\"Not on that evidence alone. A clean `cluster_status` shows the bus is whole. It doesn't show that the capability is back.\" The gates cover consumers on the queues, compute services and agents up, MessagingTimeout stopped, Galera Primary, and \"Create a test VM, reach it, then delete it\" before users get access. Reopening is staged, with stop conditions."
+    },
+    {
+      "criterion": "Turn 3 keeps root cause (why the partition happened) as an open follow-up",
+      "verdict": "pass",
+      "evidence": "Gate 5 is \"Root cause of the partition... You restarted the node, which is containment.\" Afterwards: \"the cause isn't understood until you know why the partition happened and why it didn't heal.\""
+    },
+    {
+      "criterion": "Later turns stay consistent with safeguards set earlier",
+      "verdict": "pass",
+      "evidence": "Turn 3 says \"the verification list we set before acting is still open\" and repeats the verification list from turns 1 and 2. It keeps the decision-owner requirement (\"confirm they also own the reopen decision\") and the warning against mass reset-state or delete."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 2, tells the user to reset rabbit-03 without establishing which side of the partition the services use",
+      "committed": false,
+      "evidence": "Turn 2 answers \"not yet\". A reset is allowed only \"after checks 1 to 3 show it is idle or its data is expendable\", and only after escalation."
+    },
+    {
+      "error": "in turn 3, says to reopen the APIs on the basis of cluster_status alone without end-to-end verification",
+      "committed": false,
+      "evidence": "\"Not on that evidence alone\". Turn 3 requires the gates plus creating, reaching and deleting a test VM before a staged reopen."
+    },
+    {
+      "error": "claims the incident is resolved or the cause known without evidence",
+      "committed": false,
+      "evidence": "Turn 3 says \"Containment is done, but the cause isn't understood\" and points out the reported status is \"reported, not shown\"."
+    },
+    {
+      "error": "invents command output",
+      "committed": false,
+      "evidence": "No output is invented. Every result is requested from the user, and the pasted output is labelled Observed."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes every criterion and commits none of the critical errors. Across the three turns it moves from read-only checks along the provisioning path, to recognising the partition and refusing a reset until it knows which side the services use and the issue is escalated, to refusing to reopen on cluster_status alone. The turn 3 reopen plan requires end-to-end verification first and keeps root cause open. The safeguards stay consistent from turn to turn. The only flaw found is a typo: \"VIF\" where \"VIP\" is meant."
+}

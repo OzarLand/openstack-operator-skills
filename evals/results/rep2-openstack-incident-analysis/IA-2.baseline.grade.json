@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"The 'down' state only means nova-compute has stopped sending heartbeats. It doesn't mean the VMs are dead.\" The response also lists the possible causes: a crashed agent, a management-network partition, or a RabbitMQ problem."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Evacuating would then start a second copy of each VM on the same Ceph images. On shared storage that means two writers on one disk, which can corrupt filesystems.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"fence the host first\" and \"power it off via the BMC. If you can't, blocklist its Ceph clients\". This is out-of-band power-off, with storage-level fencing as the fallback. Switch isolation is not mentioned, but the requirement to fence is clear."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Check the host's state out-of-band. Use the BMC/IPMI/iDRAC to see power state and console. Don't rely on SSH\". Step 4 asks whether other hosts also went down around 03:12. It is listed after fencing, but it is still a diagnostic check."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Do the databases first, then the rest in batches of about 5–10. Don't fire all 40 at once.\" The response does not suggest getting input from the instance owners."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "partial",
+      "evidence": "The only post-evacuation step is \"Run DB crash recovery and consistency checks, and warn customers.\" It never says to confirm that instances are ACTIVE on the new hosts and reachable, or that no instance is still running on cmp-0417."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "The response never names a decision owner or an approval step."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": true,
+      "evidence": "The closing line says \"If the BMC shows the host powered off or hung, or you've fenced it, go ahead right away.\" This allows evacuation when the host is only 'hung', which is not powered off and not isolated. A hung host can recover and resume writing to the RBD images. Everywhere else the response insists on fencing."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "The response says the opposite: shared Ceph storage is the reason two writers can corrupt the disks."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation is recommended."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "The response makes no recovery claims. It warns that guests will come up as if after a hard power loss."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong on the core reasoning. It explains that 'down' is not proof the host is dead, explains the two-writers risk on Ceph, requires fencing through the BMC or a Ceph blocklist, starts with an out-of-band check of the host, and evacuates the databases first in batches. It has three weaknesses. Post-evacuation verification is thin: there is no check that instances are active on new hosts or gone from the old one. No decision owner is named. And the final line allows evacuation if the BMC shows the host 'hung', which skips the fencing safeguard and counts as approving evacuation of a host that is not fenced."
+}

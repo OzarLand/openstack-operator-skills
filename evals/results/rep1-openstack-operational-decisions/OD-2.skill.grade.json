@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"The fix exists upstream but not for your series, and the patch is small. That is the standard legitimate case for a local backport.\" It also says declining means \"knowingly running an unpatched advisory.\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "pass",
+      "evidence": "Step 5: \"keep the upstream advisory and change it derives from, the owner, how it was tested, and the exit condition. I'd expect the exit condition to be the next upgrade.\" The record has no explicit 'why not upgrade' field, but the response offers to write an \"upgrade-versus-backport comparison\"."
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "pass",
+      "evidence": "\"Six carried security backports on an unmaintained series is already a lifecycle problem, not just a patching one.\" The section \"Why the count matters\" explains why."
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "pass",
+      "evidence": "\"pair this decision with a dated review of the upgrade path... which maintained series you can reach and how many hops\". It also proposes a trigger to reopen the decision (next OSSA, a date, or N patches) and a named owner for the residual risk."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "pass",
+      "evidence": "Step 1: \"See whether your distribution or vendor ships a fix for this series, or will soon. If so, that's better than a local patch.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": false,
+      "evidence": "The backport is conditional on the steps under \"Before you backport\": Step 4 requires testing and Step 5 requires owner, test record and exit condition."
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "The response opens by calling the six backports \"already a lifecycle problem\" and recommends a dated upgrade review and a trigger to reopen the decision."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a conditional yes for the backport. It requires the distribution check, an exposure check, testing, and a record with owner and exit condition. It names the accumulated backports as a lifecycle problem and recommends a dated upgrade review with reopening triggers. Two small gaps: the record has no explicit 'why not upgrade' field, and it does not explicitly say to review the exit conditions of the six existing backports. It only asks who maintains them and says to record this one 'like the other six'. It commits no critical errors, has no faithfulness issues, and invents nothing about the user's environment."
+}

@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "Top risk 2: \"you can't tell whether a TLS fault or a patch/reboot fault caused it\"; Recommendation: \"split the change... The OS patch and reboot move to a separate window\"; Option A rejected as \"Not attributable on failure\"."
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "\"treat it as an unknown with unknown blast radius\"; Scope lists \"the clients (nova-compute, neutron agents and the like) on every compute node\" and says the trust bundle \"must reach every controller and compute node first\"."
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "Gap 2: \"Rehearse the rotation now, before Saturday, in staging or a lab\"; prerequisite \"Rehearsal in a representative environment, or at least staged production\"; Option D staged production rotation."
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "Recovery section covers the 9-day time limit, mixed CA trust state, Galera SST/IST and RabbitMQ specifics, whether old keys exist, the rollback never being exercised, the point of no return, and the missing OS rollback. Gap 6 asks for concrete steps, order, trigger and time limit."
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "pass",
+      "evidence": "Stop conditions include node failing to rejoin, handshake errors above baseline, quorum risk, and a time check that reserves time for rollback. Verification includes TLS reconnects, Galera Synced, RabbitMQ with no partitions, an end-to-end test checked from a compute node, new expiry dates in monitoring, and an observation period."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "pass",
+      "evidence": "Decision rights section lists technical assessor, capability owner, accountable person, decision maker and consumer communication, all marked unknown. Notes \"CAB approves the process, but someone who is entitled to accept a control-plane outage must be named.\""
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "pass",
+      "evidence": "The prerequisites table marks rehearsal \"Not done\" and backups, monitoring and owners \"Unknown\". The gates mark evidence, owner and authority Unknown/Fail. The only Pass is Mandatory requirements, and it is qualified as \"(Reported)... This is not verified\". That is not a prerequisite such as tests, backups or rehearsal."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready\"; recommends splitting the change."
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "Recovery gate is Fail: \"'Restore old certs' isn't a recovery path\", followed by a detailed critique."
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "Rehearsal is marked \"Not done\"; backups and restore tests are marked \"Unknown\"."
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "\"Decision support only. State-changing steps above require approval by the accountable owner\"; \"Selected option: pending rehearsal and owner decision.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion and commits none of the critical errors. Its verdict is Not ready, and it asks for the cert rotation to be split from the OS patching because bundling them makes failures impossible to attribute. It points out that the agents on every compute node are affected, requires a rehearsal, and takes the 'restore old certs' rollback apart in detail (the 9-day limit, mixed trust state, cluster specifics). It also sets stop conditions and verification, names the missing decision roles, and marks unknowns honestly. It makes no false book citations and invents no facts about the environment. The window and expiry dates are clearly labelled as worked out from today's date."
+}

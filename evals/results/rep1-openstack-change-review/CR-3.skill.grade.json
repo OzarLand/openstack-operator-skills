@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags incomplete online data migrations as a blocker",
+      "verdict": "pass",
+      "evidence": "Top risk #2: \"skipped migrations make the next schema sync refuse to run\"; point 2 calls it \"the most concrete blocker... completing them is a hard prerequisite of the next upgrade\"; the prerequisites table marks it Fail."
+    },
+    {
+      "criterion": "Explains the limits of the SLURP promise beyond OpenStack services",
+      "verdict": "pass",
+      "evidence": "\"SLURP is a promise about OpenStack services only. The release notes don't tell you the OS, Python, RabbitMQ, MariaDB, or network and storage backends support the same jump.\""
+    },
+    {
+      "criterion": "Requires upgrade check commands",
+      "verdict": "pass",
+      "evidence": "Prerequisite \"`*-status upgrade check` run with **target** release code\"; it is also a stop condition and step 1 of the closing actions."
+    },
+    {
+      "criterion": "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+      "verdict": "pass",
+      "evidence": "Recovery gate marked **Fail**; \"the first action should be a recovery exercise, not the upgrade\"; step 3 asks for a restore exercise that a second person executes."
+    },
+    {
+      "criterion": "Includes policy/RBAC testing",
+      "verdict": "pass",
+      "evidence": "Point 5 covers enforce_new_defaults and enforce_scope and says \"Test with real users, service accounts and automation\"; verification includes a permission matrix."
+    },
+    {
+      "criterion": "Addresses local patches against the target release",
+      "verdict": "pass",
+      "evidence": "Point 3 is triage of each patch: whether the target release already includes it, whether it still applies cleanly, schema/RPC impact. It also asks for a functional test of the 2 scheduler patches."
+    },
+    {
+      "criterion": "Gives a clear not-ready verdict with ordered conditions",
+      "verdict": "pass",
+      "evidence": "\"Verdict: Not ready. Do not run the upgrade next week.\" The section \"What would close the gaps\" lists steps 1–7 in order. It is framed as \"sequencing, not resistance\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "declares the upgrade ready next week",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready. Do not run the upgrade next week.\""
+    },
+    {
+      "error": "ignores the incomplete online data migrations",
+      "committed": false,
+      "evidence": "Treated as a top risk and a failed prerequisite, with a dedicated section."
+    },
+    {
+      "error": "treats SLURP support as covering the whole stack",
+      "committed": false,
+      "evidence": "States that SLURP covers OpenStack services only and lists the OS, Python, RabbitMQ, MariaDB and backends as unverified."
+    },
+    {
+      "error": "invents specific release names as the user's current/target versions",
+      "committed": false,
+      "evidence": "Names no releases; says \"Which release you are on and which you are targeting\" is unknown and asks for it in question 2."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, well-sequenced not-ready review that meets every criterion. It treats the skipped online data migrations as a hard blocker, says SLURP covers only OpenStack services, and requires the *-status upgrade checks with target code. It also treats recovery as failed and puts a restore exercise first, covers RBAC policy testing and patch triage, and ends with ordered first actions and a draft decision record. It commits no critical errors, invents no release names or environment facts, and makes no unsupported book citations."
+}

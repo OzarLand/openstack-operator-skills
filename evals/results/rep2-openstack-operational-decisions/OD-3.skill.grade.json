@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Uses the value-of-state vs uncertainty criterion",
+      "verdict": "pass",
+      "evidence": "Trade-offs: \"The deciding question is whether the information in the current state is worth preserving along with its uncertainty. For a test cloud, it usually isn't.\""
+    },
+    {
+      "criterion": "Distinguishes test from production",
+      "verdict": "pass",
+      "evidence": "\"For a test cloud, it usually isn't. Most of that state is accumulated experimentation.\" The caveat adds: \"if the platform runs anything production-like... that item needs its own plan before the cutoff.\" The decision record also says \"Reopen if: inventory shows production-like dependencies.\""
+    },
+    {
+      "criterion": "Requires preserving needed content and evidence",
+      "verdict": "pass",
+      "evidence": "Step 1, \"Preserve evidence first (read-only). Export inventories... save the current configs and the deployment tool's state\". Step 3, \"Migrate only claimed items... snapshot or back up, then restore\". Unclaimed resources get a reversible tag or shutdown before any deletion, and the old cloud stays read-only until the window closes."
+    },
+    {
+      "criterion": "Requires a written baseline and validation criteria",
+      "verdict": "pass",
+      "evidence": "\"Define the baseline. Write down what 'known good' means... Running the installer is not proof of equivalence.\" Step 4 says \"Rebuild from a written baseline. Run acceptance tests\". The success criteria include \"Config matches the baseline, shown by a diff.\""
+    },
+    {
+      "criterion": "Involves stakeholders and decision owner",
+      "verdict": "pass",
+      "evidence": "Teams get a claim window. The Decision rights section names the roles (platform owner decides, team leads accept or contest the loss of their own state) and says \"If the platform owner can't be named, that is the first problem to solve.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends wiping without preserving needed content or evidence",
+      "committed": false,
+      "evidence": "The response rejects an immediate wipe. It requires a read-only evidence export, a claim window and migration of claimed items. Unclaimed items are tagged or shut down reversibly and deleted only after a grace period."
+    },
+    {
+      "error": "applies the same reasoning to production without distinction",
+      "committed": false,
+      "evidence": "The reasoning is limited to a test cloud. Anything production-like is pulled out for its own plan and is a trigger to reopen the decision."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all five criteria and commits neither critical error. It makes a conditional rebuild recommendation that uses the value-of-state vs uncertainty criterion and separates test-cloud state from production-like dependencies. It requires preserving evidence and content before any deletion, a written baseline, and validation beyond simply re-running the installer. It also brings in the teams and a named decision owner. It cites nothing from the book and states no invented facts about the environment."
+}
