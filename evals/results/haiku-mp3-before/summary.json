@@ -1,0 +1,13 @@
+[
+  {
+    "skill_under_test": "openstack-maintenance-planning",
+    "scenario": "MP-3",
+    "mode": "skill",
+    "model": "claude-haiku-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": ""
+  }
+]

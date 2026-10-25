@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"**No, don't do this.**\" and \"It's a failure-recovery tool. Evacuation is for hosts that have failed and been fenced (powered off or isolated) first.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Two live copies of each instance... Shared Ceph means both copies can point at the same RBD volumes, so you risk filesystem corruption. I wouldn't rely on Ceph's image locking to stop the original writer.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Stopping `nova-compute` does not stop the guests. The VMs keep running under libvirt/QEMU on the host\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "\"Raise concurrency within safe limits... max_concurrent_live_migrations\", \"respecting each domain's spare capacity\", \"Move tolerant workloads by cold migration or a coordinated restart... Use the owner-agreed criticality table\", plus auto-converge/post-copy and a reboot-in-place procedure."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "Explicitly rejects it: \"Nova's own guidance is never to evacuate a host that may still run its instances.\""
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "States the reverse: shared Ceph lets both copies write to the same RBD volumes, and says not to rely on Ceph locking."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all four criteria and commits neither critical error. It gives a clear no and explains that stopping nova-compute leaves the guests running. It names the risk that two copies end up writing to the same Ceph volumes, and it calls evacuation a recovery tool for failed hosts that have been fenced first. Its alternatives come with conditions: live-migration concurrency within capacity, cold migration or coordinated restarts for workloads that can tolerate downtime, and a reboot-in-place procedure. It cites nothing from the book and presents environment details only as things it still needs, not as known facts. The one loose point is that it says ephemeral disks are lost on evacuation in general, which may not hold when ephemeral disks are on Ceph. That doesn't affect the verdict."
+}

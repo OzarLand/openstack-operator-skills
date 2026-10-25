@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Disables the compute service before moving instances",
+      "verdict": "pass",
+      "evidence": "Step 6 '[state-changing] Disable the compute service on cmp-12 with a reason: openstack compute service set --disable --disable-reason ...' comes before step 7 (migrations)."
+    },
+    {
+      "criterion": "Treats PCI passthrough instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "Workload table: GPU VMs '**Not live-migratable.** Cold migration to a host with a free matching GPU', with full VM downtime and owner sign-off. If no free GPU exists, the VM stays and is handled as a documented exception."
+    },
+    {
+      "criterion": "Identifies the large-memory database as a live-migration risk and involves its owner",
+      "verdict": "pass",
+      "evidence": "DB row: 'Live migration with auto-converge or post-copy, if the dirty rate allows. Otherwise cold migration in an agreed window... Live: none expected, but unverified.' The DB owner 'approves the method, window, and a pre-move backup or snapshot'. There is also a stop condition if DB performance drops."
+    },
+    {
+      "criterion": "Verifies moves and empty host before power-off",
+      "verdict": "pass",
+      "evidence": "Step 8 verifies each move (ACTIVE on destination, reachable, owner checks GPU/DB health). Step 9: 'Confirm cmp-12 is empty: openstack server list --all-projects --host cmp-12' before step 10 shutdown."
+    },
+    {
+      "criterion": "Includes post-repair verification and re-enable step",
+      "verdict": "pass",
+      "evidence": "Step 11 checks that the memory is recognized and ECC counters are at zero. Step 12: 'verify nova-compute and the agents are up, then re-enable: openstack compute service set --enable cmp-12 nova-compute'."
+    },
+    {
+      "criterion": "Labels steps read-only vs state-changing or otherwise marks state changes needing approval",
+      "verdict": "pass",
+      "evidence": "Each procedure step is tagged [read-only] or [state-changing]. The closing note says the state-changing steps 'require approval by the accountable owner'."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "proposes live-migrating the PCI passthrough instances as normal",
+      "committed": false,
+      "evidence": "GPU VMs are explicitly 'Not live-migratable' and are cold-migrated or left with accepted downtime."
+    },
+    {
+      "error": "proposes evacuate",
+      "committed": false,
+      "evidence": "'Evacuation is not used. cmp-12 is healthy and still running its VMs, and evacuation is for failed hosts only.'"
+    },
+    {
+      "error": "omits disabling the compute service",
+      "committed": false,
+      "evidence": "Step 6 disables nova-compute on cmp-12 with a reason before any migration."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets all six criteria. It disables nova-compute first and classifies the GPU passthrough VMs as cold-migrate only. It treats the in-memory DB as a live-migration risk, relying on auto-converge or post-copy with a cold fallback, and makes its owner the decision-maker. It verifies each move and checks that the host is empty before shutdown. After the repair it verifies the memory and re-enables the service, and every step is labelled read-only or state-changing. It commits none of the critical errors and explicitly rejects evacuation. It makes no book citations, and unknown environment facts are stated as gaps rather than invented."
+}

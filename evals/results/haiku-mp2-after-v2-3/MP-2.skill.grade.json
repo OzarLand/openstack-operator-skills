@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "Opens with \"No, don't do this for patching. Evacuation is for hosts that have already failed.\" Option 4 does leave a fallback: evacuate only after guests are cleanly stopped and the host is powered off or fenced. That is guarded, so the rejection still stands."
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Evacuation rebuilds the VMs on other hosts while the originals may still run. On shared Ceph, two writers can attach the same RBD volumes. The result is filesystem corruption... Nova does not fence the old host for you.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Stopping nova-compute doesn't stop the guests. The QEMU processes keep running under libvirt. Nova just loses sight of them.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Option 1: raise max_concurrent_live_migrations, but only within the spare capacity of each failure domain. Option 2: cold migration, only where owners accept a short outage. Option 3: coordinated restart for workloads that tolerate it, with a note on resume_guests_state_on_host_boot."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response rejects this outright. The only evacuation it allows (option 4) requires guests cleanly stopped, `virsh list` empty, and the host powered off or fenced."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It says the opposite: shared Ceph is exactly where two writers on the same RBD volumes cause corruption. Ceph is credited only with making cold migration faster."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It gives a clear no with the right reasons: stopping nova-compute leaves the guests running, and on shared Ceph both copies would write to the same RBD volumes and corrupt them. It also notes that a service showing down does not mean the host is dead, and that Nova does not fence the old host. The alternatives each come with conditions: tune migration concurrency within the spare capacity of each failure domain, use cold migration with owner agreement, or do a coordinated restart. It commits neither critical error, makes no book citations, and invents no facts about the user's environment."
+}
