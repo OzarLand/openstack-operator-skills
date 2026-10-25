@@ -22,6 +22,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SKILLS = ROOT / "skills"
 SHARED = ROOT / "shared"
 SCENARIOS = ROOT / "evals" / "scenarios"
+# Top-level documentation whose relative links must keep resolving.
+REPO_DOCS = ["README.md", "CONTRIBUTING.md", "CHANGELOG.md", "evals/README.md", "docs/*.md"]
 
 # Keys accepted by claude.ai and the Skills API (Claude Code accepts more, but
 # using only these keeps every skill portable across surfaces).
@@ -215,6 +217,23 @@ def check_skill(skill_dir, shared_texts, report):
             report.error(rel(copy), "differs from shared/ (run tools/sync_shared.py)")
 
 
+def check_repo_docs(report):
+    for pattern in REPO_DOCS:
+        for path in sorted(ROOT.glob(pattern)):
+            text = path.read_text(encoding="utf-8")
+            for target in LINK_RE.findall(text):
+                if re.match(r"^[a-z]+://", target) or target.startswith(("#", "mailto:")):
+                    continue
+                target_path = (path.parent / target.split("#")[0]).resolve()
+                try:
+                    target_path.relative_to(ROOT)
+                except ValueError:
+                    report.error(rel(path), f"link '{target}' points outside the repository")
+                    continue
+                if not target_path.exists():
+                    report.error(rel(path), f"broken link '{target}'")
+
+
 def check_scenarios(skill_names, report):
     for name in skill_names:
         path = SCENARIOS / f"{name}.json"
@@ -256,6 +275,7 @@ def main():
             continue
         check_skill(skill_dir, shared_texts, report)
     check_scenarios([d.name for d in skill_dirs], report)
+    check_repo_docs(report)
 
     for line in report.warnings + report.errors:
         print(line)

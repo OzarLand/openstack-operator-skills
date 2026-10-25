@@ -51,9 +51,11 @@ exercise rather than the upgrade.
 
 ## Upstream readiness tools
 
-[Book: Ch. 14] Read-only pre-upgrade checks returning a status code:
-`nova-status upgrade check`, `neutron-status upgrade check`,
-`cinder-status upgrade check`, `placement-status upgrade check`. They perform
+[Book: Ch. 14] Read-only pre-upgrade checks returning a status code, for
+example `nova-status upgrade check`, `neutron-status upgrade check`,
+`cinder-status upgrade check`, `placement-status upgrade check`. Other projects
+ship one too (e.g. `keystone-status`, `glance-status`, `octavia-status`): check
+each deployed project `[Addition]`. They perform
 release-specific checks before services are restarted with new code: run them
 with the **target** release's code; run with the installed code they only
 check the current release.
@@ -74,7 +76,8 @@ check the current release.
    to run.
 
 Since 2023.1, Nova tolerates computes up to two releases older than control
-services; control services refuse to start if they detect an older one.
+services (N-2); control services refuse to start if they detect a compute
+service older than that.
 
 ## Neutron expand/contract
 

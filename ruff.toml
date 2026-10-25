@@ -1,0 +1,5 @@
+# Lint configuration used locally and in CI (.github/workflows/validate.yml).
+line-length = 120
+
+[lint]
+select = ["E", "F", "W", "EXE", "PLW1510"]
