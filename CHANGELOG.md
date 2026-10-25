@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+- Tested on claude.ai: the seven zips upload, the right skill loads, the
+  references are read (`docs/evaluation-report.md`, section 11).
+- `tools/sync_shared.py` leaves the contributor note ("Canonical copy: ...")
+  out of the shared references copied into each skill, so the model no longer
+  reads it.
+
 ## [0.1.0] — 2026-10-25
 
 First version.

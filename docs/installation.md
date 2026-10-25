@@ -50,6 +50,13 @@ python3 tools/package_skills.py     # writes dist/<skill>.zip
 Upload each zip in Settings (Capabilities / Features → Skills). Each zip
 contains one skill folder with its `SKILL.md` and `references/`.
 
+Tested on 2026-10-25 (see `docs/evaluation-report.md`, section 11): all seven
+zips uploaded without error, and the right skill loaded on each test question.
+claude.ai mounts the skills under `/mnt/skills/plugins/<name>/` and Claude
+reads the `references/` files with shell commands (`cat`, `sed`), so code
+execution must stay enabled. Long outputs such as a runbook may be delivered
+as a document rather than in the chat.
+
 ## Claude API
 
 Upload each skill directory with the Skills API (`/v1/skills`) and reference
