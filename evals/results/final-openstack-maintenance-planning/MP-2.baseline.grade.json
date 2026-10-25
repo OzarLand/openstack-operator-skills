@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "Opens with \"Not a good idea for planned patching. Evacuate is built for dead hosts\" and repeats that evacuate \"assumes the source host is fenced.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Split-brain risk... Nova starts a second copy of each VM on another host using the same RBD images. Ceph's exclusive locks can reduce the damage, but they aren't a safe fence, and you can end up with corrupted disks.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"'nova-compute is down' only means the Nova agent stopped. The qemu processes keep running on the hypervisor.\" and \"Stopping a service doesn't do that.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "partial",
+      "evidence": "Gives detailed live-migration tuning (post-copy/auto-converge, max_concurrent_live_migrations, bandwidth, parallel drains), conditions cold migration on \"VMs that can take a short, clean reboot,\" and suggests sorting hosts by whether a reboot is needed. It never makes parallel migration conditional on spare capacity on the destination hosts, and it says little about coordinating restarts with workload owners outside the fenced-evacuate case."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "It rejects evacuating a live host outright. Its fallback (\"If you use evacuate anyway\") requires the host to be fenced first: \"fence the host first (IPMI power-off or STONITH), and only then...\". That is the safeguard the scenario asks for."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It says the opposite: \"Ceph's exclusive locks can reduce the damage, but they aren't a safe fence, and you can end up with corrupted disks.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear no and explains it well: stopping nova-compute leaves the guests running, and evacuating would start second copies on the same RBD images, so Ceph locks are no substitute for fencing. Its alternatives are solid: tuned and parallelized live migration, cold migration for VMs that can tolerate a reboot, and skipping the drain when no reboot is needed. The fallback evacuate path is safe because it requires fencing first. One weakness: it never makes faster or parallel migration conditional on spare capacity, and it says little about coordinating restarts with workload owners. It commits neither critical error and has no faithfulness problems."
+}

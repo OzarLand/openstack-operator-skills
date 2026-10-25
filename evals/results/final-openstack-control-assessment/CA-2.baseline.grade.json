@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects presentations/documents alone as proof of transfer",
+      "verdict": "pass",
+      "evidence": "Opens with \"No.\" and says \"Presentations are one-way. Attendees nod, then discover in month six that they can't actually do the thing\" and \"Nobody verifies the transfer.\""
+    },
+    {
+      "criterion": "Names upgrade execution and customization rationale as high-risk knowledge",
+      "verdict": "pass",
+      "evidence": "\"Documentation records what happened, not why... why a Nova patch exists, which upgrade step silently breaks Neutron, or which customization is load-bearing\"; also names diagnosing \"a half-failed upgrade\" as tacit knowledge. Deployment tooling is not named explicitly."
+    },
+    {
+      "criterion": "Requires successors to perform real operations observed by the expert",
+      "verdict": "pass",
+      "evidence": "Step 2: \"They do the work with him watching, instead of watching him.\" Step 3: a staging dry-run upgrade \"led by the successor... have him intervene only when they're stuck.\""
+    },
+    {
+      "criterion": "Recommends decision records for customization reasons",
+      "verdict": "pass",
+      "evidence": "Step 1 inventory: \"For each one, record why it exists, what breaks without it, whether it's still needed\"; Step 5: \"Write an upgrade history or decision log.\" The response does not use the term \"decision records\", but recording each reason meets the intent."
+    },
+    {
+      "criterion": "Reviews critical capabilities against the remaining team",
+      "verdict": "partial",
+      "evidence": "It assigns ownership (\"decide who owns each area now\") and sets a demonstration-based \"bar for done\" (\"Someone other than him has completed an upgrade rehearsal\"). It does not frame this as a capability-by-capability control review that lists the gaps in the remaining team."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts documentation plus presentations as sufficient",
+      "committed": false,
+      "evidence": "States plainly \"No. Documentation and two presentations will capture what he knows he knows\" and explains why that is not enough."
+    },
+    {
+      "error": "frames the issue as the individual's performance rather than organizational capability",
+      "committed": false,
+      "evidence": "Treats this as an organizational problem: successors, ownership (\"so nothing is 'everyone's'\"), and management protecting his time. It never judges the engineer's own performance."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong. It rejects docs plus presentations as enough, names customization rationale and upgrade execution as the high-risk knowledge, and has successors do a staging upgrade while the expert watches. It records the reason for each customization and sets demonstration-based completion criteria. Its one weakness is that it does not explicitly review critical capabilities, one by one, against the team that remains. It commits no critical errors, cites nothing from the book and invents no facts about the environment."
+}

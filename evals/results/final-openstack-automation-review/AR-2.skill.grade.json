@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags rebooting without draining instances as blocking",
+      "verdict": "pass",
+      "evidence": "Finding #2, Blocking: \"Nothing drains the host. VMs are not live-migrated, evacuated or stopped before the reboot... Disable the nova-compute service on the host, migrate or coordinate the VMs off, and confirm the host is empty\""
+    },
+    {
+      "criterion": "Flags lack of batching (serial) as a blast-radius problem",
+      "verdict": "pass",
+      "evidence": "Finding #1, Blocking: \"There is no batch limit... you can lose far more capacity than you have spare. Add `serial: 1` for the first run\"; the summary also explains the default forks behaviour."
+    },
+    {
+      "criterion": "Flags ignore_errors and missing stop conditions",
+      "verdict": "pass",
+      "evidence": "Finding #3, Blocking: \"Remove it. Make failure stop the play. Add `any_errors_fatal` or `max_fail_percentage: 0` so one bad host halts the campaign\"; Finding #4 notes \"the next batch starts anyway\"."
+    },
+    {
+      "criterion": "Flags unpinned updates as uncontrolled change",
+      "verdict": "pass",
+      "evidence": "Finding #5, Major: \"The playbook takes whatever the repos hold on the day... Pin and stage repo content, review the update list per host, and test it on a canary host first.\""
+    },
+    {
+      "criterion": "Requires post-reboot verification",
+      "verdict": "pass",
+      "evidence": "Finding #4: \"The `reboot` module only waits for SSH to return... Add checks that test the capability: the compute service is `up` and enabled, libvirt and the network agent are healthy... re-enable the host only after they pass.\""
+    },
+    {
+      "criterion": "Refers to a maintenance plan based on criticality and capacity",
+      "verdict": "pass",
+      "evidence": "Covers capacity: \"Raise it only after you've sized spare capacity per failure domain\" and \"How much spare capacity do you have?\". Covers criticality: \"Which workloads can't be migrated or interrupted?\" and the 'What the playbook delegates' section on business context. Also offers the maintenance-planning skill \"to size batches and choose a migration method per workload\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the playbook on production as is",
+      "committed": false,
+      "evidence": "\"Verdict: not safe to run on prod as written. It needs changes first.\""
+    },
+    {
+      "error": "ignores the lack of instance draining",
+      "committed": false,
+      "evidence": "Finding #2 is rated Blocking and covers draining, and the suggested shape includes \"disable nova-compute on host, drain VMs, assert host is empty\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all six criteria and commits neither critical error. It says clearly that the playbook is not safe to run on prod as written. It rates the missing draining, the missing serial batching and ignore_errors as blocking. It also flags unpinned `state: latest` updates and missing post-reboot checks, and it proposes a structure using serial, any_errors_fatal or max_fail_percentage, pre-checks and post-checks, and disable-and-drain. It ties batch sizing to spare capacity, failure domains and which workloads can be interrupted. It labels its assumptions and invents nothing about the user's environment. It makes no book citations, so there are no faithfulness issues. Small gaps that don't change the verdict: it doesn't make the book's point that a QEMU/libvirt update only protects instances that have since been migrated or restarted. Its example shape also still uses `state: latest`, though Finding #5 deals with that."
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+      "verdict": "pass",
+      "evidence": "Section B: \"read grastate.dat ... Note uuid, seqno and safe_to_bootstrap\"; \"If seqno is -1, run mysqld --wsrep-recover ... read the Recovered position line\", followed by a position table and a decision table."
+    },
+    {
+      "criterion": "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+      "verdict": "pass",
+      "evidence": "\"Bootstrapping a node that is behind makes its state the truth, and transactions only the more advanced node held are lost.\" The Do NOT list includes \"Bootstrap a node because it came up first ... Compare positions.\" Point of no return is also stated."
+    },
+    {
+      "criterion": "Adds a decision point distinguishing full outage from partial failure",
+      "verdict": "pass",
+      "evidence": "Section A, \"Is this really a full outage?\": \"Any node Primary | Stop. This is a rejoin, not this runbook.\" The Scope section also excludes a single node down."
+    },
+    {
+      "criterion": "Includes end-to-end verification",
+      "verdict": "pass",
+      "evidence": "Verification section: all nodes Primary/Synced, cluster size, writes accepted, load balancer, OpenStack services started, authenticate, then create, reach and delete a test VM."
+    },
+    {
+      "criterion": "Marks unknown specifics as TODOs",
+      "verdict": "pass",
+      "evidence": "Many TODOs: \"TODO: real path\", \"TODO: exact command. The note doesn't say.\", deployment method, approver, load balancer, service order, node count."
+    },
+    {
+      "criterion": "Proposes validation by a non-author while the expert is still available",
+      "verdict": "pass",
+      "evidence": "Validation plan: \"Have an engineer who didn't write it run it on a non-production cluster ... with the expert watching but not helping ... Do this before Friday.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "omits the safe_to_bootstrap / wsrep-recover identification step",
+      "committed": false,
+      "evidence": "Section B covers both explicitly."
+    },
+    {
+      "error": "presents invented service names or paths as fact",
+      "committed": false,
+      "evidence": "Paths and commands are framed as examples with TODOs: \"for example /var/lib/mysql/grastate.dat; TODO: real path\" and \"for example galera_new_cluster ... TODO: exact command\"."
+    },
+    {
+      "error": "does not propose a validation session before the expert leaves",
+      "committed": false,
+      "evidence": "The validation plan explicitly says to do it before Friday with the expert observing."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong runbook draft. It meets every expected reasoning point: it identifies the most advanced node using grastate.dat, safe_to_bootstrap and --wsrep-recover. It states the data-loss risk as a must-not-do and gives a decision point for full outage versus partial failure. It also includes end-to-end capability verification, marks unknown specifics as TODOs, and plans a validation run before Friday by a non-author with the expert watching. It commits none of the critical errors. Environment-specific paths and commands are labelled as examples, and there are no book citations."
+}

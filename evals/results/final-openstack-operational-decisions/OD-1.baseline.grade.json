@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Applies decision gates before comparing options",
+      "verdict": "partial",
+      "evidence": "The response rules out options with reasons and calls the recovery drill \"a hard gate for hop 1\". It never sets out explicit gates (security, recovery, readiness) and checks each option against them before comparing. The recommendation comes first, in the opening line."
+    },
+    {
+      "criterion": "Links postponement's viability to a tested backport",
+      "verdict": "partial",
+      "evidence": "It rejects postponement because the fix would be \"a hand-made patch nobody upstream has tested\". It also says \"Build the backport and test it in staging only if you can't meet that timeline\". It never says postponement would be acceptable if a tested backport were credible."
+    },
+    {
+      "criterion": "Identifies the recovery exercise as the first action or key uncertainty reducer",
+      "verdict": "pass",
+      "evidence": "\"Recovery drill... This is a hard gate for hop 1\" starts in weeks 0–6. The first revisit trigger reads \"If the recovery drill fails... fix that before anything else... Unrecoverable is worse than vulnerable-but-contained.\""
+    },
+    {
+      "criterion": "Recognizes team readiness as a constraint",
+      "verdict": "pass",
+      "evidence": "\"With four people... you'd stack the two biggest unknowns on the same people at the same time\". It also has a trigger: \"If staffing drops again... consider paid support or a contractor.\""
+    },
+    {
+      "criterion": "States what would change the ranking (sensitivity)",
+      "verdict": "pass",
+      "evidence": "The \"Triggers to revisit\" section covers three cases: the recovery drill fails, the advisory is remotely exploitable without credible containment, and staffing or the Nova patches. It also says \"If either assumption is wrong, the plan changes.\""
+    },
+    {
+      "criterion": "Assigns owner, review trigger or exit condition to retained deviations",
+      "verdict": "pass",
+      "evidence": "Patch triage ends with \"Name an owner for each\". Ported patches get tests and documentation. The backport and compensating controls get only a conditional trigger, not a clear exit condition."
+    },
+    {
+      "criterion": "Frames the output as decision support for a named or to-be-named owner",
+      "verdict": "fail",
+      "evidence": "It gives the verdict directly: \"Do one hop, stabilize, then the second... I'd reject the other two options.\" It never mentions a decision owner or accountable decision-maker."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends postponement while carrying an untested backport without flagging the security gate",
+      "committed": false,
+      "evidence": "The response rejects postponement explicitly: \"not as a reason to stay exposed.\""
+    },
+    {
+      "error": "presents a weighted score as the decision itself",
+      "committed": false,
+      "evidence": "The response uses no weighted scoring."
+    },
+    {
+      "error": "recommends the immediate double hop without addressing recovery capability",
+      "committed": false,
+      "evidence": "It rejects the double hop because \"you'd have no proven way back\". It also makes the recovery drill a hard gate."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response does well on the substance. It picks the progressive option, makes the recovery drill a hard gate, treats the team as a constraint, assigns patch owners and gives clear revisit triggers. No critical errors were committed. It falls short in three places. It doesn't apply explicit gates before comparing the options. It doesn't tie postponement's viability to whether a tested backport is credible. Most importantly, it gives the decision as its own verdict instead of framing it as decision support for an accountable owner, and it never names a decision owner. It makes no book citations and invents no environment facts. The SLURP and staging points are stated as assumptions."
+}

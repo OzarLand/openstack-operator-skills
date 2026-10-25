@@ -1,0 +1,133 @@
+{
+  "skill": "openstack-maintenance-planning",
+  "scenarios": [
+    {
+      "id": "MP-1",
+      "title": "Mandatory kernel and QEMU patching without capacity to migrate everything",
+      "source": "Book: Ch. 20 (field decision and technical note); Ch. 17",
+      "prompt": "Security says all 300 compute hosts must get a kernel + QEMU fix within 3 weeks. Hosts are spread over 3 availability zones. We have roughly 8 hosts worth of free capacity in total. Some tenants use SR-IOV ports. We don't really know which VMs are critical - the infra team just sees instances. How should we plan this?",
+      "available_evidence": [
+        "300 hosts, 3 AZs (reported)",
+        "~8 hosts of spare capacity in total (reported)",
+        "kernel + QEMU fix required within 3 weeks (reported)",
+        "some SR-IOV instances (reported)",
+        "criticality unknown to infra (reported)"
+      ],
+      "missing_information": [
+        "distribution of spare capacity per AZ",
+        "storage model (shared vs local disks)",
+        "libvirt/QEMU and CPU model versions across hosts",
+        "workload criticality and acceptable downtime per consumer",
+        "migration baselines (duration, concurrency)"
+      ],
+      "expected_reasoning": [
+        "keeps the security requirement fixed and designs a differentiated execution strategy",
+        "collects business criticality from consuming teams via a shared table before execution",
+        "computes capacity per failure domain (AZ), not overall",
+        "classifies non-live-migratable instances (SR-IOV) as needing restart or cold migration with owner agreement",
+        "explains patch order: landing zone first; no migration from newer to older QEMU/libvirt",
+        "notes QEMU fix protects only instances migrated or restarted since",
+        "excludes evacuation from maintenance",
+        "defines stop conditions and campaign completion criteria",
+        "does not invent per-AZ numbers"
+      ],
+      "expected_output": [
+        "plan with workload classes, capacity check per AZ, sequencing, per-host procedure, stop conditions, decision rights, completion criteria, follow-up"
+      ],
+      "critical_errors": [
+        "plans to live-migrate everything despite insufficient capacity",
+        "restarts workloads without owner input on criticality",
+        "suggests evacuation for maintenance",
+        "treats patched hosts as protecting running instances that were not migrated or restarted",
+        "invents capacity numbers per AZ and presents them as known"
+      ],
+      "criteria": [
+        "Separates the fixed requirement from the execution strategy",
+        "Requires consumer-provided criticality before execution",
+        "Computes or frames capacity per availability zone",
+        "Handles SR-IOV instances as non-live-migratable",
+        "Explains landing zone and version direction constraint",
+        "States that running instances are only protected after migration or restart",
+        "Defines stop conditions and completion criteria",
+        "Does not recommend evacuation for maintenance"
+      ]
+    },
+    {
+      "id": "MP-2",
+      "title": "Use evacuate to drain hosts faster",
+      "source": "Book: Ch. 10; Ch. 20",
+      "prompt": "Live migrations are too slow for our patching campaign. Our storage is shared Ceph, so a colleague suggests: stop nova-compute on the host, wait until it shows down, then 'openstack server evacuate' everything off it - much faster. Good idea?",
+      "available_evidence": [
+        "live migrations perceived as slow (reported)",
+        "shared Ceph storage (reported)",
+        "proposal to stop nova-compute and evacuate a running host"
+      ],
+      "missing_information": [
+        "actual migration durations and concurrency settings",
+        "workload tolerance for downtime",
+        "capacity"
+      ],
+      "expected_reasoning": [
+        "rejects evacuation for maintenance: it is for failed hosts only",
+        "explains the instances would still be running on the original host while rebuilt elsewhere, both writing to the same Ceph volumes",
+        "notes stopping nova-compute does not stop the instances",
+        "offers legitimate alternatives: tune/parallelize live migration within capacity, cold migration or coordinated restarts for tolerant workloads"
+      ],
+      "expected_output": [
+        "clear no with the reason",
+        "alternatives with conditions"
+      ],
+      "critical_errors": [
+        "endorses evacuating a host that is still running its instances",
+        "claims Ceph makes evacuation safe in this case"
+      ],
+      "criteria": [
+        "Clearly rejects evacuation for planned maintenance",
+        "Explains the double-write / split-brain risk on shared storage",
+        "Notes that stopping nova-compute leaves instances running",
+        "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)"
+      ]
+    },
+    {
+      "id": "MP-3",
+      "title": "Single host hardware repair with non-migratable instances",
+      "source": "Book: Ch. 20 (technical note); Ch. 9; Ch. 13",
+      "prompt": "Tomorrow a technician replaces a faulty DIMM in compute node cmp-12 and needs it powered off for ~1 hour. It runs about 20 VMs; two of them use PCI passthrough GPUs and one is a big in-memory database. What's the plan to get the VMs off safely?",
+      "available_evidence": [
+        "host cmp-12 must be powered off ~1 hour tomorrow (reported)",
+        "~20 VMs, 2 with PCI passthrough GPUs, 1 large in-memory database (reported)"
+      ],
+      "missing_information": [
+        "storage model",
+        "owners and criticality of the VMs",
+        "auto-converge/post-copy settings",
+        "destination capacity and compatibility",
+        "whether the DIMM fault is already causing errors"
+      ],
+      "expected_reasoning": [
+        "disables nova-compute on the host first",
+        "classifies PCI passthrough instances as not live-migratable: cold migration or downtime agreed with owners",
+        "flags the memory-intensive database as a live-migration risk unless auto-converge/post-copy, and involves its owner",
+        "verifies each move and that the host is empty before power-off",
+        "includes verification after repair and re-enabling",
+        "asks owners for criticality rather than assuming"
+      ],
+      "expected_output": [
+        "per-host procedure with classes, owner communication, verification, stop conditions"
+      ],
+      "critical_errors": [
+        "proposes live-migrating the PCI passthrough instances as normal",
+        "proposes evacuate",
+        "omits disabling the compute service"
+      ],
+      "criteria": [
+        "Disables the compute service before moving instances",
+        "Treats PCI passthrough instances as non-live-migratable",
+        "Identifies the large-memory database as a live-migration risk and involves its owner",
+        "Verifies moves and empty host before power-off",
+        "Includes post-repair verification and re-enable step",
+        "Labels steps read-only vs state-changing or otherwise marks state changes needing approval"
+      ]
+    }
+  ]
+}

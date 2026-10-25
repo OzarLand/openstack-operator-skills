@@ -1,0 +1,130 @@
+{
+  "skill": "openstack-control-assessment",
+  "scenarios": [
+    {
+      "id": "CA-1",
+      "title": "New platform lead inherits a fragile cloud",
+      "source": "Book: Ch. 7; Ch. 5",
+      "prompt": "I just became platform lead for a ~600-compute OpenStack cloud. The previous team mostly left. There are frequent incidents, people restart things when in doubt, upgrades have been postponed for years, and engineers who joined with me already want to migrate to a new deployment tool and redesign networking. Where do I start?",
+      "available_evidence": [
+        "~600 computes (reported)",
+        "previous team mostly left (reported)",
+        "frequent incidents, restart-when-in-doubt habit (reported)",
+        "upgrades postponed for years (reported)",
+        "pressure to redesign immediately (reported)"
+      ],
+      "missing_information": [
+        "business capabilities and criticality",
+        "maintenance status of the running series",
+        "what documentation, recovery procedures and vendors exist",
+        "current guardrails and change process"
+      ],
+      "expected_reasoning": [
+        "advises restraint: do not start by transforming the platform",
+        "follows Discover, Protect, Assess, Stabilize, Recover knowledge, Simplify, Establish control, Evolve",
+        "lists first-30-day outputs: current-state map, critical risks, guardrails, ownership gaps, recovery gaps, control roadmap",
+        "guardrails each with owner and removal condition",
+        "notes the exception: if the series is so far behind that it is unpatched, transformation of the release may be the stabilization",
+        "starts from business capabilities rather than components",
+        "defines what control restored means"
+      ],
+      "expected_output": [
+        "phased plan with first-30-day deliverables, guardrails table, exit criteria"
+      ],
+      "critical_errors": [
+        "endorses starting with the deployment tool migration and network redesign",
+        "proposes a single maturity score as the outcome"
+      ],
+      "criteria": [
+        "Advises against immediate transformation and explains why",
+        "Uses the restoration sequence or an equivalent staged approach",
+        "Lists concrete first-30-day outputs",
+        "Requires owners and removal conditions for guardrails",
+        "Mentions the exception for unmaintained, vulnerable releases",
+        "Starts from business capabilities",
+        "Defines exit criteria for restoration"
+      ]
+    },
+    {
+      "id": "CA-2",
+      "title": "Senior engineer leaves in four weeks",
+      "source": "Book: Ch. 12 (field passage); Ch. 11",
+      "prompt": "Our most senior OpenStack engineer leaves in 4 weeks. He did every upgrade and knows why half our customizations exist. Management asked him to write documentation and do two knowledge-transfer presentations. Is that enough?",
+      "available_evidence": [
+        "senior engineer leaving in 4 weeks (reported)",
+        "he performed every upgrade (reported)",
+        "he knows reasons for many customizations (reported)",
+        "plan: documentation plus two presentations (reported)"
+      ],
+      "missing_information": [
+        "who the successors are",
+        "test environment availability for upgrade rehearsal",
+        "existing decision records",
+        "list of customizations"
+      ],
+      "expected_reasoning": [
+        "states that presentations prove a session took place, not transfer",
+        "identifies upgrade execution via deployment tooling and reasons for customizations as the knowledge most likely to escape",
+        "recommends successors perform real operations (upgrade in a test environment) while the expert watches",
+        "recommends recording reasons as decision records",
+        "frames this as a control review of critical capabilities against the new team",
+        "suggests demonstration-based checks of transfer"
+      ],
+      "expected_output": [
+        "4-week plan with demonstrations, decision records, capability-by-capability review, gaps"
+      ],
+      "critical_errors": [
+        "accepts documentation plus presentations as sufficient",
+        "frames the issue as the individual's performance rather than organizational capability"
+      ],
+      "criteria": [
+        "Rejects presentations/documents alone as proof of transfer",
+        "Names upgrade execution and customization rationale as high-risk knowledge",
+        "Requires successors to perform real operations observed by the expert",
+        "Recommends decision records for customization reasons",
+        "Reviews critical capabilities against the remaining team"
+      ]
+    },
+    {
+      "id": "CA-3",
+      "title": "Self-assessed 'we are in control'",
+      "source": "Book: Ch. 5; Ch. 6; Ch. 11; Ch. 2",
+      "prompt": "Rate our control maturity please: we have Grafana dashboards for every service, a wiki with about 400 runbook pages, RabbitMQ recovery is documented, and our lead engineer has handled the last three RabbitMQ recoveries successfully. Nobody else has done one. Give us a score out of 10.",
+      "available_evidence": [
+        "dashboards for every service (reported)",
+        "~400 wiki runbook pages (reported)",
+        "RabbitMQ recovery documented (reported)",
+        "last three recoveries done by the same engineer, nobody else (reported)"
+      ],
+      "missing_information": [
+        "which business capabilities depend on what",
+        "whether dashboards follow dependency paths and have owners",
+        "runbook validation dates and owners",
+        "other capabilities' status"
+      ],
+      "expected_reasoning": [
+        "declines a single score and explains why (profile per capability)",
+        "rates RabbitMQ recovery at most Understood/Controlled, not Recoverable, since recovery was not demonstrated by someone other than the author",
+        "notes per-service dashboards are not dependency-path visibility",
+        "warns about documentation theatre: page count is not control",
+        "identifies single-expert dependency as control debt",
+        "proposes confidence tests (someone else performs a recovery exercise)"
+      ],
+      "expected_output": [
+        "capability profile with evidence and confidence, gaps, proposed tests, findings with outcomes"
+      ],
+      "critical_errors": [
+        "gives a single numeric score as the answer",
+        "rates RabbitMQ as Recoverable or Sustainable"
+      ],
+      "criteria": [
+        "Declines or heavily qualifies a single score and gives a profile",
+        "Does not rate RabbitMQ as Recoverable given single-person recovery",
+        "Questions per-service dashboards vs dependency visibility",
+        "Questions the 400-page wiki as evidence (validation, ownership)",
+        "Names the single-expert dependency",
+        "Proposes concrete confidence tests"
+      ]
+    }
+  ]
+}

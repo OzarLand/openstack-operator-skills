@@ -1,0 +1,108 @@
+[
+  {
+    "skill_under_test": "openstack-maintenance-planning",
+    "scenario": "MP-1",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-maintenance-planning"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "host-maintenance-mechanics.md",
+      "criticality-table-template.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-maintenance-planning",
+    "scenario": "MP-1",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.625,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-maintenance-planning",
+    "scenario": "MP-2",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-maintenance-planning"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "host-maintenance-mechanics.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-maintenance-planning",
+    "scenario": "MP-2",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.875,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-maintenance-planning",
+    "scenario": "MP-3",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-maintenance-planning"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "host-maintenance-mechanics.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-maintenance-planning",
+    "scenario": "MP-3",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.917,
+      "critical_errors_committed": []
+    }
+  }
+]

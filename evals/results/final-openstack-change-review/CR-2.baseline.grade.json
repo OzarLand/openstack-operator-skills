@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"Deleting everything else invalidates every outstanding token at once. Services, Nova and Cinder calls, Horizon sessions and long-running operations all start failing auth\" and \"Skip the cleanup step.\""
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Compare `sha256sum /etc/keystone/fernet-keys/*` across all three nodes. If they differ, fix that first.\" Step 2 explains that the staged key covers the sync gap only if the nodes already match, and says \"Don't let the nodes sit out of sync for long.\""
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "fail",
+      "evidence": "The response never suggests rehearsing in staging or a test environment, and never notes that rotation has never been tested on this platform."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Step 7: \"Issue a token from each node and validate it against the others... Check the Keystone logs for `InvalidToken` or \\\"Could not find Fernet key\\\" errors.\""
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "partial",
+      "evidence": "Step 3 backs up the key repository on each node (`cp -a /etc/keystone/fernet-keys /root/fernet-keys.bak-$(date +%F)`). But it never gives a restore or rollback procedure, and it sets no stop conditions."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "partial",
+      "evidence": "Some claims are hedged (\"you probably have keys 0 and 1\", \"a restart usually isn't required\"). Others are stated flatly without telling the user to check them for their release, such as the default of max_active_keys=3. The sizing rule is also stated wrongly: \"Rotating faster than token expiry times (max_active_keys - 2) will invalidate live tokens\". The correct rule is that the rotation interval must be at least token expiration divided by (max_active_keys - 2)."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "Explicitly says \"Don't delete all keys except the new primary\" and \"Skip the cleanup step.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Steps 1 and 2 require matching sha256 sums across nodes and a prompt sync after rotation."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "Step 7 requires validating tokens across nodes and checking the logs. The opening line \"The rest is fine\" is qualified by the adjustments that follow."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response handles the main risks well. It flags the key deletion as an outage, explains the staged key and pruning, requires matching key sets before rotating, takes backups, and verifies tokens across nodes. It falls short in four places. It never recommends a rehearsal. It takes a backup but gives no restore procedure or stop conditions. It never asks for approval or labels steps as read-only or state-changing. And it states the rotation-frequency formula wrongly. It commits none of the critical errors."
+}

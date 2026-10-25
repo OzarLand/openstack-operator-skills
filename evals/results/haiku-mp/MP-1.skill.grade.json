@@ -1,0 +1,75 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "pass",
+      "evidence": "\"The security deadline doesn't move. What changes is how each workload is treated, and that is a decision for the accountable owner.\" It also lists the requirement as \"Mandatory\", separate from the two-lane strategy."
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "pass",
+      "evidence": "\"send the template ... to project owners today, with a response deadline of about day 3\". Per-host step 1 says \"Confirm each has a class and an owner who has been informed\". Unknown criticality \"is a gap, not 'low'\"."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "B is \"bounded by spare capacity per AZ, minus a reserve of one host per AZ\". It also says \"Keep AZs separate\" and \"usable only ... within the right AZ\", and lists the per-AZ free capacity as a gap (\"8 total; split unknown\")."
+    },
+    {
+      "criterion": "Handles SR-IOV instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "Class C, \"SR-IOV direct ports ... Restart or cold migrate\" with \"Owner agrees, or exception\". It says to \"treat as class C until your release and NIC driver are verified\" and notes that VF and physnet matching is needed."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "pass",
+      "evidence": "\"Patch the 8 spare hosts first ... They become the patched landing zone\". Also: \"Migration from newer libvirt/QEMU to older is not supported, so once a host is patched, instances can move onto it but not back.\""
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"QEMU still requires each instance to be restarted or migrated onto the patched binary\". It adds \"A process started before the patch still runs the old binary\", and completion requires \"Every instance either started or migrated since the patch\"."
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "pass",
+      "evidence": "The 'Boundaries and stop conditions' section lists stop triggers and says \"Resuming after a stop is a new decision\". A separate 'Campaign completion criteria' section is also included."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "\"Never use evacuation for planned maintenance. Evacuation is for hosts that have failed.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "It explicitly says live migration only is \"probably isn't feasible\" and uses a two-lane plan with owner-agreed restarts."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "Restarts happen only with \"Owner agrees window\". Unknown criticality is treated as class A (capacity-bound path) and escalated, not restarted."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "\"Never use evacuation for planned maintenance.\""
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "It states that pre-patch QEMU processes keep running the old binary, and completion requires every instance to have been restarted or migrated."
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "Hosts per AZ are given as \"Gap (assume ~100 each; unverified)\" and free capacity per AZ as \"split unknown\". Throughput tables are labeled \"illustrative values, not measurements\"."
+    }
+  ],
+  "faithfulness_issues": [
+    "The response tells the user to \"send the template in `criticality-table-template.md`\", referring to a file that was neither provided nor created. It is presented as if it already exists."
+  ],
+  "summary": "The response passes all eight criteria and commits none of the critical errors. Key strengths:\n- It keeps the security deadline fixed and puts per-workload treatment in owners' hands.\n- It runs two lanes: owner-agreed restarts and capacity-bound live migration.\n- It requires owner-supplied criticality by about day 3 before execution.\n- It frames capacity per AZ without inventing per-AZ figures.\n- It treats SR-IOV as restart or cold migration, with owner agreement or an exception.\n- It patches the spare hosts first as the landing zone and states the newer-to-older migration constraint.\n- It says running instances are protected only after a restart or migration.\n- It defines stop conditions, completion criteria and decision rights, and rules out evacuation.\n\nWeaknesses:\n- It references a template file that was never provided.\n- The Lane 1 per-host ordering (restart instances in step 5, before the host is patched in step 7) is slightly confusing, but the completion criteria resolve it."
+}

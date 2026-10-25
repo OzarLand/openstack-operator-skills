@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "Opens with \"No. Don't use evacuate for planned patching.\" Later adds: \"That's an incident, not a maintenance method.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"That gives you the same VM twice, both pointing at the same Ceph RBD volumes. The result is split-brain, with two writers on one disk...\" and \"Shared Ceph makes this worse, not safer.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Stopping `nova-compute` doesn't stop the VMs. The guests keep running under libvirt/QEMU on the host.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Classifies workloads (\"Tolerates downtime, owner agreed: cold migration ... or a coordinated restart\"), tunes live migration (auto-converge/post-copy, bandwidth/concurrency, no block migration on Ceph), and parallelises \"no more than the spare capacity in each rack or AZ allows.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response explicitly rejects this. It allows evacuation only for a really failed host \"after fencing the host (power it off or isolate it).\""
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "\"Shared Ceph makes this worse, not safer... Ceph RBD exclusive locks only reduce the risk. They are not a fence you should rely on here.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all four criteria. It says a clear no and explains why: stopping nova-compute leaves the guests running, and an unfenced evacuation would put two writers on the same Ceph volumes. It treats Ceph as a reason for more caution, not less. Its alternatives come with conditions: cold migration or coordinated restart for downtime-tolerant workloads, live-migration tuning, and parallel drains limited by spare capacity. It commits neither critical error. It presents no invented environment facts as known and includes no book citations that the source contradicts."
+}

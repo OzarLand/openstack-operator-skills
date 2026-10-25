@@ -1,0 +1,20 @@
+{
+  "skill_under_test": "openstack-operational-decisions",
+  "scenario": "OD-4",
+  "mode": "skill",
+  "model": "claude-sonnet-5-5",
+  "skills_invoked": [
+    "openstack-operational-decisions"
+  ],
+  "triggered": true,
+  "reference_files_read": [
+    "evidence-and-safety.md",
+    "decision-playbooks.md"
+  ],
+  "exit_code": 0,
+  "stderr_tail": "",
+  "score": {
+    "criteria_score": 0.9,
+    "critical_errors_committed": []
+  }
+}

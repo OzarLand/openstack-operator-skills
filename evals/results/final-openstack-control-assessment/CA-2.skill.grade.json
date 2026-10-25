@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects presentations/documents alone as proof of transfer",
+      "verdict": "pass",
+      "evidence": "\"No, that isn't enough.\" and \"Nobody can tell whether it worked. A talk can go well while the audience still couldn't do the job. Documentation is rarely tested by someone who didn't write it.\""
+    },
+    {
+      "criterion": "Names upgrade execution and customization rationale as high-risk knowledge",
+      "verdict": "pass",
+      "evidence": "\"He knows the reasons, not just the facts\" (customization rationale) and \"Upgrades are performed, not described\"; it also mentions \"a config change through your deployment tooling\"."
+    },
+    {
+      "criterion": "Requires successors to perform real operations observed by the expert",
+      "verdict": "pass",
+      "evidence": "Step 3, \"Transfer by doing, not telling... have them do real work while he watches... run a rehearsal in a test environment, with the successor driving.\""
+    },
+    {
+      "criterion": "Recommends decision records for customization reasons",
+      "verdict": "pass",
+      "evidence": "Step 2, \"Record the reason for every customization... why it exists, what incident or requirement drove it, who asked for it, what happens without it, and the condition for removing it.\" It also covers explicit \"Reason unknown\" entries. This is decision-record content, though the response never uses the term."
+    },
+    {
+      "criterion": "Reviews critical capabilities against the remaining team",
+      "verdict": "partial",
+      "evidence": "The Week 1 inventory is \"ranked by consequence\", and the \"How you'll know it's enough\" checks ask whether \"someone else\" can do each critical task. Step 7 lists gaps with owners and risk acceptance. However, the inventory covers customizations, not a capability-by-capability review against the new team, and the response defers the question of \"which capabilities are most exposed\" until it gets more information."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts documentation plus presentations as sufficient",
+      "committed": false,
+      "evidence": "The response opens with \"No, that isn't enough.\" It treats recordings as \"a supplement\" only."
+    },
+    {
+      "error": "frames the issue as the individual's performance rather than organizational capability",
+      "committed": false,
+      "evidence": "The response focuses on whether the successors can do the work, on gap ownership, on management accepting risk in writing, and on who owns the next upgrade. None of it is framed as the engineer's own performance."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It clearly rejects documentation plus presentations as enough. It names upgrades and customization rationale as the knowledge most at risk. It requires successors to do real operations, including an upgrade rehearsal in a test environment, while the expert watches. It asks for structured reason records and suggests demonstration-based checks. Its only weakness is that it never explicitly frames the work as a review of critical capabilities against the remaining team. It makes no book citations and does not present invented environment facts as known."
+}

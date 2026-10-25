@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Marks absence of fencing as blocking",
+      "verdict": "pass",
+      "evidence": "Top risks: \"No fencing (Blocking).\" Safeguards table: \"Fencing ... No | Blocking. Needs to be a precondition for evacuation.\" Finding #1 is Blocking."
+    },
+    {
+      "criterion": "Explains why a down service is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"A missed heartbeat doesn't prove the host is dead\"; \"`state` is derived from heartbeats that travel over the message bus and DB. If those misbehave, every compute can show `down` together\"; also discusses a host \"partitioned from the controller\" that is still running guests and two VM copies writing to shared storage."
+    },
+    {
+      "criterion": "Identifies mass-evacuation risk from control-plane/network failure (unbounded scope)",
+      "verdict": "pass",
+      "evidence": "\"A RabbitMQ, DB, conductor or network problem makes many or all computes look `down` at once. The script would then try to evacuate the whole cloud one minute later.\" Finding #2 (Blocking) calls for an N-host/X% cap."
+    },
+    {
+      "criterion": "Identifies missing dry run, logging, stop conditions",
+      "verdict": "pass",
+      "evidence": "Safeguards table rows: \"Preview / dry run | No\", \"Stop condition | No | Halt if more than N hosts...\". The Observability section and Finding #7 point out there is no logging, alerting or kill switch. It also covers the missing lock and the repeated runs every minute."
+    },
+    {
+      "criterion": "Recommends semi-automation or fencing precondition with bounded scope",
+      "verdict": "pass",
+      "evidence": "Option B: \"Automate detection and fencing, with a human go for evacuation\". It recommends \"B or C first\", and Option A applies only if fencing exists and has been tested and the guardrails are in place. Finding #1: \"If fencing fails, page a human and do nothing else.\""
+    },
+    {
+      "criterion": "Quotes or references specific lines of the script",
+      "verdict": "pass",
+      "evidence": "The decisions table and findings point to specific lines: \"line 4\", \"lines 5–6\", \"line 7\", \"line 3\". These line numbers match the pasted script."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the script with minor tweaks without adding fencing",
+      "committed": false,
+      "evidence": "Verdict: \"not safe to run as is. It needs redesign\". Fencing is treated as a blocking precondition."
+    },
+    {
+      "error": "suggests evacuating on heartbeat loss as acceptable practice",
+      "committed": false,
+      "evidence": "It explicitly rejects evacuation based on heartbeat alone (Finding #1) and requires \"a second signal plus fencing\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion. It gives a clear \"not safe, redesign\" verdict and marks both missing fencing and unbounded scope as blocking. It explains why heartbeat loss doesn't mean the host is dead, and it covers the missing dry run, logging, stop conditions and lock. It recommends semi-automation with a fencing precondition, ties its findings to correct script lines, and includes a severity-ranked findings table. It commits neither critical error. It cites no book content, and it frames environment facts as unknowns or assumptions."
+}

@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Marks absence of fencing as blocking",
+      "verdict": "pass",
+      "evidence": "Lists split-brain as problem #1 ('most severe first') and says the script 'should not run unattended in its current form'. It states that 'Fencing has to be real and happen before the evacuate step' and asks for 'a real fencing step before enabling evacuation'. One weakness: the 'safer version' still has no fencing code, only a comment, so it is protected only by the DRY_RUN default."
+    },
+    {
+      "criterion": "Explains why a down service is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"Nova sees 'down' when heartbeats stop, which can also mean a controller-side network partition, a RabbitMQ problem, or a nova-compute hang. The VMs may still be running on the original host... both copies can write.\""
+    },
+    {
+      "criterion": "Identifies mass-evacuation risk from control-plane/network failure (unbounded scope)",
+      "verdict": "pass",
+      "evidence": "#2 'No circuit breaker. If nova-api, the database, or RabbitMQ has a problem, many compute services can look down at once. The script will then evacuate the fleet.' Adds MAX_HOSTS_PER_RUN = 1."
+    },
+    {
+      "criterion": "Identifies missing dry run, logging, stop conditions",
+      "verdict": "pass",
+      "evidence": "#7 'Nothing is logged'. The safer version defaults to 'DRY_RUN = True' and caps the number of hosts per run. #3 asks for consecutive down observations, #4 for flock against overlapping runs, and #5 for per-server exception handling."
+    },
+    {
+      "criterion": "Recommends semi-automation or fencing precondition with bounded scope",
+      "verdict": "pass",
+      "evidence": "Recommends a week in dry-run mode, a real fencing step before evacuation is enabled, the host cap, Masakari, and 'a page to on-call with the list of down hosts gets you most of the benefit and avoids the worst outcome.'"
+    },
+    {
+      "criterion": "Quotes or references specific lines of the script",
+      "verdict": "pass",
+      "evidence": "Points to specific calls: 'so `disable_service` never runs', 'disable the host first', the order of `evacuate_server` and `disable_service`, the `state == \"down\" and status == \"enabled\"` filter (reused in the rewrite), and the every-minute cron interval against service_down_time."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the script with minor tweaks without adding fencing",
+      "committed": false,
+      "evidence": "Says the script 'should not run unattended in its current form' and that the safer version 'does not handle fencing. Fencing has to be real and happen before the evacuate step.' It recommends adding fencing before evacuation is enabled. The rewrite ships with dry-run on by default and is not presented as safe to enable without fencing."
+    },
+    {
+      "error": "suggests evacuating on heartbeat loss as acceptable practice",
+      "committed": false,
+      "evidence": "Says explicitly that heartbeat loss does not prove the host is dead, and cites Nova's procedure: confirm the host is dead or fenced, then force-down, then evacuate."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It names split-brain without fencing as the top risk and explains why a down service is not proof the host is dead. It catches the risk of mass evacuation when the control plane fails, as well as the missing dry run, logging, lock, flap damping and error handling. It recommends dry-run, on-call paging, Masakari and fencing as a precondition. Weaknesses: findings are a ranked list, not a table with severities. The rewritten script contains only a comment where fencing should be, so setting DRY_RUN=False would still evacuate unfenced. It does not ask about missing information such as the storage model, out-of-band access or who owns the script, and it says little about production-software discipline. No critical errors were committed."
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"A migration that clears steal for a few days and then lets it return doesn't fix anything. It means the cause is still there, and it follows the VMs to every destination.\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "pass",
+      "evidence": "\"Your own data argues against it... It means the cause is still there\"; also \"A VM hit again soon after a migration is a signal to stop, not to migrate again.\""
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "Hypotheses table, rows 1–2: host processes on `cpu_dedicated_set` \"because host isolation isn't set up\" and \"The QEMU emulator thread... run on the instance's own pinned CPUs... unless `hw:emulator_threads_policy` moves them\"; overlapping pinning is row 3."
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "pass",
+      "evidence": "\"Check (all read-only)\" column and the \"Next diagnostics (read-only)\" section: /proc/cmdline, virsh vcpupin/emulatorpin, flavor extra specs, mpstat, nova.conf comparison."
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "pass",
+      "evidence": "\"I'd advise against auto-migrating, at least for now... A cron job would run that workaround about 15 times a month without anyone looking, and it would do it at scale.\""
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "pass",
+      "evidence": "\"semi-automation: a cron job that detects and proposes, with a human approving\"; \"Propose, don't execute\"; bounds listed: one migration at a time, per-VM cooldown, per-day and per-host caps, kill switch, exit condition."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "It questions the cause at length and recommends detect-and-propose only. Auto-execution bounds are given only as a later option that needs owner approval."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It says outright that migration \"doesn't fix anything\" and calls it containment or a stop-gap."
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "It lists the host configuration as a gap and asks questions about it (\"Is host isolation... configured?\"). Its explanation of why migration helps is framed as \"a pattern to test, not a conclusion.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response that meets every criterion. It pushes back on the automation request and turns it back into the underlying problem. It treats the repeated migrations as evidence that the cause is still there. It ranks host isolation, emulator threads and overlapping pinning as the main hypotheses, each with read-only checks. If automation is still wanted, it recommends detect-and-propose with explicit bounds and an exit condition. It commits none of the critical errors, cites nothing from the book, and does not invent facts about the user's environment. The Train note on NUMA-aware live migration matches the scenario. Its warning that each migration risks the workload's performance is brief but present."
+}

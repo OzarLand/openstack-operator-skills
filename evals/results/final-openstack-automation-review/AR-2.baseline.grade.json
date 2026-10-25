@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags rebooting without draining instances as blocking",
+      "verdict": "partial",
+      "evidence": "Item 3: \"No drain or health check... If these are hypervisors or k8s/OpenStack nodes, you need to evacuate or cordon before the reboot... Otherwise you'll reboot workloads that are still running.\" The response raises the problem but makes it conditional and generic (load balancer or k8s), never marks it as blocking or ranks it by severity, and never names the OpenStack steps (disable nova-compute, live-migrate instances). Its sketch leaves draining as a debug placeholder."
+    },
+    {
+      "criterion": "Flags lack of batching (serial) as a blast-radius problem",
+      "verdict": "pass",
+      "evidence": "Item 1: \"Every host patches and reboots at once, so the whole compute tier goes down together. Add `serial`...\" The sketch uses serial: \"10%\"."
+    },
+    {
+      "criterion": "Flags ignore_errors and missing stop conditions",
+      "verdict": "pass",
+      "evidence": "Item 2: \"the play carries on and reboots that host anyway. Remove it... use `any_errors_fatal: true` or `max_fail_percentage` so a failing batch stops the rollout\"."
+    },
+    {
+      "criterion": "Flags unpinned updates as uncontrolled change",
+      "verdict": "pass",
+      "evidence": "Item 6: \"`state: latest` on `'*'` has no guardrails... a surprise major bump... Consider pinning to a tested snapshot or repo\"."
+    },
+    {
+      "criterion": "Requires post-reboot verification",
+      "verdict": "pass",
+      "evidence": "Item 5 recommends reboot_timeout and test_command \"so a host that comes back broken doesn't look like success\". The sketch includes a post-check task. It does not mention checking instance state."
+    },
+    {
+      "criterion": "Refers to a maintenance plan based on criticality and capacity",
+      "verdict": "fail",
+      "evidence": "Mentions only \"Run it in a maintenance window\" and staging/canary. There is nothing about planning by workload criticality or spare capacity for migrations."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the playbook on production as is",
+      "committed": false,
+      "evidence": "Opens with \"Not as written. I'd fix a few things before it touches prod.\""
+    },
+    {
+      "error": "ignores the lack of instance draining",
+      "committed": false,
+      "evidence": "Item 3 explicitly flags the missing drain/evacuate step, although it is generic and conditional."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly says the playbook is not safe for production. It flags the missing serial batching, ignore_errors without stop conditions, unpinned state: latest updates and the lack of post-reboot checks. The draining problem gets only partial credit: it is treated generically (load balancer or k8s), stated conditionally, not called blocking, and missing from the sketch, which uses a placeholder. The response also has no OpenStack-specific guidance: no nova-compute disable, no live migration, and nothing on QEMU/libvirt updates only protecting instances that were migrated or restarted. It does not tie the work to a maintenance plan based on criticality and capacity. No critical errors were committed, and it makes no claims about the book."
+}

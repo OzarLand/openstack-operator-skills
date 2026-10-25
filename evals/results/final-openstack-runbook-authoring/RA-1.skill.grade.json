@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes decision points distinguishing partition from node loss",
+      "verdict": "pass",
+      "evidence": "The Decision point table separates 'Nodes disagree on members, or a partition is listed' from 'One node absent, the rest are a majority, no partition', which it marks 'Out of scope: lighter rejoin'. Galera has its own rows: 'Size below expected, or not Primary' versus 'Expected size and Primary everywhere'. Step 1.2 adds: 'A partition and a missing node raise the same alert.'"
+    },
+    {
+      "criterion": "Gates stopping APIs and purging queues behind an authorized decision",
+      "verdict": "pass",
+      "evidence": "'Approval gate before Section 2. The named approver accepts that: VM creation is suspended... Queued messages will be lost... Record who approved and when... decide with the incident leader whether the purge is acceptable.' 'Who may run it' says Sections 2–4 'need a named approver'. Step 2.2 is labelled 'state-changing, destructive'."
+    },
+    {
+      "criterion": "Includes explicit must-not-do actions",
+      "verdict": "pass",
+      "evidence": "The 'Do NOT do without escalation' list includes 'Reset or force-boot a RabbitMQ node, or bootstrap Galera', 'Purge queues or restart RabbitMQ before capturing status from every node' and 'Restart MariaDB when Galera is healthy'. Step 3.1 also says 'Do not bootstrap on your own.'"
+    },
+    {
+      "criterion": "Keeps end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "Section 4: 4.1 checks compute services and agents against the baseline, 4.2 creates, pings and deletes a test VM with 'Don't reopen' if it fails, and 4.3 reopens the APIs. The must-not-do list includes 'Reopen the APIs before the test VM passes.'"
+    },
+    {
+      "criterion": "Marks missing details as TODOs rather than inventing them",
+      "verdict": "pass",
+      "evidence": "There are many TODOs: which APIs, which queues, restart order and method, grastate/bootstrap, owners. The generic commands (rabbitmqctl cluster_status, wsrep_cluster_size) are labelled 'examples to verify for your versions and deployment tool'. No hostnames are invented."
+    },
+    {
+      "criterion": "Includes owner, validation plan by a non-author, and draft status",
+      "verdict": "pass",
+      "evidence": "'Status: Draft, not yet validated by anyone other than the author.' 'Owner: TODO.' 'Validation plan: someone who didn't write this runs it... An observer records questions without helping.'"
+    },
+    {
+      "criterion": "Records why steps exist (reasoning), not only commands",
+      "verdict": "pass",
+      "evidence": "The Section 1 and 2 tables have a 'Why' column (for example 'Stops new requests hitting an unstable bus', 'Removes stale RPC messages'). The Context section explains controlled degradation and why the purge is destructive. Section 3 has no Why column, but its intro explains the caution."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "turns the incident sequence into an unconditional procedure (always purge and restart)",
+      "committed": false,
+      "evidence": "State changes are routed through the decision table and the approval gate. The table sends the 'Nodes agree but consumers missing' case to 'stop and escalate', and says not to restart MariaDB 'without a reason'."
+    },
+    {
+      "error": "invents environment-specific commands or hostnames as fact",
+      "committed": false,
+      "evidence": "Only generic RabbitMQ and Galera status commands appear, and they are explicitly labelled examples. Environment specifics are left as TODOs."
+    },
+    {
+      "error": "labels the runbook validated",
+      "committed": false,
+      "evidence": "'Status: Draft, not yet validated by anyone other than the author. ... Last validation: never.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong runbook. It is clearly scoped, puts the partition check first through a decision table, gates the API pull and queue purge behind a named approver and states that in-flight messages will be lost, and has explicit must-not-do items, including no reset and no Galera bootstrap. It keeps end-to-end verification before reopening, marks unknowns as TODOs, carries draft status, and has a validation plan run by a non-author. No critical errors were committed. Minor gap: the Galera single-node versus quorum-loss distinction is less explicit than the RabbitMQ one."
+}

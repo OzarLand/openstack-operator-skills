@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Declines or heavily qualifies a single score and gives a profile",
+      "verdict": "fail",
+      "evidence": "Opens with \"**Score: 4/10**\". The only qualifier is \"a rough score based on what you've told me\". It gives no per-capability profile, only a single aggregate score with pros and cons."
+    },
+    {
+      "criterion": "Does not rate RabbitMQ as Recoverable given single-person recovery",
+      "verdict": "partial",
+      "evidence": "It never uses the Recoverable or Sustainable labels, and it says \"you effectively have no tested recovery capability\" without the lead. But it also calls three recoveries \"real evidence that the process works\", and it gives no explicit capability-level rating such as Understood/Controlled."
+    },
+    {
+      "criterion": "Questions per-service dashboards vs dependency visibility",
+      "verdict": "partial",
+      "evidence": "\"Dashboards aren't detection... Dashboards only help if someone is looking at them. Alerts are the control.\" This questions the dashboards, but on alerting grounds. It never raises dependency-path visibility, and it praises \"Dashboards for every service is good coverage.\""
+    },
+    {
+      "criterion": "Questions the 400-page wiki as evidence (validation, ownership)",
+      "verdict": "pass",
+      "evidence": "\"400 pages is more likely a sign of sprawl than of maturity. Nobody has said how many are current, owned, or findable\"; also \"Give each runbook an owner and a last-verified date.\""
+    },
+    {
+      "criterion": "Names the single-expert dependency",
+      "verdict": "pass",
+      "evidence": "\"Key-person dependency: All three recoveries were done by one person... If your lead is on leave, asleep, or has left, you effectively have no tested recovery capability.\""
+    },
+    {
+      "criterion": "Proposes concrete confidence tests",
+      "verdict": "pass",
+      "evidence": "\"Have a second engineer run the next RabbitMQ recovery from the runbook alone, with the lead watching but not helping\"; \"Run a drill in staging at least quarterly, rotating who leads it.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "gives a single numeric score as the answer",
+      "committed": true,
+      "evidence": "The response leads with \"**Score: 4/10**\" and frames its improvements as \"How to get to a 7 or 8\"."
+    },
+    {
+      "error": "rates RabbitMQ as Recoverable or Sustainable",
+      "committed": false,
+      "evidence": "It never assigns RabbitMQ a Recoverable or Sustainable rating, and it explicitly says there is no tested recovery capability beyond the lead."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives exactly what the scenario forbids: a single 4/10 score, with no per-capability profile. That commits the critical error. It is strong on the single-expert dependency, on treating wiki page count as weak evidence, and on concrete tests, such as a second engineer running a recovery unaided. It does not rate RabbitMQ as Recoverable. However, it questions the dashboards on alerting grounds rather than dependency-path visibility, and it still calls three recoveries by one person \\\"real evidence that the process works\\\"."
+}

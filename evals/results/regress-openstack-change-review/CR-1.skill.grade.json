@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "\"Two unrehearsed changes are stacked... If something fails, you can't tell which change caused it.\" Verdict: \"Recommended: split it into two changes.\" Restructuring: \"Saturday: certificates only... Controller patching and reboot: a later, separate window.\""
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "Scope section: \"RabbitMQ, with every service and every agent on every compute connecting to it\". It says the endpoint list is incomplete without an inventory, lists \"any CA bundle copied to computes\", and asks \"How many computes are there, and will they need new CA trust?\""
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "\"Rehearsal in a representative environment\" is a listed prerequisite. The Saturday conditions include \"rehearsal done... staged order\". Boundaries: \"One service group at a time... One controller at a time.\""
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "\"'Restore old certs' only works until the old certs expire in 9 days. After that it restores an outage.\" The Recovery gate is marked fail. The response also covers the point of no return, falling back to roll-forward, side-by-side trust, and evidence to preserve before starting."
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "pass",
+      "evidence": "The Stop conditions list covers TLS handshake errors, Galera cluster size or quorum, RabbitMQ partitions, compute agents failing to reconnect, monitoring being unavailable, no one with authority reachable, and running out of time. Verification covers the new cert and expiry seen from outside and from a compute, an end-to-end VM/volume/network test, Galera and RabbitMQ status, agent reconnection, and monitoring of the new expiry."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "pass",
+      "evidence": "The Decision rights section lists technical assessor, capability owner, accountable, decision maker (\"CAB or named owner (to confirm)\") and consumer communication, with the unknown ones marked unknown. \"Consumer communication\" also appears as a prerequisite."
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "pass",
+      "evidence": "The gates table marks Business impact, Owner and Authority as unknown and Recovery, Evidence and Blast radius as fail. Every prerequisite is marked unknown or missing. The Starting state section marks tooling, CA and baselines as unknown."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready as written. Recommended: split it into two changes.\" Combining is recorded as a rejected option."
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "\"'Restore old certs' is not a procedure. It expires in 9 days.\" The Recovery gate is marked fail."
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "Rehearsal, backup with a restore test, and baseline are all marked \"unknown\". The Evidence gate is marked \"fail\"."
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "\"Decision support only. State-changing steps above require approval by the accountable owner\". It also says \"Selected option: (b), recommended. To be confirmed by the decision maker.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review that meets all seven criteria. It says the change is not ready, recommends splitting cert rotation from the OS patching, and takes apart the 'restore old certs' rollback because the old certs expire. It includes compute agents in the blast radius, requires a rehearsal and a staged rollout, and defines both stop conditions and verification. It lists decision roles and consumer communication and marks every unknown as unknown. It commits none of the critical errors. The date reasoning (Saturday = Oct 31) is labelled as an assumption. It has no faithfulness problems: it says the book warns against stacking changes, which matches the scenario, and it labels its own additions as its own rather than the book's."
+}

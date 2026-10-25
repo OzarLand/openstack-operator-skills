@@ -1,0 +1,73 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "pass",
+      "evidence": "\"Fixed (Reported): all 300 compute hosts get the kernel + QEMU fix within 3 weeks... To design: how we get there. The requirement defines what.\""
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "pass",
+      "evidence": "Shared table sent to each project owner; \"It is the first deliverable and it blocks all disruptive work except the landing zone\"; \"silence means class D: treated as critical, with no restart.\""
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "\"per AZ, hosts drainable at once = spare capacity in that AZ minus the reserve\"; the even split of \"about 2.7 per AZ\" is labelled \"(Assumption)\", and the response asks for per-AZ spare capacity."
+    },
+    {
+      "criterion": "Handles SR-IOV instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "\"These VMs can't be live-migrated, so they need a restart or cold migration\"; Class C requires \"Project owner (mandatory)\" sign-off, and the response notes the need for a free VF on the same physnet."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "pass",
+      "evidence": "\"Landing zone first. Newer libvirt/QEMU to older isn't supported, so instances can move onto patched hosts but not back.\""
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"An instance still running on the old QEMU is not protected. Patching the host does nothing for it until it is migrated or restarted. Track it per instance.\""
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "pass",
+      "evidence": "The 'Boundaries and stop conditions' section lists the triggers and says \"Resuming after a stop is a new decision\"; the 'Campaign completion criteria' section requires that every instance was migrated or restarted, or is listed as an exception."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "\"Never use evacuation for this. It is for failed, fenced hosts only.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "\"Live-migrating everything with 8 spare hosts is probably too slow... The fix is to avoid live migration wherever the owner agrees to a restart.\""
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "Class B is limited to cases where the \"Owner agrees in the table\"; unknown workloads are treated as critical, \"with no restart.\""
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "Explicitly forbids it: \"Never use evacuation for this.\""
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "\"Patching the host does nothing for it until it is migrated or restarted.\""
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "\"about 2.7 per AZ if evenly split (Assumption)\" is followed by a warning that the real figure may be lower, and per-AZ capacity is requested as a gap."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This response meets all eight criteria and commits none of the critical errors. It keeps the security requirement fixed and splits workloads into classes, with owner sign-off for every restart. It frames capacity per AZ and labels its numbers as assumptions. It puts patched hosts first (the landing zone), forbids migration from newer to older QEMU/libvirt, treats SR-IOV instances as non-live-migratable, and states that a running instance is protected only once it has been migrated or restarted. It rules out evacuation for maintenance and defines stop conditions, completion criteria, decision rights and follow-up. One small weakness: the throughput estimate takes about 100 hosts per AZ as a given. That figure only appears as a question (\"100 each?\") in the gaps table, but it is a reasonable derivation, not an invented fact."
+}

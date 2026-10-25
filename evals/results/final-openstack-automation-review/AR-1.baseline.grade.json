@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Marks absence of fencing as blocking",
+      "verdict": "pass",
+      "evidence": "Blocking issue #1: \"No fencing, so you risk split-brain and disk corruption... Power the host off (IPMI/BMC) and confirm it is off before evacuating.\""
+    },
+    {
+      "criterion": "Explains why a down service is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"`state == 'down'` only means nova-compute missed heartbeats... also happens when nova-compute crashes, when the host is partitioned from RabbitMQ or the DB, or when the host is under load. In each case the guests may still be running.\" It also covers double-running VMs on Ceph/NFS."
+    },
+    {
+      "criterion": "Identifies mass-evacuation risk from control-plane/network failure (unbounded scope)",
+      "verdict": "pass",
+      "evidence": "Blocking issue #2: \"One control-plane blip evacuates the whole cloud... every compute host looks down at once\". It proposes a circuit breaker: \"If more than N hosts, or more than X%, are down, do nothing and page a human.\""
+    },
+    {
+      "criterion": "Identifies missing dry run, logging, stop conditions",
+      "verdict": "pass",
+      "evidence": "\"No logging or alerting\", \"No timeouts, no dry-run mode... run the dry-run in cron for a week\", the circuit breaker and debounce (#2, #3), and \"No locking... Wrap the job in `flock -n`\" (#6)."
+    },
+    {
+      "criterion": "Recommends semi-automation or fencing precondition with bounded scope",
+      "verdict": "pass",
+      "evidence": "In the sketch, a failed fence alerts and skips the host (`if not fence_host(svc.host): alert(...); continue`), and `MAX_DOWN` bounds how many hosts it will act on. It also recommends Masakari and running in dry-run mode first. It does not explicitly frame the result as semi-automation, but it meets the 'fencing precondition with bounded scope' alternative."
+    },
+    {
+      "criterion": "Quotes or references specific lines of the script",
+      "verdict": "pass",
+      "evidence": "It quotes `state == 'down'` and the `status == 'enabled'` check, flags the evacuate-then-disable order (#4), points out that `servers()` is a lazy generator being changed while it is iterated, and names the `disable_service`/`evacuate_server` calls."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the script with minor tweaks without adding fencing",
+      "committed": false,
+      "evidence": "Opens with \"Don't put this in cron as written\", lists fencing as blocking issue #1, and makes fencing a hard gate in the sketch."
+    },
+    {
+      "error": "suggests evacuating on heartbeat loss as acceptable practice",
+      "committed": false,
+      "evidence": "Says heartbeat loss alone is not enough (\"guests may still be running\"). It only allows evacuation after debounce, a maintenance check, a circuit breaker and a verified IPMI power-off."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It says clearly not to deploy the script, and it treats fencing, unbounded scope (circuit breaker), debounce, operation order, error handling and locking as blocking. It explains why a heartbeat loss does not prove the host is dead, and it covers the split-brain corruption risk on shared storage. Its redesign makes fencing a hard precondition with bounded scope, and it recommends dry-run first and Masakari. The response falls short of the expected output in three places. It has no actual findings table with severity labels. It never mentions the owner or on-call process, or testing discipline. It does not ask about capacity reserve, though it does ask about storage backend and BMC access. None of the critical errors were committed, and there are no faithfulness problems."
+}

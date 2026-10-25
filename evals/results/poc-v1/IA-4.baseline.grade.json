@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "pass",
+      "evidence": "\"A network partition can also look like 'node not running'. Resetting one side makes the split worse.\" It then gives separate fix branches for \"Node or service down\" and \"Partition\"."
+    },
+    {
+      "criterion": "Requires cluster status from each node (especially rabbit-03) before acting",
+      "verdict": "pass",
+      "evidence": "Check 3: \"Run `rabbitmqctl cluster_status` on all three nodes and look at the `Network Partitions` section. Do the nodes disagree about membership?\" Check 1 also has the user run status on rabbit-03 itself."
+    },
+    {
+      "criterion": "Explains the risk of resetting the wrong node",
+      "verdict": "partial",
+      "evidence": "It explains that reset wipes rabbit-03's local state and queue data (\"If rabbit-03 is the only holder of some queue's data, the reset destroys it for good\"), and that resetting one side of a partition makes the split worse. It never says to check which side the OpenStack services are connected to, or that resetting the side in use discards queues that are in use."
+    },
+    {
+      "criterion": "States when the runbook is applicable",
+      "verdict": "pass",
+      "evidence": "\"Corrupt or unrecoverable state: only then use the runbook's stop_app / reset / join_cluster / start_app.\" It adds preconditions: confirm replicas exist and export definitions first. It does not frame this as adding a decision point to the runbook."
+    },
+    {
+      "criterion": "Includes escalation or decision owner for the partition case",
+      "verdict": "fail",
+      "evidence": "The partition branch only says \"resolve it per your cluster_partition_handling setting. Usually that means restarting the minority-side node.\" It names no escalation path and no decision owner."
+    },
+    {
+      "criterion": "Defines verification after recovery (consumers reconnect)",
+      "verdict": "fail",
+      "evidence": "There are no checks after recovery: nothing about consumers or OpenStack services reconnecting, queue health, or RPC errors. The closest it gets is \"It should rejoin on its own.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "It opens with \"Not yet. Diagnose first\" and requires a partition check on all three nodes before any reset."
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "It treats the cause as open: \"If rabbit-03 is only partitioned, crashed or stopped...\" and gives checks to tell the cases apart."
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "No cluster output is invented. It asks the user to paste cluster_status from all three nodes and says \"I haven't run anything against your systems here.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response refuses to apply the runbook blindly. It names partition as a separate possibility, asks for cluster_status from all three nodes, explains why reset is destructive, and limits the runbook to the corrupt or unrecoverable case. It commits none of the critical errors. Its gaps: it never mentions checking which side the OpenStack services are connected to, it gives no escalation path or decision owner for the partition case, and it has no verification step after recovery (consumers reconnecting, queues healthy)."
+}

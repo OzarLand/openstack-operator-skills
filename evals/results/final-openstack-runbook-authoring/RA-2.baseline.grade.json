@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Points out missing scope and decision points for different alarm types",
+      "verdict": "pass",
+      "evidence": "\"The runbook doesn't say which alarm this is, and the cause decides the fix.\" It then separates memory/disk alarms from network partitions and says: \"Add a diagnosis step before any restart.\" It does not mention node-down as a case."
+    },
+    {
+      "criterion": "Flags simultaneous restart of all nodes/services as dangerous",
+      "verdict": "pass",
+      "evidence": "Concern 1: \"Restarting all three nodes at once can break the cluster... Restart one node at a time.\" Concern 3: \"Restarting every nova and neutron service is a very large blast radius... stagger them.\""
+    },
+    {
+      "criterion": "Flags verification of the alarm rather than the capability",
+      "verdict": "partial",
+      "evidence": "Concern 4 calls the check \"too vague\" and adds service-level checks: compute service list, network agent list, queue depths, consumers attached. It frames the problem as vagueness, not as checking the alarm instead of the capability. It never suggests an end-to-end test such as booting an instance."
+    },
+    {
+      "criterion": "Flags missing stop/escalation, owner and validation",
+      "verdict": "partial",
+      "evidence": "It lists \"A rollback or escalation path if a node doesn't rejoin\" and \"who can run this\". It never mentions a runbook owner, a validation date or history, explicit stop conditions, or must-not-do items."
+    },
+    {
+      "criterion": "Gives findings before a rewritten version",
+      "verdict": "partial",
+      "evidence": "Findings come first, but as a numbered list, not a table. No rewritten draft is given: it only offers one (\"I can also draft a revised runbook\"). So there is no restructured draft with decision points and TODOs."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts the runbook as adequate",
+      "committed": false,
+      "evidence": "The response opens with \"Main concerns\" and criticises every step of the runbook."
+    },
+    {
+      "error": "rewrites it while keeping 'restart all nodes' as an unconditional first step",
+      "committed": false,
+      "evidence": "There is no rewrite. The response asks for a diagnosis step before any restart, and for one-node-at-a-time restarts."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid critique. It catches the missing alarm-type scope and decision points, and the danger of restarting all nodes and all services at once. On verification, it adds service-level checks but doesn't say the runbook checks the alarm instead of the capability. Owner, validation history and must-not-do items are missing, and only an escalation path is mentioned. It gives no findings table and no restructured draft; it only offers to write one. It commits neither critical error."
+}

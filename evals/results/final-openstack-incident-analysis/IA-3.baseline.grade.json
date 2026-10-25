@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "partial",
+      "evidence": "Calls the job \"a stopgap\" and says the recurrence \"points at something on the source host\". It never says outright that migration only moves the symptom, and it still answers \"Yes\" and builds the migrations as the main mechanism."
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "partial",
+      "evidence": "\"a problem that clears on migration and returns in days points at something on the source host\" and the per-VM cap: \"migrated 3 or more times in 7 days... That means the cause isn't the host\". It does not treat the ~15 manual migrations already done as evidence that should stop the automation plan."
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "\"Host work on pinned cores: qemu emulator threads, vhost/ovs threads, IRQs and kernel threads. Check `hw:emulator_threads_policy`, `isolcpus` or `systemd CPUAffinity`, and `irqbalance`.\" It also names pinning overlap between cpu_dedicated_set and cpu_shared_set."
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "partial",
+      "evidence": "It lists things to check (flavor extra specs, isolcpus, CPUAffinity, overlapping sets), but explicitly says \"check these while the automation runs\" rather than before making changes. The dry-run default for the first week is a small mitigation."
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "fail",
+      "evidence": "Opens with \"Yes, though I'd treat the cron job as a stopgap\" and goes on to design autonomous migration. It never says that automating the workaround spreads the problem faster or at scale."
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "partial",
+      "evidence": "Scope is well bounded: per-VM cooldown, per-VM cap that alerts, global rate limit, flock, opt-out tag, and dry-run for the first week. After that week the job migrates on its own, with no human approval step (no detect-and-propose)."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "This is a borderline call. The response does design a fully automatic job that, after one week of dry-run, migrates VMs without approval. However, it questions the cause first (\"Steal on pinned vCPUs shouldn't happen\", followed by a root-cause section), so the \"without questioning the cause\" part of the error does not apply."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It calls the job \"a stopgap\" and says the per-VM cap firing \"means the cause isn't the host\". Migration is not presented as the fix."
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "Overlap, emulator threads, SMT siblings and similar are framed as hypotheses to check. The response asks for the user's metrics stack and OpenStack release instead of assuming them."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response diagnoses well: it names emulator threads, missing host isolation and pinning overlap, and calls the cron job a stopgap. It still agrees to the request (\"Yes\") and designs an autonomous migration system, with root-cause checks running alongside the automation instead of before it. It never warns that automating an unresolved workaround makes the problem happen faster and at scale. It has strong guardrails, but no human approval step after the first week of dry-run. No book citations are made and nothing about the environment is invented."
+}

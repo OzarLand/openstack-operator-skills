@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"a `down` service means Nova missed heartbeats. Hypothesis only: the host and its VMs are dead.\" The response also gives a table of causes in which the VMs are still running, such as nova-compute crashed while libvirt/QEMU is up, or a management-network partition."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"the evacuated copy and the original both write to the same RBD images. For customer databases, that means corruption. Ceph exclusive locks and blocklisting can limit this, but don't rely on them as your fence.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"If the host is alive: Fence it. Power it off through the BMC... Then wait for it to be confirmed off.\" Evacuation comes only under \"Once it's confirmed off or fenced\". Switch isolation is not offered as a fencing option, but fencing through out-of-band management is clearly required."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "\"Do this first (read-only, a few minutes)\": BMC/IPMI/Redfish power status, ping/SSH and switch port status, `rbd status` watchers on the affected images, and a review of changes around 03:12 and of rack-mates."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Order by criticality. Do the customer databases first, and ask their owners about priority. Then do the rest in batches.\" It also says to start with a small batch of 2–3 VMs."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Per VM: `ACTIVE` on the new host, the service reachable from the customer's side, and for DBs the application-level check from their owner. Platform: no VM running on two hosts (compare libvirt domain lists), and the old host stays fenced.\""
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "partial",
+      "evidence": "It says \"Only a human with authority should do this\" and that state-changing steps \"require approval by the accountable owner\", and it asks \"Who has authority to approve fencing and mass evacuation? Name them.\" It treats authorization as required and leaves the owner to the user, but never names a specific role, such as an incident commander or service owner."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "\"confirm cmp-0417 is really off before evacuating anything\". The response makes evacuation depend on the host being confirmed off or fenced."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "It warns that both copies would write to the same RBD images, and says Ceph locks and blocklisting should not be relied on as the fence."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation is recommended. It asks for a deliberate, batched, human-approved evacuation."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Recovery depends on stop conditions and per-VM verification. It promises no outcome."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It answers clearly: do not evacuate until the host is confirmed off or fenced. It explains why a down nova-compute service does not prove the host is dead, describes the split-brain risk of two copies writing to the same Ceph RBD images, and lists concrete read-only checks (BMC power state, reachability and switch ports, rbd watchers, recent changes). It requires fencing through the BMC before any evacuation, orders evacuations by criticality in small batches with stop conditions, and defines checks after evacuation. Its one gap is authorization: it says the accountable owner must approve and asks the user to name them, but does not name a specific role. It commits none of the critical errors. It makes no book citations, and it labels the details it infers about the environment (for example, Ceph RBD) as assumptions."
+}

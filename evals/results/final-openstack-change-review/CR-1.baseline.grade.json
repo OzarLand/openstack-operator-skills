@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "\"If something breaks after the reboots, you won't know whether the cause is the new certs, the new kernel or packages, or a Galera or RabbitMQ rejoin problem.\" It recommends \"Do certs on Saturday, and put the patching in a separate, later window.\" Its fallback is a gated conditional, which it lists explicitly."
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "\"every client has to trust the new CA ... That includes nova-compute, neutron agents and every other service on every compute and storage node that connects to RabbitMQ, Galera and the APIs.\" It also asks for an inventory of every place the certs are used."
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "\"I'd ask for evidence before CAB approves: A dry run in staging or a lab with the same deployment tooling.\" It also requires a staged sequence: \"Galera, then RabbitMQ, then APIs. Do one node at a time\", plus distributing the trust bundle before Saturday."
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "Section 2 says the rollback is \"time-limited\" (\"The old certs expire in 9 days ... the real fallback is a fix-forward path\"), \"untested\", ignores trust ordering, and has \"no abort criteria\". It then lists concrete parts: backups with checksums, a trust-bundle overlap, and a stated fallback with a re-attempt date."
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "partial",
+      "evidence": "It gives per-step checks (`wsrep_cluster_size=3`, `wsrep_ready=ON`, `rabbitmqctl cluster_status`, `openssl s_client`, a real API call), a go/no-go checkpoint, a T+2h gate, and 24-48h monitoring. It does not explicitly verify agent-to-RabbitMQ TLS from the compute nodes, does not monitor the new expiry dates, and gives no explicit stop thresholds beyond calling for \"abort criteria\"."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "partial",
+      "evidence": "The only coverage is one brief line: \"Named owners, a comms plan, and a monitoring plan\" and an \"Impact statement: API downtime expectations\". It does not say who owns the go/no-go or abort decision, and it does not address communication to consumers or tenants beyond that."
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "partial",
+      "evidence": "It treats several things as unknown: \"Nothing says the old files, keys and configs are backed up\", it asks which tooling is used (\"kolla-ansible, TripleO, OSA, manual?\"), and it asks whether the CA is changing. Nothing is marked as passed. However, there is no gates table or systematic list of unknowns, and the existence of a staging environment and the decision owner are not explicitly marked unknown."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"My recommendation is not to submit it as written. Split the patching out of this change\". The conditional option is gated: patching starts only if certs are verified healthy by T+2h."
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "Section 2 is headed \"'Restore old certs' is not a rollback plan\" and examines the rollback in detail."
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "It requires backups and a staging dry run as evidence before approval and does not assume either exists."
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "It frames itself as advice on what to submit (\"Gaps CAB will likely ask about\", \"before CAB approves\")."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It rejects the bundled change, recommends doing the certificates first and the OS update in a later window, and takes apart the 'restore old certs' rollback (short validity, untested, CA trust ordering). It identifies the blast radius reaching compute agents and requires a staging rehearsal and staged rotation. It is weaker on three points: verification and stop conditions (no compute-side TLS checks, no monitoring of the new expiry dates), decision rights and consumer communication (one brief line only), and marking unknowns (no gates table). It commits none of the critical errors. Its date calculation is hedged and consistent with the reported 9 days, so it is not listed as a faithfulness issue."
+}

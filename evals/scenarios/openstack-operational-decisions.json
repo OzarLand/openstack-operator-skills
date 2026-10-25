@@ -1,0 +1,163 @@
+{
+  "skill": "openstack-operational-decisions",
+  "scenarios": [
+    {
+      "id": "OD-1",
+      "title": "Upgrade now, progressively, or postpone (the book's worked situation)",
+      "source": "Book: Ch. 18; App. A; Ch. 14",
+      "prompt": "Our platform runs a series that left maintenance and is two SLURP releases behind. We carry about a dozen local patches, three in Nova scheduling written by an engineer who has left. Control-plane recovery was demonstrated once, two years ago, by that same engineer. The team went from six to four people this year. A security advisory affects our series; the fix exists only for maintained series and a backport is possible but untested. Options on the table: do both upgrade hops in one quarter, do one hop then stabilize then the second, or postpone and remove local patches first while carrying the security backport. What should we do?",
+      "available_evidence": [
+        "series unmaintained, two SLURP releases behind (reported)",
+        "~12 local patches, 3 in Nova scheduling by departed engineer (reported)",
+        "recovery demonstrated once two years ago by departed engineer (reported)",
+        "team reduced from 6 to 4 (reported)",
+        "security advisory with untested backport (reported)"
+      ],
+      "missing_information": [
+        "business criticality and security deadline",
+        "vendor/distribution support path",
+        "test environment availability",
+        "who is the decision owner"
+      ],
+      "expected_reasoning": [
+        "applies gates before scoring; postponement passes the security gate only if a tested backport is credible",
+        "compares options on explicit dimensions with justified scores, or equivalent structured trade-offs",
+        "identifies that transition risk is driven by undemonstrated recovery and that a recovery exercise is the first action",
+        "notes the team is the constraint (readiness)",
+        "states what evidence would change the ranking",
+        "keeps the decision with the accountable owner and assigns exit conditions to the backport"
+      ],
+      "expected_output": [
+        "gates table, trade-offs, optional weighted comparison with sensitivity, recommendation of first action, decision rights, exit conditions"
+      ],
+      "critical_errors": [
+        "recommends postponement while carrying an untested backport without flagging the security gate",
+        "presents a weighted score as the decision itself",
+        "recommends the immediate double hop without addressing recovery capability"
+      ],
+      "criteria": [
+        "Applies decision gates before comparing options",
+        "Links postponement's viability to a tested backport",
+        "Identifies the recovery exercise as the first action or key uncertainty reducer",
+        "Recognizes team readiness as a constraint",
+        "States what would change the ranking (sensitivity)",
+        "Assigns owner, review trigger or exit condition to retained deviations",
+        "Frames the output as decision support for a named or to-be-named owner"
+      ]
+    },
+    {
+      "id": "OD-2",
+      "title": "Another local security backport on an old series",
+      "source": "Book: Ch. 14; Ch. 17",
+      "prompt": "A new OSSA hits Neutron on our series, which upstream no longer maintains. We already carry 6 local security backports on this series. My plan is to backport this one too - it's a small patch. Fine?",
+      "available_evidence": [
+        "new OSSA affecting Neutron on running series (reported)",
+        "series no longer maintained upstream (reported)",
+        "6 existing local security backports (reported)"
+      ],
+      "missing_information": [
+        "distribution/vendor coverage of the fix",
+        "test approach for the backport",
+        "upgrade plan and timeline",
+        "owners of existing backports"
+      ],
+      "expected_reasoning": [
+        "accepts that a backport for a security advisory can be legitimate",
+        "requires the backport record: upstream issue, origin change, why not upgrade, owner, test, exit condition",
+        "identifies that carrying many security backports signals the series is too old: a lifecycle decision",
+        "recommends putting the upgrade on the roadmap and reviewing existing backports' exit conditions",
+        "checks whether the distribution already ships the fix"
+      ],
+      "expected_output": [
+        "conditional yes for the backport with record, plus lifecycle recommendation"
+      ],
+      "critical_errors": [
+        "approves the backport without owner, test or exit condition",
+        "ignores the lifecycle signal of accumulated backports"
+      ],
+      "criteria": [
+        "Recognizes security backports as a legitimate case",
+        "Lists the backport record fields including exit condition",
+        "Names accumulated backports as a lifecycle problem",
+        "Recommends an upgrade/lifecycle decision path",
+        "Checks vendor/distribution coverage"
+      ]
+    },
+    {
+      "id": "OD-3",
+      "title": "Keep repairing or rebuild a shared test environment",
+      "source": "Book: Ch. 10 (field passage)",
+      "prompt": "Our shared OpenStack test cloud has been used by many teams for years. It's full of leftover instances, ports, half-applied config changes, and every fix we make seems to create the next problem. Some people want to keep repairing because 'teams have stuff in there'. Should we rebuild it?",
+      "available_evidence": [
+        "long-lived shared test environment with accumulated state (reported)",
+        "each fix creates the next problem (reported)",
+        "concern that teams have content in it (reported)"
+      ],
+      "missing_information": [
+        "which content teams actually need",
+        "whether an intended baseline is documented",
+        "whether installation is reproducible",
+        "dependencies other teams have on it"
+      ],
+      "expected_reasoning": [
+        "applies the criterion: is the information in the current state valuable enough to justify preserving its uncertainty",
+        "distinguishes test (state mostly experimentation) from production",
+        "requires preserving the evidence/content that matters, writing the intended baseline, rebuilding and validating progressively",
+        "notes automated installation alone does not make a rebuild safe; needs validation criteria",
+        "involves the teams in identifying content to keep"
+      ],
+      "expected_output": [
+        "recommendation with conditions, steps, and what would make repair preferable"
+      ],
+      "critical_errors": [
+        "recommends wiping without preserving needed content or evidence",
+        "applies the same reasoning to production without distinction"
+      ],
+      "criteria": [
+        "Uses the value-of-state vs uncertainty criterion",
+        "Distinguishes test from production",
+        "Requires preserving needed content and evidence",
+        "Requires a written baseline and validation criteria",
+        "Involves stakeholders and decision owner"
+      ]
+    },
+    {
+      "id": "OD-4",
+      "title": "Remove a long-standing workaround immediately?",
+      "source": "Book: Ch. 15 (principles; scenario constructed)",
+      "prompt": "For two years a cron job has restarted neutron-dhcp-agent on all network nodes every night because of a stale-lease problem nobody fully understood. Our new team lead wants it removed this week because 'workarounds are tech debt'. Others are scared to touch it. What's the right call?",
+      "available_evidence": [
+        "nightly restart of DHCP agent on all network nodes for two years (reported)",
+        "underlying stale-lease problem not understood (reported)",
+        "disagreement in the team (reported)"
+      ],
+      "missing_information": [
+        "whether the original problem still occurs on the current release",
+        "side effects of the nightly restart (brief DHCP disruption?)",
+        "owner of the workaround",
+        "detection criteria for the original problem"
+      ],
+      "expected_reasoning": [
+        "rejects both 'remove immediately because it is debt' and 'never touch it' as universal rules",
+        "treats retention vs removal as a decision with owner, reason, detection criteria and exit condition",
+        "proposes investigating whether the original cause still exists and testing removal in a bounded way (one node, detection in place)",
+        "notes the workaround has become accidental architecture and has its own side effects",
+        "uses the risk comparison: safe only while risk introduced < risk removed"
+      ],
+      "expected_output": [
+        "options with conditions, recommended path, owner and exit condition"
+      ],
+      "critical_errors": [
+        "recommends removing it across all nodes immediately without detection or rollback",
+        "recommends keeping it indefinitely without owner or review"
+      ],
+      "criteria": [
+        "Avoids a universal rule and frames a decision",
+        "Requires the workaround record fields (owner, scope, side effects, detection, exit)",
+        "Proposes bounded testing of removal with detection and rollback",
+        "Recognizes accidental architecture",
+        "Applies the 'risk introduced vs risk removed' test"
+      ]
+    }
+  ]
+}

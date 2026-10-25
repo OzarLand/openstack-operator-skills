@@ -1,0 +1,75 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "partial",
+      "evidence": "It builds a differentiated strategy (classes A–D, waves, timeline). But section 4, \"Scope the security ask\", proposes questioning \"all 300 in 3 weeks\", reprioritising by exposure, and \"a documented exception path for class D hosts\". That treats the requirement as negotiable instead of fixed."
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "fail",
+      "evidence": "\"Start with inventory, not criticality ... Don't wait for the infra team to learn which VMs matter.\" Criticality comes only from existing CMDB tags or metadata. Tenants get notices but are never asked to supply criticality through a shared table before execution."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "\"That's ~2 hosts per AZ, not 8 total, because VMs can't leave their AZ\", stated under \"These numbers are assumptions. Substitute your real ones.\" The suggestion to borrow capacity \"from other clusters or AZs\" slightly undercuts this."
+    },
+    {
+      "criterion": "Handles SR-IOV instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "\"C. SR-IOV or pinned: needs tenant coordination, cold migration, or a short planned restart.\" It later asks whether SR-IOV VMs can be live-migrated in the user's stack, which is a minor hedge."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "partial",
+      "evidence": "\"patch the spare hosts first, then use them as migration targets ... Never migrate VMs onto an unpatched host.\" This covers the landing zone, but only on security grounds. It never states the compatibility rule that you must not migrate from newer to older QEMU/libvirt."
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"A QEMU fix requires the QEMU process to restart ... A running VM keeps the old QEMU until it moves.\""
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "fail",
+      "evidence": "No stop conditions are defined. It only notes that \"one failed migration ... can stall a whole wave\". There are no completion criteria either, only \"Verify with a version report\" and a \"live count\" for security."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "partial",
+      "evidence": "The class B per-host procedure reads \"automated cordon, evacuate, patch, reboot, verify, and uncordon\". In context this probably means draining the host by live migration, but in OpenStack \"evacuate\" is the operation for failed hosts. The response never makes the distinction or excludes evacuation."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "Splits hosts into classes C/D that need cold migration, restart or exceptions. Flags the buffer math as fragile and asks for temporary capacity."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "Class C needs \"tenant coordination\" and class D a \"tenant-scheduled window\". Blank criticality is treated as \"needs a planned window\"."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "The procedure includes an \"evacuate\" step, but within live-migration waves it reads as draining the host, not Nova evacuate. The ambiguous wording is penalised under the criterion instead."
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "\"A running VM keeps the old QEMU until it moves.\""
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "Per-AZ figures appear under \"These numbers are assumptions. Substitute your real ones.\""
+    }
+  ],
+  "faithfulness_issues": [
+    "Treats \"roughly 8 hosts worth of free capacity in total\" as 8 discrete spare hosts (\"Days 4–5: patch the 8 spare hosts\"). It presents empty whole hosts as known, though the free capacity may be spread across many hosts."
+  ],
+  "summary": "The response has a solid technical core. It classifies workloads by migratability, puts SR-IOV in the cold-migration/restart class, patches the landing zone first, frames capacity per AZ with labelled assumptions, and correctly says running VMs keep the old QEMU until they are migrated or restarted. Its gaps are against the expected approach: it explicitly deprioritises collecting criticality from consumers, proposes renegotiating the security requirement, omits the newer-to-older QEMU/libvirt constraint, and defines no stop conditions or completion criteria. Its per-host procedure also uses the word \\\"evacuate\\\" ambiguously. It commits none of the critical errors."
+}

@@ -1,0 +1,76 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "partial",
+      "evidence": "Keeps the 3-week deadline and builds a staged plan: leapfrog, waves, long-tail buffer. It never says outright that the requirement is fixed while the execution varies by workload, and it suggests asking security whether a livepatch is acceptable as an interim step and getting a written decision on exceptions."
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "fail",
+      "evidence": "Section 2 is headed \"Don't try to learn criticality. Treat everything as critical.\" Owners can opt in, but \"Anyone who doesn't reply gets the default method.\" Nothing requires criticality from consuming teams before execution."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "\"spare capacity has to be counted per AZ. 8 free hosts all in one AZ would not help the other two\". It also schedules a per-AZ inventory and lists \"Whether capacity really is spread across the AZs\" as a risk."
+    },
+    {
+      "criterion": "Handles SR-IOV instances as non-live-migratable",
+      "verdict": "partial",
+      "evidence": "Puts SR-IOV in the \"Hard to migrate\" class and says failures need the tenant to restart in a window they pick. It still treats live migration of SR-IOV as the main path (\"Nova can hot-unplug the VF, migrate and re-plug it\") instead of defaulting these instances to restart or cold migration with the owner's agreement."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "partial",
+      "evidence": "Leapfrog: \"patch the spare hosts first... Instances move once, onto a host that already has the new kernel and QEMU.\" That covers the landing zone. It never states the constraint against migrating from newer to older QEMU/libvirt."
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"The fix needs a new QEMU process, so a live migration to a patched host delivers it.\""
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "partial",
+      "evidence": "Gives a pause rule with placeholder thresholds: \"more than X failed migrations or any host that won't rejoin pauses the rollout\". It has no campaign completion criteria, such as all instances migrated or restarted onto patched QEMU, or documented exceptions closed out."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "Evacuation is never mentioned. The per-host procedure is disable, live migrate, patch, reboot."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "Plans rolling leapfrog waves sized to spare capacity (2–3 hosts per AZ), with a separate long tail for hard-to-migrate VMs. It does not try to migrate everything at once."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "Restarts of SR-IOV instances that cannot be migrated go through the tenant \"in a window they pick\". The default for non-responders is live migration, the least disruptive option."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "Evacuation is not mentioned."
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "States that a new QEMU process is needed, and every host is drained before it is patched."
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "\"roughly 2–3 per AZ\" is arithmetic that assumes an even spread. It is immediately qualified (\"8 free hosts all in one AZ would not help\") and repeated as a risk to check, so it is not presented as known. This is borderline."
+    }
+  ],
+  "faithfulness_issues": [
+    "The response says \"You have 100 hosts per AZ\" as fact. The prompt says only that 300 hosts are spread over 3 AZs, not that they are spread evenly.",
+    "\"roughly 2–3 per AZ\" spare capacity comes from an assumed even distribution. The response does flag elsewhere that this needs checking."
+  ],
+  "summary": "The response is a practical rolling-patch plan. It counts spare capacity per AZ, patches the spare hosts first and migrates onto them, notes that a new QEMU process is needed for the fix to apply, and does not mention evacuation. Its main failure is rejecting consumer-provided criticality (\"Treat everything as critical\"), which the scenario requires before execution. It is weaker on four other points: SR-IOV is handled as possibly live-migratable rather than a restart/cold-migration class, the constraint against migrating from newer to older QEMU/libvirt is missing, there are no completion criteria, and stop conditions use placeholder thresholds. It assumes an even 100 hosts per AZ, but no critical error is clearly committed."
+}

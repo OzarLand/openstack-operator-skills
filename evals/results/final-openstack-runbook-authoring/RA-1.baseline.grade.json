@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes decision points distinguishing partition from node loss",
+      "verdict": "fail",
+      "evidence": "The procedure is a straight sequence of steps 1–8 that always runs the same way. It never separates a RabbitMQ partition from a node leaving, or a single Galera node failure from quorum loss. The only branch is a fallback: \"If no node will form a cluster, bootstrap...\""
+    },
+    {
+      "criterion": "Gates stopping APIs and purging queues behind an authorized decision",
+      "verdict": "fail",
+      "evidence": "Step 1 \"Stop new API traffic\" and step 2 \"Purge RabbitMQ queues and restart the cluster\" are unconditional. No owner or approval is required and no communication step is included. The response does not mention that purging loses in-flight operations; it only says it \"clears stale RPC messages\"."
+    },
+    {
+      "criterion": "Includes explicit must-not-do actions",
+      "verdict": "fail",
+      "evidence": "There is no must-not-do section. It never warns against resetting RabbitMQ nodes during a partition or bootstrapping the wrong Galera node. The only related line is \"If the test fails... Don't reopen.\""
+    },
+    {
+      "criterion": "Keeps end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "Steps 4–7 check Galera size, Primary status and Synced state, then RabbitMQ cluster status and consumers, then compute, network and volume services. The smoke test creates, pings and deletes a VM \"before reopening\", with the instruction \"If the test fails... Don't reopen.\""
+    },
+    {
+      "criterion": "Marks missing details as TODOs rather than inventing them",
+      "verdict": "partial",
+      "evidence": "It says \"The commands are typical examples I added... check hostnames, HAProxy backend names, service names\" and uses placeholders such as <backend>/<server>. Follow-ups include \"Fill in the real hostnames...\". However, the commands appear in the body as concrete steps rather than marked TODOs. The other unknowns are not flagged: queue types, the partition handling setting, and how to identify the most advanced Galera node."
+    },
+    {
+      "criterion": "Includes owner, validation plan by a non-author, and draft status",
+      "verdict": "fail",
+      "evidence": "The runbook has no owner field, no validation plan and no draft status."
+    },
+    {
+      "criterion": "Records why steps exist (reasoning), not only commands",
+      "verdict": "partial",
+      "evidence": "There is some rationale: \"This clears stale RPC messages and rebuilds one healthy cluster\", \"Order matters: stop the APIs, fix RabbitMQ, fix MariaDB\", and the stated healthy criteria. There are no author notes, and it does not explain the trade-offs or the risks of each step."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "turns the incident sequence into an unconditional procedure (always purge and restart)",
+      "committed": true,
+      "evidence": "Steps 1–3 always stop the APIs, purge the queues, restart RabbitMQ and restart MariaDB, with no decision gate or alternative paths. The response opens with \"Order matters: stop the APIs, fix RabbitMQ, fix MariaDB, verify, then reopen.\""
+    },
+    {
+      "error": "invents environment-specific commands or hostnames as fact",
+      "committed": false,
+      "evidence": "The commands are labelled \"typical examples I added\" with a warning to check them against the environment. Hostnames and backends are placeholders."
+    },
+    {
+      "error": "labels the runbook validated",
+      "committed": false,
+      "evidence": "The runbook is never called validated. It also has no draft status."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response turns the incident notes into a linear runbook. Its verification before reopening is good, and it flags the example commands as assumptions. However, it commits the main critical error: the incident sequence becomes an unconditional procedure. It has no partition vs node-loss or quorum decision points, no authorized gate on stopping the APIs or purging queues, no statement of the in-flight loss, no must-not-do list, and no owner, validation plan or draft status."
+}

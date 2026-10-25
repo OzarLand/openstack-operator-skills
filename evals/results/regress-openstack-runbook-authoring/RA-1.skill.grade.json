@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes decision points distinguishing partition from node loss",
+      "verdict": "pass",
+      "evidence": "The Decision points table separates 'Nodes disagree, a partition is listed, partition events in the logs, no majority...' (go to Section B) from 'All nodes agree, one node absent, the rest a majority, no partition events' (out of scope, node-level procedure). For Galera it separates 'Primary component exists' from 'No Primary on any node → Stop and escalate'."
+    },
+    {
+      "criterion": "Gates stopping APIs and purging queues behind an authorized decision",
+      "verdict": "pass",
+      "evidence": "Section B is labelled 'state-changing, approval required', and running it needs 'explicit approval from TODO: named approver'. Step A5 says 'get approval in writing'. Preconditions include 'Notify stakeholders that new VM operations will be unavailable'. The Context section says 'Purging queues discards in-flight messages, so it is the point of no return', and the Do NOT list says 'Don't purge or restart anything without approval.' Minor gap: once Section B is approved, the purge is not a separate decision point of its own."
+    },
+    {
+      "criterion": "Includes explicit must-not-do actions",
+      "verdict": "pass",
+      "evidence": "The 'Do NOT do without escalation' section includes: 'Don't reset or remove a RabbitMQ node', 'Don't bootstrap Galera or force a primary', 'Don't reopen the APIs before the test passes', 'Don't restart before capturing evidence'."
+    },
+    {
+      "criterion": "Keeps end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "B9 says 'Run the end-to-end test (see Verification) **before** reopening the APIs'. The Verification section says 'Create a test VM, confirm it reaches ACTIVE, ping it, delete it, and confirm it is gone', and also checks Galera, RabbitMQ consumers, and compute services and network agents."
+    },
+    {
+      "criterion": "Marks missing details as TODOs rather than inventing them",
+      "verdict": "pass",
+      "evidence": "Examples: 'Purge the RabbitMQ queues (TODO: command and scope)', 'Restart MariaDB (TODO: nodes, order, method)', 'Test parameters ... are TODO', and in the Author notes, 'I gave no commands because the notes contain none.'"
+    },
+    {
+      "criterion": "Includes owner, validation plan by a non-author, and draft status",
+      "verdict": "pass",
+      "evidence": "The header reads 'Status: Draft, not yet validated. Owner: TODO. Last validation: never.' The Validation plan says 'someone other than the author runs it in non-production with a deliberately induced RabbitMQ partition... TODO: who, where, when.'"
+    },
+    {
+      "criterion": "Records why steps exist (reasoning), not only commands",
+      "verdict": "pass",
+      "evidence": "The Context section explains why running VMs survive, why the APIs are stopped first, and that the purge is the point of no return. It also gives the caveat 'Whether the purge was needed, or a restart alone would have done, is unknown.' The Do NOT list gives reasons, for example 'A wrong reset discards queues that services are still using.'"
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "turns the incident sequence into an unconditional procedure (always purge and restart)",
+      "committed": false,
+      "evidence": "Section B runs only after the decision table confirms a partition and an approver signs off. The response says 'this is the sequence that worked once' and states that the purge may not have been needed."
+    },
+    {
+      "error": "invents environment-specific commands or hostnames as fact",
+      "committed": false,
+      "evidence": "The only commands named are generic ones (RabbitMQ `cluster_status`, `openstack compute service list`). Environment-specific commands and hostnames are left as TODOs."
+    },
+    {
+      "error": "labels the runbook validated",
+      "committed": false,
+      "evidence": "The runbook says 'Draft, not yet validated' and 'Last validation: never.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A strong, well-scoped draft runbook. It has decision points that separate a RabbitMQ partition from a single node leaving, and Galera quorum loss from a healthy Primary. State-changing steps require approval. It lists explicit must-not-do actions, runs the end-to-end test before the APIs reopen, and leaves unknown commands as TODOs. It has an owner placeholder, draft status and a validation plan run by someone other than the author. The only small gap is that the queue purge is not a separate decision point inside the approved section. No critical errors were committed."
+}

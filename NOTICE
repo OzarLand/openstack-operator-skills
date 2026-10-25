@@ -1,0 +1,12 @@
+OpenStack Operator Skills
+Copyright 2026 Soufian Zaouam
+
+This product contains Agent Skills derived from the operating method described
+in "OpenStack, the Day After Tomorrow: Operating Mission-Critical OpenStack
+Platforms" by Soufian Zaouam (v1.2, 2026),
+https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow.
+The book itself is licensed separately under CC BY-NC-ND 4.0; this repository
+does not reproduce its text.
+
+OpenStack is a registered trademark of the OpenInfra Foundation. This project
+is independent of, and not endorsed by, the OpenInfra Foundation.

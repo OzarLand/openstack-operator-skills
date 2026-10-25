@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"A 'down' nova-compute service doesn't prove that... Nova can't tell a dead host from one that is alive but cut off from the control plane.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"you get two copies of each VM writing to the same RBD volumes... For the customer databases, that means silent corruption\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"fence the host first\"; step 3 \"Power it off through the BMC or isolate its switch ports\"; step 4 \"Only after fencing is confirmed, evacuate\""
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "\"What to do now (all read-only unless noted)\": ipmitool chassis power status, console/BMC, ping on mgmt/tenant networks, `rbd status` watchers, check whether other computes are down"
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"evacuate in priority order rather than all 40 at once... customer databases, with their owners' input on the order. Nova can't tell which VMs matter most.\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"check that it is ACTIVE on the new host, reachable, and that its application (for databases, the engine and its data) is healthy. Check that cmp-0417 no longer runs any of these VMs\" plus cleanup of old domains"
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "partial",
+      "evidence": "Says fencing \"needs a named approver\" and state-changing steps \"require approval by the accountable owner\", but doesn't name a specific role (e.g. incident commander or service owner) or ask the user who that is."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "\"do not evacuate yet\" if powered on; evacuation only \"after fencing is confirmed\""
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"It makes the move fast, but it also makes a double-write easy.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation recommended; it explicitly warns that heartbeat loss is not proof the host is dead."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Gives no recovery claims. It requires checks after each batch and warns about ERROR states from capacity limits."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It clearly says not to evacuate until the host is fenced. It explains the split-brain risk on Ceph RBD and lays out a confirm → fence → evacuate sequence. The read-only checks come first: BMC power state, network reachability, RBD watchers, and whether other computes are also down. Evacuation is ordered by priority, with database owners' input on the order. Verification after evacuation is defined. On authorization, it only says a generic \\\"named approver/accountable owner\\\" without naming a specific role, so that criterion is partial. It commits none of the critical errors, cites nothing from the book, and states no invented facts about the environment."
+}

@@ -1,0 +1,65 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"'nova-compute down' only means the heartbeat stopped. It doesn't mean the host is dead.\" It also lists hypotheses 5 and 6, where the host is alive but isolated."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Evacuating then starts a second copy of each VM on another host, using the same Ceph RBD images. Two guests writing to one disk will corrupt it.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"Don't evacuate until cmp-0417 is confirmed powered off or fenced.\" The prerequisites list: \"confirmed off via BMC, or you force it off via BMC (chassis power off), or you isolate its ports at the switch.\""
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "The section \"Next diagnostics (all read-only, about 5 minutes)\" covers BMC power status, ping/SSH, switch port and bond state, virsh list, checking other computes, rbd status watchers, and what changed around 03:12."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "partial",
+      "evidence": "It recommends small batches with a non-critical canary first. Under Gaps it asks \"Which of the 40 VMs are customer databases? Prioritise those, and tell their owners.\" There is an ordering by criticality, but owners are only told about restarts. They are not asked for input on the order."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Verification before calling it recovered\": each VM ACTIVE on its new host, no copies in virsh on the old host, DB consistency or replication checks, and Placement allocations moved."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "pass",
+      "evidence": "\"Approver: the incident commander or service owner, not just the on-call engineer\" and \"whoever owns customer impact on call.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Evacuation is always conditioned on fencing: \"Yes, evacuate, but fence first. If the BMC says the host is off, go ahead... If the host is on, find out why before touching the VMs.\""
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"Ceph doesn't prevent this on its own. Cephx and RBD exclusive locks are not a substitute for fencing.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "The response does not recommend any automated evacuation."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "\"I haven't inspected anything.\" It also says ACTIVE status doesn't prove the data is intact and requires DB consistency checks."
+    }
+  ],
+  "faithfulness_issues": [
+    "States \"It only extends an outage that has already lasted hours\" as fact. The prompt gives only the start time (03:12), not the current time, so the outage length is unknown. This is a minor unflagged assumption."
+  ],
+  "summary": "This is a strong response that matches the expected reasoning. It answers clearly that the on-call must not evacuate until the host is fenced. It explains the split-brain corruption risk on shared Ceph and requires BMC power-off or switch isolation first. It lists read-only checks, names the incident commander or service owner as approver, and defines verification after evacuation. Business-criticality ordering is only partly covered: databases are prioritised, but owners are informed rather than consulted. It commits none of the critical errors. The only faithfulness issue is a minor unflagged assumption that the outage has lasted hours."
+}

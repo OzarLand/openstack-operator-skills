@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "pass",
+      "evidence": "\"The alert doesn't tell you whether rabbit-03 left the cluster or the cluster is partitioned, and the runbook is only safe for the first case.\" It also gives separate hypotheses A (down/left) and B (partition)."
+    },
+    {
+      "criterion": "Requires cluster status from each node (especially rabbit-03) before acting",
+      "verdict": "pass",
+      "evidence": "Diagnostic 1: \"Run `rabbitmqctl cluster_status` on **each** of the three nodes. Compare the 'running nodes' and 'partitions' sections.\" Hypothesis B's check is \"`cluster_status` run on rabbit-03 itself\"."
+    },
+    {
+      "criterion": "Explains the risk of resetting the wrong node",
+      "verdict": "pass",
+      "evidence": "\"If rabbit-03 is alive and still serving clients on its own side, `reset` wipes its state. That discards queues and messages that services may still be using, and it can't be undone.\" It also says to \"Establish which side the services are using.\""
+    },
+    {
+      "criterion": "States when the runbook is applicable",
+      "verdict": "pass",
+      "evidence": "\"If hypothesis A holds (rabbit-03 simply left, and 01 and 02 still form a majority): Rejoining is reasonable, so you can follow the runbook's steps.\" It adds prerequisites (save the logs first) and a stop condition."
+    },
+    {
+      "criterion": "Includes escalation or decision owner for the partition case",
+      "verdict": "pass",
+      "evidence": "\"If hypothesis B holds (partition): Do not reset anything. Escalate to whoever owns the bus first.\" It also names the platform owner or incident lead for the protect decision."
+    },
+    {
+      "criterion": "Defines verification after recovery (consumers reconnect)",
+      "verdict": "pass",
+      "evidence": "Verification section: \"`cluster_status` shows all three nodes running with no partitions. Queues are present with consumers connected. All compute services and agents report as up. A test VM is created, reached and deleted.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "\"Don't run `stop_app` / `reset` on rabbit-03 until you've done a few read-only checks.\" The runbook is allowed only if hypothesis A is confirmed."
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "\"rabbit-03 is down or stopped\" appears only as Hypothesis A, next to the partition and node-to-node alternatives. The evidence table marks rabbit-03's process state as Unknown."
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "The only output cited is the user's own observation. Output from the other nodes is marked \"Not shown\", and the response asks the user to paste it."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It refuses to apply the runbook blindly and separates the node-left case from a partition. It requires read-only cluster_status checks on every node, rabbit-03 included. It explains that a reset on the side clients are using destroys queues that are in use. It limits the runbook to the confirmed node-left case and says to escalate to the owner of the message bus if there is a partition. It defines recovery checks, including connected consumers. It commits none of the critical errors, makes no book citations and invents no facts about the user's environment."
+}

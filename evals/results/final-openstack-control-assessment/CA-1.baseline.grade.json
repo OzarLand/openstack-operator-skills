@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against immediate transformation and explains why",
+      "verdict": "pass",
+      "evidence": "\"Don't start with the deployment tool or the network redesign. You can't safely change a system you can't observe or explain\"; also calls them \"year-long, high-risk projects\" and says starting both on an unstable cloud \"is how you create a worse outage.\""
+    },
+    {
+      "criterion": "Uses the restoration sequence or an equivalent staged approach",
+      "verdict": "pass",
+      "evidence": "Phases run Weeks 1–2 (inventory, recovery check, incident analysis, knowledge holes), Weeks 3–8 (staging, config in VCS, change process, SLOs), Months 3–6 (fix causes, upgrades), then Month 6+ (evaluate tooling and networking). This covers discover, protect, stabilize, recover knowledge, establish control and evolve, though it does not use the book's named sequence."
+    },
+    {
+      "criterion": "Lists concrete first-30-day outputs",
+      "verdict": "partial",
+      "evidence": "Days 1–14 lists activities: \"Inventory, backups and restore test, cert expiry check, incident analysis\", plus a list of knowledge holes. It never names deliverables such as a current-state map, a critical-risk register, a guardrails list, ownership/recovery gap lists or a control roadmap."
+    },
+    {
+      "criterion": "Requires owners and removal conditions for guardrails",
+      "verdict": "fail",
+      "evidence": "Guardrails appear (restart logging rule, \"freeze policy\", change process), but none has an owner or a removal condition, and there is no guardrails table."
+    },
+    {
+      "criterion": "Mentions the exception for unmaintained, vulnerable releases",
+      "verdict": "partial",
+      "evidence": "It notes \"which security patches you've missed... you may be several releases behind on something no longer supported\" and \"this is the real risk.\" It does not say that upgrading the release may itself be the stabilization step, and it still schedules upgrades for Months 3–6."
+    },
+    {
+      "criterion": "Starts from business capabilities",
+      "verdict": "fail",
+      "evidence": "Step 1 is a component inventory (release, Neutron backend, Ceph, RabbitMQ). The only nod to business needs is asking stakeholders \"what's hurting most\" and setting SLOs. Business capabilities and their criticality are never the starting point."
+    },
+    {
+      "criterion": "Defines exit criteria for restoration",
+      "verdict": "partial",
+      "evidence": "It offers a 90-day goal (\"fewer incidents, a tested restore, and an upgrade plan\") and SLOs \"so you can tell whether things are getting better\". It never defines what \"control restored\" means as exit criteria."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses starting with the deployment tool migration and network redesign",
+      "committed": false,
+      "evidence": "Explicitly rejects this: \"Don't start with the deployment tool or the network redesign\"; pushes evaluation to \"Month 6+\"."
+    },
+    {
+      "error": "proposes a single maturity score as the outcome",
+      "committed": false,
+      "evidence": "No maturity score. Outcomes are SLOs, a 90-day goal and a sequencing table."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response holds back on transformation and lays out a sensible staged plan. It correctly sequences the new engineers' proposals for later. It misses the scenario's key structural elements: it gives no guardrails with owners and removal conditions, starts from components rather than business capabilities, names no concrete 30-day deliverables, and gives no explicit exit criteria for restored control. It touches on EOL and missed security patches without stating that an upgrade can itself be the stabilization step. It commits no critical errors and has no faithfulness issues."
+}

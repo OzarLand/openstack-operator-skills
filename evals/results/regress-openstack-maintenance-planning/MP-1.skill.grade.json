@@ -1,0 +1,73 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "pass",
+      "evidence": "\"The kernel and QEMU fix on all hosts within 3 weeks is the fixed requirement. How you get there is the part to design... You need a differentiated strategy\""
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "pass",
+      "evidence": "\"Criticality has to come from the tenants, so collecting it is the first deliverable. Use the shared table: project, instances, criticality, acceptable downtime...\" Classes A/B/D are tagged \"Tenant says so\" with tenant sign-off, and the table goes out on days 1–3, before the pilot."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "\"The formula applies per failure domain. Spare capacity has to exist in each AZ, not in total: concurrent hosts drained in AZ ≤ (spare host-equivalents in AZ) − (failure reserve)\"; it also asks \"How is the spare capacity split across the AZs\""
+    },
+    {
+      "criterion": "Handles SR-IOV instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "Class C: \"Not live-migratable (SR-IOV direct ports...) | Cold migration or coordinated restart | Agreed with owner\"; \"treat these as class C until you confirm your release can live-migrate them... Cold migration also needs free VFs on the same physnet\""
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "pass",
+      "evidence": "\"Landing zone first. Patch the spare hosts first... QEMU migration is supported old to new but not new to old, so instances can only move onto patched hosts.\""
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"A QEMU fix only protects instances that were migrated or restarted since the fix landed... Track per instance whether it has been moved or restarted\""
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "pass",
+      "evidence": "\"Stop if: migrations fail or slow beyond the baseline... AZ spare falls below the reserve... decision owner is unreachable\"; \"Campaign completion criteria: Every host is patched and verified. Every instance has been migrated or restarted since the patch, or sits on the exceptions list with an owner.\""
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "\"Never use evacuation for maintenance. It is only for failed, fenced hosts.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "\"you can't live-migrate everything\"; workloads are split into live-migrate, cold/restart and exception classes"
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "Each restart class needs tenant-owner sign-off. Restarting tenants who don't answer is only a possible default, and it must be decided explicitly by a named platform/business owner and announced with N days' notice (Decision 1)."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "\"Never use evacuation for maintenance.\""
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "\"An instance that stayed on an unpatched host is still running the old QEMU.\""
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "Per-AZ figures are conditional or labelled as assumptions: \"if the 8 hosts split 3/3/2\", \"I'm assuming about 100 each\", \"This is an estimate on assumed numbers\"; it asks the user for the actual split"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong. It passes all eight criteria and commits none of the critical errors. It keeps the security requirement fixed and sets out a differentiated strategy: workload classes, criticality collected from tenants through a shared table, capacity computed per AZ (with per-AZ numbers clearly marked as assumptions), SR-IOV instances treated as cold-migrate or restart with owner agreement, and the landing zone patched first with the old-to-new QEMU direction. It states that the QEMU fix protects only instances migrated or restarted since, rules out evacuation, and defines stop conditions, completion criteria, decision rights and follow-up. The policy for tenants who don't answer is left as an explicit decision for an accountable owner, not an automatic restart. It makes no book citations and presents no invented environment facts as known."
+}

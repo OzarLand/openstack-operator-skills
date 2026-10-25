@@ -1,0 +1,196 @@
+{
+  "skill": "openstack-change-review",
+  "scenarios": [
+    {
+      "id": "CR-1",
+      "title": "Certificate rotation bundled with an OS update, never rehearsed",
+      "source": "Book: Ch. 17; Ch. 9; Ch. 8 (scenario constructed from these chapters)",
+      "prompt": "Change request for Saturday's 4-hour window on our production OpenStack: (1) replace all internal TLS certificates - API endpoints, RabbitMQ, Galera - because they expire in 9 days, (2) at the same time apply the OS security update and reboot the three controllers, since we have the window anyway. We have never rotated these certificates before; they were installed at deployment 3 years ago. Rollback plan: 'restore old certs'. Can you review this so I can submit it to CAB?",
+      "available_evidence": [
+        "certificates expire in 9 days (reported)",
+        "certificates never rotated since deployment 3 years ago (reported)",
+        "plan combines certificate rotation with OS update and controller reboots in one window",
+        "rollback described only as 'restore old certs'"
+      ],
+      "missing_information": [
+        "deployment tool and how certificates are distributed",
+        "whether a non-production environment exists for rehearsal",
+        "which clients/agents on computes trust which CA",
+        "verification plan and stop conditions",
+        "who owns the decision and the consumer communication"
+      ],
+      "expected_reasoning": [
+        "identifies stacked uncertainty: certificate rotation and OS update plus reboots in one window make failures impossible to attribute",
+        "notes a never-rehearsed rotation is a change with unknown blast radius, reaching agents on every compute",
+        "requires a rehearsal or staged scope before production",
+        "challenges the rollback plan: old certs expire in 9 days, so rollback has a short validity and must be concrete",
+        "defines verification (TLS connections from services and agents, API/RPC healthy, new expiry dates monitored) and stop conditions",
+        "recognizes deadline pressure but recommends sequencing (certificates first, OS update another window) rather than bundling"
+      ],
+      "expected_output": [
+        "verdict: not ready or ready with conditions, with the conditions listed",
+        "gates table with unknowns marked",
+        "recommendation to split the changes",
+        "recovery section, stop conditions, verification, decision rights",
+        "draft decision record"
+      ],
+      "critical_errors": [
+        "approves the combined change as ready without requiring separation or justification",
+        "accepts 'restore old certs' as a sufficient rollback without examination",
+        "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+        "presents its review as CAB approval"
+      ],
+      "criteria": [
+        "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+        "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+        "Requires rehearsal or staged rollout",
+        "Examines rollback credibility concretely",
+        "Defines verification criteria and stop conditions",
+        "Names decision roles and consumer communication",
+        "Marks missing information as unknown, not passed"
+      ]
+    },
+    {
+      "id": "CR-2",
+      "title": "First Fernet key rotation with immediate removal of old keys",
+      "source": "Book: Ch. 17; Ch. 9",
+      "prompt": "Plan for tonight: our Keystone Fernet keys have never been rotated (3 Keystone nodes). Steps: on keystone-1 run keystone-manage fernet_rotate, delete all keys except the new primary to 'clean up', then rsync /etc/keystone/fernet-keys/ to keystone-2 and keystone-3 and restart keystone. Looks simple - anything I'm missing?",
+      "available_evidence": [
+        "keys never rotated (reported)",
+        "three Keystone nodes (reported)",
+        "plan deletes all non-primary keys after rotation",
+        "distribution by rsync then restart"
+      ],
+      "missing_information": [
+        "token expiration setting and max active keys configuration",
+        "whether nodes currently hold identical key sets",
+        "rsync ordering and atomicity",
+        "verification and rollback approach",
+        "approval and timing (traffic levels)"
+      ],
+      "expected_reasoning": [
+        "identifies that deleting keys still needed to validate tokens in flight breaks authentication platform-wide",
+        "requires keys to be identical on every Keystone node and warns about a window where nodes differ",
+        "notes that a platform that never rotated has never tested that it can: rehearse first",
+        "proposes verification (issue and validate tokens against each node) and a rollback (keep a copy of the previous key repository)",
+        "labels steps read-only vs state-changing and requires approval"
+      ],
+      "expected_output": [
+        "verdict not ready as written",
+        "corrected sequence keeping prior keys until tokens issued with them expire",
+        "verification per node",
+        "recovery path and stop conditions"
+      ],
+      "critical_errors": [
+        "endorses deleting all non-primary keys immediately after rotation",
+        "ignores the multi-node consistency requirement",
+        "states the change will succeed without verification"
+      ],
+      "criteria": [
+        "Identifies the in-flight token risk of deleting old keys",
+        "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+        "Recommends rehearsal given rotation was never performed",
+        "Defines verification across all nodes",
+        "Provides a concrete recovery path (backup of current key repository)",
+        "Does not claim certainty about version-specific Keystone behaviour without flagging verification"
+      ]
+    },
+    {
+      "id": "CR-3",
+      "title": "Two-release upgrade with skipped online data migrations and stale recovery",
+      "source": "Book: Ch. 14; Ch. 17; Ch. 18",
+      "prompt": "We want to upgrade Nova, Neutron, Cinder, Glance and Keystone next week, jumping one release using SLURP. Facts: we carry 9 local patches, 2 of them in the Nova scheduler; after our last upgrade we never ran nova-manage db online_data_migrations; the last control-plane restore test was 2 years ago by an engineer who left; we haven't looked at policy changes. The deployment tool's release notes say it supports the jump. Please review the plan's readiness.",
+      "available_evidence": [
+        "SLURP skip-level upgrade planned next week (reported)",
+        "9 local patches, 2 in Nova scheduler (reported)",
+        "online data migrations not completed after previous upgrade (reported)",
+        "control-plane recovery last tested 2 years ago by a departed engineer (reported)",
+        "policy changes not reviewed (reported)",
+        "deployment tool claims support for the jump (reported)"
+      ],
+      "missing_information": [
+        "current and target series and their maintenance status",
+        "whether current release is a SLURP release",
+        "OS, Python, RabbitMQ, MariaDB, network and storage backend support for the jump",
+        "status of local patches against target release",
+        "test environment availability",
+        "upgrade check output"
+      ],
+      "expected_reasoning": [
+        "identifies incomplete online data migrations as a hard blocker: the next schema sync refuses to run",
+        "notes SLURP promises only OpenStack services; OS, deployment tool, RabbitMQ, MariaDB and backends must support the jump too",
+        "requires running *-status upgrade check commands",
+        "treats untested recovery by a departed engineer as a failed or unknown recovery gate; suggests a recovery exercise first",
+        "requires policy (secure RBAC defaults) testing against users and automation",
+        "requires review of local patches against the target release",
+        "verdict not ready, framed as sequencing"
+      ],
+      "expected_output": [
+        "verdict not ready with list of conditions",
+        "readiness table",
+        "first actions in order",
+        "decision record draft"
+      ],
+      "critical_errors": [
+        "declares the upgrade ready next week",
+        "ignores the incomplete online data migrations",
+        "treats SLURP support as covering the whole stack",
+        "invents specific release names as the user's current/target versions"
+      ],
+      "criteria": [
+        "Flags incomplete online data migrations as a blocker",
+        "Explains the limits of the SLURP promise beyond OpenStack services",
+        "Requires upgrade check commands",
+        "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+        "Includes policy/RBAC testing",
+        "Addresses local patches against the target release",
+        "Gives a clear not-ready verdict with ordered conditions"
+      ]
+    },
+    {
+      "id": "CR-4",
+      "title": "Bulk database cleanup of stuck instances",
+      "source": "Book: Ch. 10 (field passage on stale records); Ch. 6",
+      "prompt": "We have ~300 instances stuck in BUILD, ERROR or deleting for months, plus orphan ports and volumes marked attached to deleted instances. My colleague wrote one SQL script that marks all 300 instances deleted in the nova cell DB, deletes the orphan ports in neutron DB and detaches the volumes in cinder DB. He wants to run it tonight in one transaction per database. Review please.",
+      "available_evidence": [
+        "about 300 instances in stuck states for months (reported)",
+        "orphan ports and wrongly attached volumes (reported)",
+        "single SQL script across three service databases (reported)"
+      ],
+      "missing_information": [
+        "whether project tools were tried (placement audit, reset-state, archive_deleted_rows)",
+        "backup and restore test",
+        "how records were confirmed as not describing reality (hypervisor check)",
+        "Placement allocations for those instances",
+        "approval and owner"
+      ],
+      "expected_reasoning": [
+        "prefers project tools where they exist (nova-manage placement audit/heal_allocations, archive_deleted_rows, reset state via API) before direct SQL",
+        "requires backup first, one record (or small batch) at a time, verification after",
+        "requires confirming each record against reality (hypervisor, Neutron, Cinder) before deleting",
+        "notes the cross-database consistency: Placement allocations also need reconciliation",
+        "flags bulk irreversible change across three databases as high blast radius",
+        "recommends a staged approach and a dry-run listing"
+      ],
+      "expected_output": [
+        "verdict not ready as written",
+        "staged alternative plan",
+        "verification and recovery",
+        "decision roles"
+      ],
+      "critical_errors": [
+        "approves running the bulk SQL script in one go",
+        "omits the backup requirement",
+        "ignores Placement allocations"
+      ],
+      "criteria": [
+        "Prefers project tools over direct SQL where available",
+        "Requires backup, small increments and verification",
+        "Requires confirming records against real hypervisor/network/storage state",
+        "Mentions Placement allocation reconciliation",
+        "Flags the irreversibility and blast radius",
+        "Proposes a staged plan with a dry run"
+      ]
+    }
+  ]
+}

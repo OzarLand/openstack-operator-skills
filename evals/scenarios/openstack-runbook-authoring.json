@@ -1,0 +1,124 @@
+{
+  "skill": "openstack-runbook-authoring",
+  "scenarios": [
+    {
+      "id": "RA-1",
+      "title": "Runbook from a control-plane incident",
+      "source": "Book: Ch. 19; Ch. 11; Ch. 10",
+      "prompt": "Turn our incident notes into a runbook for next time: 'VM creation failed, existing VMs OK. RabbitMQ RPC broken, Galera unhealthy. We stopped the APIs (pulled them from HAProxy), purged RabbitMQ queues and restarted the RabbitMQ cluster, then restarted MariaDB. Checked Galera size/Primary, rabbit cluster + consumers, compute services and agents up, test VM create/ping/delete. Reopened APIs. Root cause later: RabbitMQ network partition.'",
+      "available_evidence": [
+        "incident notes describing the sequence and verification (provided)",
+        "root cause was a RabbitMQ partition (provided)"
+      ],
+      "missing_information": [
+        "exact commands and environment (deployment tool, containerization)",
+        "who authorized stopping the APIs",
+        "versions, queue types, partition handling setting",
+        "how to identify the most advanced Galera node if a bootstrap is needed"
+      ],
+      "expected_reasoning": [
+        "scopes the runbook to the failure mode and lists what it does not cover",
+        "adds decision points: RabbitMQ node-left vs partition; Galera single node vs quorum loss",
+        "makes stopping the APIs a decision requiring an authorized owner, with communication",
+        "keeps queue purge as an explicit decision stating the loss of in-flight operations",
+        "includes must-not-do items (reset nodes during partition before escalation; bootstrap wrong Galera node)",
+        "keeps the verification list as end-to-end checks",
+        "marks unknown commands as TODOs instead of inventing them",
+        "marks the runbook as draft pending validation by a non-author"
+      ],
+      "expected_output": [
+        "runbook following the template with decision points, steps labelled, stop/escalate, must-not-do, verification, recovery, owner, validation plan, author notes"
+      ],
+      "critical_errors": [
+        "turns the incident sequence into an unconditional procedure (always purge and restart)",
+        "invents environment-specific commands or hostnames as fact",
+        "labels the runbook validated"
+      ],
+      "criteria": [
+        "Includes decision points distinguishing partition from node loss",
+        "Gates stopping APIs and purging queues behind an authorized decision",
+        "Includes explicit must-not-do actions",
+        "Keeps end-to-end verification before reopening",
+        "Marks missing details as TODOs rather than inventing them",
+        "Includes owner, validation plan by a non-author, and draft status",
+        "Records why steps exist (reasoning), not only commands"
+      ]
+    },
+    {
+      "id": "RA-2",
+      "title": "Review a thin existing runbook",
+      "source": "Book: Ch. 11",
+      "prompt": "Please review our runbook 'RabbitMQ alarm': 1) restart rabbitmq-server on all three nodes 2) restart all nova and neutron services 3) check that the alarm cleared.",
+      "available_evidence": [
+        "three-step runbook (provided)"
+      ],
+      "missing_information": [
+        "alarm types it is meant for (memory, disk, partition, node down)",
+        "deployment specifics",
+        "owner and validation history"
+      ],
+      "expected_reasoning": [
+        "identifies missing purpose/scope: one runbook for many different alarms",
+        "no decision points: same alert can mean node left, partition, memory/disk alarm",
+        "restarting all nodes at once is high blast radius and may lose queues; restarting all services causes reconnect storms",
+        "verification checks the alarm, not the capability",
+        "no stop/escalation, no must-not-do, no owner, no validation date, no reasoning",
+        "provides a findings table before any rewrite"
+      ],
+      "expected_output": [
+        "findings table, then a restructured draft with decision points and TODOs"
+      ],
+      "critical_errors": [
+        "accepts the runbook as adequate",
+        "rewrites it while keeping 'restart all nodes' as an unconditional first step"
+      ],
+      "criteria": [
+        "Points out missing scope and decision points for different alarm types",
+        "Flags simultaneous restart of all nodes/services as dangerous",
+        "Flags verification of the alarm rather than the capability",
+        "Flags missing stop/escalation, owner and validation",
+        "Gives findings before a rewritten version"
+      ]
+    },
+    {
+      "id": "RA-3",
+      "title": "Capture Galera full-outage recovery from a leaving expert's notes",
+      "source": "Book: Ch. 10 (technical note); Ch. 11; Ch. 12",
+      "prompt": "Our DB expert leaves Friday. His notes on Galera full outage recovery say only: 'find node with highest seqno, bootstrap it, start the others'. Can you turn this into a proper runbook?",
+      "available_evidence": [
+        "brief notes on Galera full-outage recovery (provided)",
+        "expert leaving Friday (reported)"
+      ],
+      "missing_information": [
+        "deployment specifics (containerized, service names)",
+        "load balancer write-node configuration",
+        "backup procedures",
+        "who approves a bootstrap"
+      ],
+      "expected_reasoning": [
+        "adds the grastate.dat seqno and safe_to_bootstrap check, and --wsrep-recover after unclean shutdown when seqno is -1",
+        "warns that bootstrapping the wrong node discards committed transactions (must-not-do)",
+        "adds preconditions: confirm it is a full outage, not a single-node failure (decision point)",
+        "adds verification: cluster size, Primary state, services writing, capability check",
+        "marks environment-specific commands as TODOs",
+        "proposes validation by someone else before Friday, observed by the expert"
+      ],
+      "expected_output": [
+        "runbook draft with decision points, steps, must-not-do, verification, validation plan using the expert's remaining days"
+      ],
+      "critical_errors": [
+        "omits the safe_to_bootstrap / wsrep-recover identification step",
+        "presents invented service names or paths as fact",
+        "does not propose a validation session before the expert leaves"
+      ],
+      "criteria": [
+        "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+        "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+        "Adds a decision point distinguishing full outage from partial failure",
+        "Includes end-to-end verification",
+        "Marks unknown specifics as TODOs",
+        "Proposes validation by a non-author while the expert is still available"
+      ]
+    }
+  ]
+}

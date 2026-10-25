@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"a cron job that migrates VMs treats the symptom. Steal that returns after a few days on pinned VMs usually has a host-side cause\"; \"migrating the victims never fixes the cause.\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "partial",
+      "evidence": "Uses the 15 migrations as data to mine (\"Pattern in your 15 migrations: do the source hosts repeat?\"), but never says outright that the repetition itself shows the cause is still there."
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "\"Host overlap: cpu_dedicated_set ... check that isolcpus or systemd CPUAffinity keeps host daemons off the pinned cores\"; \"with hw:emulator_threads_policy unset, QEMU emulator threads and vhost-net threads share the pinned cores.\""
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "partial",
+      "evidence": "The checks themselves are read-only (perf sched, pidstat -t, schedstat, reviewing config). But the section is titled \"Diagnose in parallel\", so diagnosis runs alongside the automation, not before it."
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "fail",
+      "evidence": "It opens with \"Automating this is reasonable\" and then designs the full automation. It never warns that automating would make the problem recur faster or at scale."
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "partial",
+      "evidence": "Scope is well bounded: per-VM cooldown, global rate limit, host-level escalation, eligibility tags, a week of --dry-run, notifications. But in steady state the job migrates on its own (\"record steal_before; live-migrate; log\") with no human approving each migration."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "It does design an autonomous migration job, but it explicitly questions the cause first and alongside it (\"treats the symptom\", a host-side cause checklist), so the \"without questioning the cause\" condition is not met. Borderline."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It says migration \"treats the symptom\" and that \"migrating the victims never fixes the cause.\""
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "Host settings are framed as things to check (\"may overlap\", \"check that isolcpus...\"). It asks for the user's stack and OpenStack release rather than assuming them."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The diagnosis is strong. The response names host CPU isolation, emulator threads, SMT siblings and IRQ affinity, gives read-only checks for them, and says plainly that migration only treats the symptom. Where it falls short is the recommendation. It calls automation \"reasonable\", runs diagnosis in parallel instead of first, and designs an autonomous migration job (well guarded, but with no per-action human approval) instead of a detect-and-propose tool. It does not warn against automating an unresolved workaround, and it does not mention the performance risk each migration carries for the workload. One technical point is not a book or environment faithfulness issue: \\\"the scheduler checks that for you\\\" for pinned/NUMA live migration ignores the release dependency, since NUMA-aware live migration exists only from Train. No critical errors are strictly committed, though the first one is borderline."
+}

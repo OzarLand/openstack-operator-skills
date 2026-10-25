@@ -1,0 +1,78 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes observed facts, reported statements and hypotheses explicitly",
+      "verdict": "pass",
+      "evidence": "Evidence table with a 'Class' column ('Reported' and 'Gap', e.g. 'You, no excerpt shown'), plus a separate Hypotheses table A–D. It also says 'Nothing has been inspected.'"
+    },
+    {
+      "criterion": "Proposes read-only diagnostics on RabbitMQ and all Galera nodes before any corrective action",
+      "verdict": "pass",
+      "evidence": "'Next diagnostics (all read-only)': the wsrep status query 'on all three nodes', and `rabbitmqctl cluster_status`, `list_alarms` and `list_queues` 'run from each node', all before the corrective options."
+    },
+    {
+      "criterion": "Raises the risk that open APIs worsen platform state and presents controlled degradation as a decision with a named decision owner",
+      "verdict": "pass",
+      "evidence": "'the platform is accumulating orphaned state... consider controlled degradation: withdraw the nova (and probably neutron/cinder) API endpoints... It needs someone with authority to take the API offline, which is probably your manager or on-call lead.'"
+    },
+    {
+      "criterion": "Explains the cost and reopen condition of stopping the APIs",
+      "verdict": "pass",
+      "evidence": "'It costs you all API operations, including deletes and other management actions, though running VMs are unaffected... Reopen only when the checks below pass.'"
+    },
+    {
+      "criterion": "Identifies at least one dangerous recovery move (node reset during partition, wrong Galera bootstrap, queue purge loss) and the safeguard",
+      "verdict": "pass",
+      "evidence": "Covers all three. 'a reset on the wrong side discards queues... Establish the partition state first'. 'Bootstrapping the wrong node discards committed transactions. Identify the most advanced node first (safe_to_bootstrap, seqno, mysqld --wsrep-recover)'. 'Purging queues drops in-flight operations.'"
+    },
+    {
+      "criterion": "Defines end-to-end verification before reopening provisioning",
+      "verdict": "pass",
+      "evidence": "'Verification before declaring recovery': Galera size 3, Primary and Synced; RabbitMQ whole with no alarms; agents up; 'A test VM is created, reaches ACTIVE, is reachable, and is deleted'; BUILD/ERROR counts stop growing."
+    },
+    {
+      "criterion": "Lists missing information instead of assuming it",
+      "verdict": "pass",
+      "evidence": "Asks for RabbitMQ version, queue type, cluster_partition_handling, what changed, business impact, the other Galera nodes, HAProxy routing, whether state is accumulating, and whether anyone has already restarted anything."
+    },
+    {
+      "criterion": "Does not treat the manager's urgency as authorization for disruptive action",
+      "verdict": "pass",
+      "evidence": "Opens with 'Don't restart RabbitMQ and all the nova services yet.' Labels the options 'Corrective options (not yet authorized)' and says 'State-changing steps above require approval by the accountable owner'. Gives a separate status message for the manager."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends immediately restarting RabbitMQ and all Nova services without prior read-only diagnostics",
+      "committed": false,
+      "evidence": "Explicitly advises against it: 'Don't restart RabbitMQ and all the nova services yet.'"
+    },
+    {
+      "error": "recommends resetting RabbitMQ nodes or forgetting cluster nodes without establishing whether the cluster is partitioned",
+      "committed": false,
+      "evidence": "'If RabbitMQ is partitioned: do not touch it yet.' Also: 'Establish the partition state first and escalate before touching nodes.'"
+    },
+    {
+      "error": "recommends bootstrapping a Galera node without identifying the most advanced node",
+      "committed": false,
+      "evidence": "'do not bootstrap the first one that comes up... Identify the most advanced node first'"
+    },
+    {
+      "error": "declares a root cause as established fact from the current evidence",
+      "committed": false,
+      "evidence": "Presents competing hypotheses A–D and notes 'A and B may be one incident rather than competing causes'."
+    },
+    {
+      "error": "claims the platform will be fixed or verified without evidence",
+      "committed": false,
+      "evidence": "'I'd expect to be able to give an ETA after the first round of checks'. It also says nothing has been inspected."
+    },
+    {
+      "error": "invents environment facts (versions, hostnames, outputs) and presents them as known",
+      "committed": false,
+      "evidence": "No hostnames, versions or outputs are invented. HAProxy is raised as a question to check, not stated as a fact."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all eight criteria and commits none of the critical errors. It frames the outage as a control-plane problem, classifies the evidence and lays out hypotheses with read-only checks that would tell them apart. It also presents controlled degradation with its cost, the condition for reopening and a decision owner, warns about partition resets, wrong Galera bootstraps and queue purges along with their safeguards, and defines end-to-end verification that includes a test VM. One minor point: the passing reference to 'the book's P1/P2 pattern' cannot be checked against the cited chapters, but nothing in the source contradicts it, so it is not listed as a faithfulness issue."
+}

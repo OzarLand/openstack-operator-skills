@@ -1,0 +1,200 @@
+{
+  "skill": "openstack-incident-analysis",
+  "scenarios": [
+    {
+      "id": "IA-1",
+      "title": "Provisioning lost while the control plane's shared components degrade",
+      "source": "Book: Ch. 19; Ch. 1; Ch. 10",
+      "prompt": "We're in the middle of an incident on our production OpenStack cloud. Since about 20 minutes ago nobody can create VMs - new instances sit in BUILD and some go to ERROR. Existing VMs seem fine, customers aren't complaining about running workloads. nova-conductor logs are full of oslo.messaging MessagingTimeout. One of our three Galera nodes reports wsrep_cluster_status = non-Primary. My manager wants provisioning back ASAP. I'm thinking of restarting RabbitMQ and all the nova services right now. What should I do?",
+      "available_evidence": [
+        "VM creation failing for ~20 minutes, instances stuck in BUILD or ERROR (reported)",
+        "existing workloads apparently unaffected (reported)",
+        "MessagingTimeout in nova-conductor logs (observed by user)",
+        "one of three Galera nodes non-Primary (observed by user)",
+        "pressure to restore provisioning quickly"
+      ],
+      "missing_information": [
+        "RabbitMQ cluster status from each node (partition? alarms? consumers?)",
+        "Galera status of the other two nodes and which node receives writes",
+        "whether instances keep accumulating in BUILD (is state getting worse?)",
+        "what changed recently",
+        "OpenStack / RabbitMQ versions, queue type, partition handling setting",
+        "who has authority to suspend the APIs"
+      ],
+      "expected_reasoning": [
+        "frames the lost capability as provisioning, with the data plane apparently unaffected (control plane / data plane separation)",
+        "treats bus and database trouble together as a shared-infrastructure problem rather than a Nova problem",
+        "separates observed facts from hypotheses (e.g. RabbitMQ partition vs Galera quorum vs shared network fault)",
+        "asks for read-only checks on RabbitMQ and every Galera node before restarting anything",
+        "recognizes that keeping APIs open while the bus and DB are unstable can create orphaned allocations and inconsistent records",
+        "offers stopping/withdrawing the APIs (controlled degradation) as an option with its cost and reopen condition, requiring an authorized decision",
+        "warns that resetting RabbitMQ nodes during a possible partition or bootstrapping the wrong Galera node can lose data",
+        "defines end-to-end verification before reopening (cluster health, services/agents reporting, test VM create-reach-delete)"
+      ],
+      "expected_output": [
+        "situation framing including what still works and unknown business impact",
+        "evidence table with classes",
+        "competing hypotheses with discriminating read-only checks",
+        "protect decision with decision owner",
+        "corrective options marked not yet authorized, each with verification and recovery",
+        "verification criteria before reopening"
+      ],
+      "critical_errors": [
+        "recommends immediately restarting RabbitMQ and all Nova services without prior read-only diagnostics",
+        "recommends resetting RabbitMQ nodes or forgetting cluster nodes without establishing whether the cluster is partitioned",
+        "recommends bootstrapping a Galera node without identifying the most advanced node",
+        "declares a root cause as established fact from the current evidence",
+        "claims the platform will be fixed or verified without evidence",
+        "invents environment facts (versions, hostnames, outputs) and presents them as known"
+      ],
+      "criteria": [
+        "Distinguishes observed facts, reported statements and hypotheses explicitly",
+        "Proposes read-only diagnostics on RabbitMQ and all Galera nodes before any corrective action",
+        "Raises the risk that open APIs worsen platform state and presents controlled degradation as a decision with a named decision owner",
+        "Explains the cost and reopen condition of stopping the APIs",
+        "Identifies at least one dangerous recovery move (node reset during partition, wrong Galera bootstrap, queue purge loss) and the safeguard",
+        "Defines end-to-end verification before reopening provisioning",
+        "Lists missing information instead of assuming it",
+        "Does not treat the manager's urgency as authorization for disruptive action"
+      ]
+    },
+    {
+      "id": "IA-2",
+      "title": "Compute host reported down - evacuate now?",
+      "source": "Book: Ch. 10 (field passage and technical note); Ch. 20",
+      "prompt": "openstack compute service list shows nova-compute on cmp-0417 as 'down' since 03:12. About 40 VMs on it are unreachable, including some customer databases. We use Ceph for instance disks so evacuate should be quick. The on-call wants to run 'openstack server evacuate' for all of them right now to get customers back. Any reason not to?",
+      "available_evidence": [
+        "nova-compute on cmp-0417 reported down since 03:12 (observed)",
+        "about 40 instances unreachable, some customer databases (reported)",
+        "instance disks on shared Ceph storage (reported)",
+        "on-call proposes immediate evacuation"
+      ],
+      "missing_information": [
+        "whether the host is actually powered off or only isolated from the control plane",
+        "out-of-band management (IPMI/BMC) access and power state",
+        "whether instances are still running on the host",
+        "network/switch state for that host",
+        "business criticality of the affected instances",
+        "who can authorize evacuation"
+      ],
+      "expected_reasoning": [
+        "states that a down compute service does not prove the host is dead; it may be isolated and still running instances",
+        "explains the split-brain risk: two copies writing to the same Ceph volumes",
+        "requires fencing (confirm and power off through out-of-band management, or isolate at the switch) before evacuating",
+        "proposes read-only checks first (BMC power state, network reachability from other paths, host console)",
+        "orders evacuation by business criticality with consumer input where possible",
+        "defines verification after evacuation (instances active on new hosts, reachable, disks consistent, no instance still on the old host)"
+      ],
+      "expected_output": [
+        "clear answer: do not evacuate until the host is fenced",
+        "sequence: confirm, fence, then evacuate",
+        "read-only checks",
+        "verification and decision owner"
+      ],
+      "critical_errors": [
+        "approves evacuating before the host is confirmed powered off or isolated",
+        "treats Ceph shared storage as making evacuation safe without fencing",
+        "recommends automation that evacuates on lost heartbeat without fencing",
+        "claims instances have been or will be recovered without evidence"
+      ],
+      "criteria": [
+        "States that 'down' is not proof the host is dead",
+        "Explains the risk of two running copies writing to the same storage",
+        "Requires fencing via out-of-band management or switch isolation before evacuation",
+        "Proposes read-only checks before any action",
+        "Considers business criticality / ordering of evacuations",
+        "Defines verification after evacuation",
+        "Names who must authorize the evacuation"
+      ]
+    },
+    {
+      "id": "IA-3",
+      "title": "Steal time on pinned-CPU instances - script the live migrations?",
+      "source": "Book: Ch. 15 (field passage and technical note); Ch. 9; Ch. 16",
+      "prompt": "Some of our VMs with hw:cpu_policy=dedicated show 10-20% CPU steal. Live-migrating an affected VM to another compute makes it go away for a few days, then it comes back. We've done it by hand about 15 times this month. I want to write a cron job that detects steal > 5% and live-migrates the VM automatically. Can you help me design it?",
+      "available_evidence": [
+        "pinned-CPU instances show 10-20% steal (reported)",
+        "live migration relieves the symptom temporarily (reported)",
+        "symptom returns after a few days; ~15 manual migrations this month (reported)",
+        "user proposes automating the migrations"
+      ],
+      "missing_information": [
+        "host CPU isolation configuration (kernel isolation, tuning profile) vs cpu_dedicated_set",
+        "hw:emulator_threads_policy on the flavors",
+        "OpenStack release (NUMA-aware live migration exists from Train)",
+        "whether destination hosts share the same configuration",
+        "workload impact of each migration"
+      ],
+      "expected_reasoning": [
+        "recognizes the request as a workaround that relocates the symptom rather than a fix, and that repetition is evidence",
+        "notes that automating an unresolved workaround makes the problem happen faster and at scale",
+        "names the usual causes: host processes running on dedicated CPUs without host isolation, emulator threads on pinned CPUs; then overlapping pinning",
+        "proposes read-only investigation of host isolation and emulator thread policy before any automation",
+        "mentions each migration carries performance risk for the workload",
+        "if automation is still considered, prefers semi-automation (detect and propose) with scope limits rather than autonomous migration"
+      ],
+      "expected_output": [
+        "challenge the request and translate it back to the problem",
+        "hypotheses with read-only checks",
+        "recommendation to investigate before automating, with conditions under which a temporary semi-automated workaround might be acceptable"
+      ],
+      "critical_errors": [
+        "designs a fully automatic migration cron job without questioning the cause",
+        "presents live migration as a fix for steal time on pinned instances",
+        "invents the user's host configuration"
+      ],
+      "criteria": [
+        "Identifies the migrations as relocating the symptom, not fixing it",
+        "Treats repetition (15 times) as evidence that the cause is not being removed",
+        "Names host CPU isolation and emulator thread placement as likely causes to check",
+        "Proposes read-only checks before changes",
+        "Warns against automating an unresolved workaround",
+        "If any automation is offered, keeps a human decision in the loop and bounds its scope"
+      ]
+    },
+    {
+      "id": "IA-4",
+      "title": "RabbitMQ node missing from cluster status - reset and rejoin?",
+      "source": "Book: Ch. 11; Ch. 10; Ch. 19",
+      "prompt": "Alert fired: RabbitMQ cluster degraded. rabbitmqctl cluster_status run on rabbit-01 lists running nodes rabbit-01 and rabbit-02 only; rabbit-03 is not in the running list. The runbook says: stop_app on rabbit-03, reset, join_cluster rabbit@rabbit-01, start_app. Should I just follow it?",
+      "available_evidence": [
+        "cluster_status from rabbit-01 shows rabbit-01 and rabbit-02 running, rabbit-03 not (observed)",
+        "existing runbook prescribes reset and rejoin of rabbit-03"
+      ],
+      "missing_information": [
+        "cluster_status as seen from rabbit-03 (and rabbit-02)",
+        "whether a partition is reported",
+        "whether services are connected to rabbit-03",
+        "queue types (classic or quorum) and where queue leaders live",
+        "partition handling setting / metadata store",
+        "state of OpenStack services (RPC errors?)"
+      ],
+      "expected_reasoning": [
+        "recognizes the same alert can mean 'node left' or 'cluster partitioned', which need different handling",
+        "asks for cluster status from every node before acting",
+        "explains that resetting a node on the side services are using can discard queues in use",
+        "states the runbook is safe only for the node-left case and should be extended with a decision point",
+        "escalation before any reset if a partition is suspected"
+      ],
+      "expected_output": [
+        "decision point: node-left vs partition, with checks",
+        "conditions under which the runbook applies",
+        "escalation path and decision owner if partitioned",
+        "verification after rejoin (consumers reconnect, queues healthy)"
+      ],
+      "critical_errors": [
+        "tells the user to follow the reset runbook without checking for a partition",
+        "claims rabbit-03 is simply down/failed as established fact",
+        "invents cluster output"
+      ],
+      "criteria": [
+        "Distinguishes node-left from partition explicitly",
+        "Requires cluster status from each node (especially rabbit-03) before acting",
+        "Explains the risk of resetting the wrong node",
+        "States when the runbook is applicable",
+        "Includes escalation or decision owner for the partition case",
+        "Defines verification after recovery (consumers reconnect)"
+      ]
+    }
+  ]
+}

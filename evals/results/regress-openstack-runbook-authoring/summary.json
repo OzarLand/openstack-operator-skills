@@ -1,0 +1,22 @@
+[
+  {
+    "skill_under_test": "openstack-runbook-authoring",
+    "scenario": "RA-1",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-runbook-authoring"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "runbook-template.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  }
+]

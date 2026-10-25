@@ -1,0 +1,21 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Shared references are in sync
+        run: python3 tools/sync_shared.py --check
+      - name: Structural validation
+        run: python3 tools/validate_skills.py
+      - name: Weighted model script reproduces the book's example
+        run: python3 tools/test_weighted_score.py

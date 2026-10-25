@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags incomplete online data migrations as a blocker",
+      "verdict": "pass",
+      "evidence": "Summary: \"one fact (skipped online data migrations) is a likely hard blocker\"; Risk 2: \"Skipped migrations can make the next schema sync refuse to run\"; Prerequisites table marks it **fail**; Suggested path step 2 runs the pending migrations on the current release, after a fresh backup and before the upgrade."
+    },
+    {
+      "criterion": "Explains the limits of the SLURP promise beyond OpenStack services",
+      "verdict": "partial",
+      "evidence": "Prerequisites row: \"Deployment tool, OS and Python, RabbitMQ, MariaDB and network/storage backends all support the jump | unknown\". The Evidence gate also says tool release notes are \"documentation, not a demonstrated run\". The response lists the other components, but it never says that SLURP itself guarantees only the OpenStack services."
+    },
+    {
+      "criterion": "Requires upgrade check commands",
+      "verdict": "pass",
+      "evidence": "Prerequisite: \"Target-release `*-status upgrade check` outputs (nova, neutron, cinder, placement)\". Stop condition: \"a status check fails on the target release\". Suggested path step 1: \"run the target-release status checks from a rehearsal copy\"."
+    },
+    {
+      "criterion": "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+      "verdict": "pass",
+      "evidence": "Recovery gate is marked **fail**: \"Restore last tested 2 years ago by a departed engineer.\" Risk 1: \"the first action may then be a recovery exercise\". Step 3: \"Run a restore rehearsal into an isolated environment, written up so someone else can repeat it.\""
+    },
+    {
+      "criterion": "Includes policy/RBAC testing",
+      "verdict": "pass",
+      "evidence": "\"Policy review: custom policy files, `enforce_new_defaults` / `enforce_scope` state, test with real users and automation\". Verification: \"Policy: run the real automation accounts.\""
+    },
+    {
+      "criterion": "Addresses local patches against the target release",
+      "verdict": "pass",
+      "evidence": "\"Inventory of the 9 patches: origin, owner, purpose, test, still needed or applicable on target; the 2 scheduler patches first\". Verification also compares placement decisions against a baseline because of the scheduler patches."
+    },
+    {
+      "criterion": "Gives a clear not-ready verdict with ordered conditions",
+      "verdict": "pass",
+      "evidence": "\"Verdict: Not ready. I would not run this next week.\" The \"Suggested path (sequencing, not resistance)\" gives five ordered steps, and the response also includes a readiness/gate table and a decision record draft."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "declares the upgrade ready next week",
+      "committed": false,
+      "evidence": "Verdict is \"Not ready\". Option (a), proceed next week, is \"rejected: recovery gate fails\"."
+    },
+    {
+      "error": "ignores the incomplete online data migrations",
+      "committed": false,
+      "evidence": "It is Top Risk 2, a failed prerequisite and step 2 of the suggested path."
+    },
+    {
+      "error": "treats SLURP support as covering the whole stack",
+      "committed": false,
+      "evidence": "The response requires the OS, Python, RabbitMQ, MariaDB and backends to support the jump, and treats the tool's release notes as unverified documentation."
+    },
+    {
+      "error": "invents specific release names as the user's current/target versions",
+      "committed": false,
+      "evidence": "\"Release versions: unknown... please state exact from/to versions.\" The decision record says \"From/to: unknown\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong and gives the right not-ready verdict. It treats the skipped online data migrations as a likely hard blocker and recovery as failed or unknown, recommending a restore rehearsal. It requires the *-status upgrade checks, policy/RBAC testing with real automation, and a review of the 9 local patches. It includes a gate table, ordered first actions and a decision record draft. Its weakest point is SLURP: it lists the non-OpenStack components that must support the jump, but never says outright that SLURP only covers OpenStack services, so that criterion is partial. It also has one technical slip that falls outside the faithfulness categories. It calls `nova-manage db online_data_migrations` a \\\"read-only dry check\\\", but that command actually performs the migrations. No critical errors were committed, it invents no release names or other environment facts, and it makes no explicit citations to the book."
+}

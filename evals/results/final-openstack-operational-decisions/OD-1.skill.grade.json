@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Applies decision gates before comparing options",
+      "verdict": "pass",
+      "evidence": "A 'Gates' table ('Option | Failed gate | What would satisfy it') rules out option 1 ('No credible recovery path... Depends on expertise you can't obtain') before any recommendation is made. There is no scoring. A descriptive risk table comes first, but the gates are what decide the outcome."
+    },
+    {
+      "criterion": "Links postponement's viability to a tested backport",
+      "verdict": "partial",
+      "evidence": "The response requires the backport to be tested ('Apply it in production only after staging passes') and warns that under option 3 'The backport becomes the lifecycle strategy' and that 'a second advisory would mean a second untested backport.' However, option 3's gate row cites only patch expertise and an open-ended timeline. It never says that postponement passes the security gate only if the backport is credibly tested."
+    },
+    {
+      "criterion": "Identifies the recovery exercise as the first action or key uncertainty reducer",
+      "verdict": "pass",
+      "evidence": "'Treat recovery as unproven.' Step 2, the recovery exercise by the current four: 'This is the gate that unlocks any upgrade.' Also: 'if it fails, fixing recovery becomes the only priority until it passes.'"
+    },
+    {
+      "criterion": "Recognizes team readiness as a constraint",
+      "verdict": "pass",
+      "evidence": "'Team shrank from six to four... it reduces change capacity'. 'Two control-plane upgrades by four people'. 'two hops in a quarter with four people stays marginal'. 'reconsider if the team drops below four'."
+    },
+    {
+      "criterion": "States what would change the ranking (sensitivity)",
+      "verdict": "pass",
+      "evidence": "Marks 'Whether hop 1 lands on a maintained series' as 'Decisive for the choice' and gives the alternative plan if it does not ('plan the two hops as one programme... shorten the stabilization period'). Says what would satisfy option 1's gates. The review triggers reopen the plan if the team shrinks or a deadline moves."
+    },
+    {
+      "criterion": "Assigns owner, review trigger or exit condition to retained deviations",
+      "verdict": "pass",
+      "evidence": "Backport record: 'the upstream change it derives from, the owner, how it is tested, and the exit condition'. Backport triggers: 'reopen if the advisory is exploited in the wild... It expires at the first hop that lands on a maintained series.' Every patch gets 'who owns it'."
+    },
+    {
+      "criterion": "Frames the output as decision support for a named or to-be-named owner",
+      "verdict": "pass",
+      "evidence": "'Decision support only.' 'Risk acceptance for the advisory exposure and the timeline: a business or security owner with authority, not the platform team alone. Name this person now.' The same owner makes the go/no-go call on each hop."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends postponement while carrying an untested backport without flagging the security gate",
+      "committed": false,
+      "evidence": "Postponement is not recommended ('mostly delays the problem'). The interim backport must pass staging tests before production and comes with compensating controls and exit conditions."
+    },
+    {
+      "error": "presents a weighted score as the decision itself",
+      "committed": false,
+      "evidence": "No weighted scoring is used at all. The decision is left with the accountable owner."
+    },
+    {
+      "error": "recommends the immediate double hop without addressing recovery capability",
+      "committed": false,
+      "evidence": "'Doing both hops in one quarter fails the gates', and the response cites the unproven recovery path as the reason."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, well-structured response. It applies gates, rejects the double hop because recovery is unproven, makes the recovery exercise by current staff the gate for any upgrade, treats team size as a constraint, and names the decisive variable (whether hop 1 lands on a maintained series). It gives the backport an owner, tests, triggers and an expiry, and assigns decision rights to a business or security owner who still needs to be named. The one weak spot: it doesn't say that postponement's viability depends specifically on a credibly tested backport. Its option 3 gate analysis focuses on patch expertise and open-endedness instead. It commits none of the critical errors, and nothing in it contradicts the book or invents facts about the user's environment."
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Prefers project tools over direct SQL where available",
+      "verdict": "pass",
+      "evidence": "\"Use the APIs and the project tools... `nova reset-state` then `openstack server delete`... `nova-manage placement audit`... `heal_allocations`... `nova-manage db archive_deleted_rows`\"; \"Direct SQL is a last resort for the rows the API cannot reach.\""
+    },
+    {
+      "criterion": "Requires backup, small increments and verification",
+      "verdict": "pass",
+      "evidence": "Prerequisite: \"Backups of the affected tables (nova cell, nova_api, neutron, cinder), taken and restore-tested\"; \"canary of 5, then a few batches\"; \"Each batch is verified before the next\"; SQL \"per record, with a backup\"; a full Verification section."
+    },
+    {
+      "criterion": "Requires confirming records against real hypervisor/network/storage state",
+      "verdict": "pass",
+      "evidence": "Step 2: \"Check each host for the domain (`virsh list --all`) and each volume's backend for active attachments\"; prerequisite \"Ceph/LVM/iSCSI-side check of volume exports\"; port deletion only \"after confirming `device_owner`\"; OVN/OVS port state noted."
+    },
+    {
+      "criterion": "Mentions Placement allocation reconciliation",
+      "verdict": "pass",
+      "evidence": "\"A nova row marked `deleted` doesn't ... free a Placement allocation\"; Step 4 `nova-manage placement audit` / `heal_allocations`; verification: \"Placement allocations for the affected hosts are consistent with the remaining instances.\""
+    },
+    {
+      "criterion": "Flags the irreversibility and blast radius",
+      "verdict": "pass",
+      "evidence": "\"The change is irreversible once committed, touches three service databases\"; \"Three transactions in three databases are not atomic\"; Blast radius gate **fail**: \"All 300 at once, across three databases, with no canary\"; \"Point of no return: the commit of the first transaction.\""
+    },
+    {
+      "criterion": "Proposes a staged plan with a dry run",
+      "verdict": "pass",
+      "evidence": "Staged 7-step table starting with read-only steps: \"Build the target list from a fixed ID list\" and hypervisor checks; \"Read-only checks to run now\" including `nova-manage placement audit` (without `--delete`); canary then batches."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the bulk SQL script in one go",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready.\" and recommends API/project tools in batches; the one-shot SQL option is listed but not selected."
+    },
+    {
+      "error": "omits the backup requirement",
+      "committed": false,
+      "evidence": "Backups of all four databases, taken and restore-tested, are listed as a prerequisite, and \"the backup isn't verified\" is a stop condition."
+    },
+    {
+      "error": "ignores Placement allocations",
+      "committed": false,
+      "evidence": "Placement comes up in the risks, scope, Step 4 (audit/heal_allocations) and verification."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong and complete. Its verdict is \"not ready\". It offers a staged alternative that puts the API and project tools first: reset-state and delete, Placement audit and heal, then archive_deleted_rows. It requires restore-tested backups, a canary followed by batches, and checks against the hypervisor and storage backends. It covers Placement reconciliation and the non-atomic risk across three databases, and gives verification, stop conditions and decision roles. It commits none of the critical errors. It makes no book citations and invents nothing about the user's environment."
+}

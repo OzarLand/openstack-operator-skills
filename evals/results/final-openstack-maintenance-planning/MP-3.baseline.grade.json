@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Disables the compute service before moving instances",
+      "verdict": "pass",
+      "evidence": "Drain step 1, before any migrations: \"Stop new scheduling: `openstack compute service set --disable --disable-reason \"DIMM swap\" cmp-12 nova-compute`\"."
+    },
+    {
+      "criterion": "Treats PCI passthrough instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "\"Libvirt can't live-migrate PCI passthrough devices, so there are two options\": cold migrate to a host with a free matching GPU, or stop the VMs and leave them on cmp-12. Preflight also says to \"Agree downtime up front for the GPU VMs.\""
+    },
+    {
+      "criterion": "Identifies the large-memory database as a live-migration risk and involves its owner",
+      "verdict": "pass",
+      "evidence": "\"A live migration can fail to converge because the guest dirties memory faster than it copies\". It names auto-converge and post-copy, warns about post-copy risk, and says \"Decide the method with its owner before tomorrow, not during the window.\""
+    },
+    {
+      "criterion": "Verifies moves and empty host before power-off",
+      "verdict": "pass",
+      "evidence": "\"Check each one reaches ACTIVE on the new host before the next batch\" and \"Confirm it's empty. `openstack server list --host cmp-12 --all-projects` should return nothing. Then check `virsh list --all` on the host.\""
+    },
+    {
+      "criterion": "Includes post-repair verification and re-enable step",
+      "verdict": "pass",
+      "evidence": "After boot it checks the full RAM count (`free -g`, `dmidecode -t memory`) and runs memtest or vendor diagnostics. Then: \"Re-enable the service with `openstack compute service set --enable cmp-12 nova-compute`\", start any VMs left on the host, and \"Check that the passthrough GPUs are visible and bound to vfio.\""
+    },
+    {
+      "criterion": "Labels steps read-only vs state-changing or otherwise marks state changes needing approval",
+      "verdict": "partial",
+      "evidence": "The plan is split into \"Today: preflight\" (mostly read-only inventory and checks) and \"Tomorrow: drain\" (state changes), which implicitly separates the two. No step is explicitly labelled read-only or state-changing, and none is marked as needing approval."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "proposes live-migrating the PCI passthrough instances as normal",
+      "committed": false,
+      "evidence": "States that libvirt can't live-migrate PCI passthrough devices and offers cold migration or stop-in-place instead."
+    },
+    {
+      "error": "proposes evacuate",
+      "committed": false,
+      "evidence": "Evacuate is never mentioned. The response uses live migration, cold migration (`openstack server migrate`) or shutdown."
+    },
+    {
+      "error": "omits disabling the compute service",
+      "committed": false,
+      "evidence": "Drain step 1 disables nova-compute on cmp-12 before any migrations."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong, correct plan that commits none of the critical errors. It disables nova-compute first and correctly treats the GPU passthrough VMs as needing cold migration or agreed downtime. It flags the convergence risk of the in-memory database (auto-converge, post-copy, application-level failover) and makes the owner decide the method. It checks each move and that the host is empty before power-off, and includes post-repair hardware checks and re-enabling the service. Weaknesses: steps are not explicitly labelled read-only vs state-changing or marked as needing approval, and stop conditions are thin. It also notifies owners rather than asking them about criticality, and calls application failover \\\"zero-risk for data\\\", which overstates it slightly. There are no book citations and no invented environment facts."
+}

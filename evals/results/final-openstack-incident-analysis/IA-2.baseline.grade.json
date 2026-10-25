@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"'nova-compute down' only means the agent stopped heartbeating. It doesn't mean the VMs stopped.\" It also covers the case where the host is cut off from the control plane but still running libvirt/QEMU."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Evacuating then starts a second copy of each VM on another host, using the same Ceph disks. Two writers on one database volume can corrupt it\". It also warns that RBD exclusive-lock is not a reliable guard."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"Fence the host. Power it off through the BMC/IPMI ... and confirm it reports off.\" If the host can't be powered off, it gives Ceph client blocklisting as the storage-level fence. The closing line says fencing is the only step to take before evacuating."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "partial",
+      "evidence": "The first numbered step is a power-off, which is an action. The response never proposes checking the BMC power state, reachability over other network paths, or the host console before acting. Its only read-only checks are confirming the host \"reports off\" after the power-off, `rbd status` to find watchers, and capacity/flavor checks."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Stagger it. Evacuate the customer databases first, in small batches (5–10).\" It does not mention getting input from the customers or service owners."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "partial",
+      "evidence": "\"check that each DB VM is ACTIVE, that the guest is up, and that the database recovers cleanly\", plus keep nova-compute stopped on the old host until the evacuations are verified. It never says to confirm that no instance is still running on cmp-0417, and it has no explicit disk-consistency check."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "The response never names a decision owner or anyone who must approve the evacuation. It says only \"If someone has already confirmed cmp-0417 is powered off\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Evacuation is only approved on the condition \"If someone has already confirmed cmp-0417 is powered off\". Otherwise \"fencing it is the only step to take before evacuating\". The fallback path also requires a Ceph blocklist fence first."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "It names shared Ceph disks as the source of the danger and says exclusive-lock should not be relied on."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "The response recommends no automation."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "It makes no recovery claims. It tells the reader to verify each instance and to expect database crash recovery."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly says not to evacuate until the host is fenced. It explains why a down service doesn't mean dead VMs and how two copies writing to the same Ceph disks can corrupt data. It requires a BMC power-off, or a Ceph blocklist if that fails, before evacuating, and it orders the evacuations with the databases first. It falls short in three places. It jumps straight to the power-off without read-only diagnostics first. Its post-evacuation checks never confirm that no instance is still on the old host. It never names who must authorize the evacuation. It commits none of the critical errors, and it has no faithfulness issues: it cites no book and invents no facts about the environment."
+}

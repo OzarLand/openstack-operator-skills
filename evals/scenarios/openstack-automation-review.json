@@ -1,0 +1,123 @@
+{
+  "skill": "openstack-automation-review",
+  "scenarios": [
+    {
+      "id": "AR-1",
+      "title": "Auto-evacuation on lost heartbeat",
+      "source": "Book: Ch. 10 (technical note); Ch. 16",
+      "prompt": "Review this script before we put it in cron every minute on a controller:\n\n```python\nimport openstack\nconn = openstack.connect(cloud='prod')\nfor svc in conn.compute.services(binary='nova-compute'):\n    if svc.state == 'down' and svc.status == 'enabled':\n        for server in conn.compute.servers(all_projects=True, host=svc.host):\n            conn.compute.evacuate_server(server)\n        conn.compute.disable_service(svc, svc.host, 'nova-compute')\n```\n\nIt saves us from waking up at night.",
+      "available_evidence": [
+        "script evacuates all servers from any host whose compute service is down and enabled, every minute",
+        "no fencing, no limits, no logging, no confirmation"
+      ],
+      "missing_information": [
+        "out-of-band management availability",
+        "storage model",
+        "capacity reserve",
+        "who owns the script and on-call process"
+      ],
+      "expected_reasoning": [
+        "identifies delegated judgement: deciding a host is dead and disrupting workloads",
+        "blocking finding: evacuates without fencing; a down service does not prove the host is dead; double-running instances on shared storage",
+        "no scope limit: a control-plane or network problem marking many hosts down would trigger mass evacuation",
+        "no dry run, no logging, no stop condition, no concurrency lock; runs every minute (repeated evacuation attempts)",
+        "recommends semi-automation (detect, fence-check, propose) or fencing as a hard precondition with bounded scope",
+        "production-software discipline: owner, tests, observability"
+      ],
+      "expected_output": [
+        "verdict not safe - redesign, findings table with severities, suggested design"
+      ],
+      "critical_errors": [
+        "approves the script with minor tweaks without adding fencing",
+        "suggests evacuating on heartbeat loss as acceptable practice"
+      ],
+      "criteria": [
+        "Marks absence of fencing as blocking",
+        "Explains why a down service is not proof the host is dead",
+        "Identifies mass-evacuation risk from control-plane/network failure (unbounded scope)",
+        "Identifies missing dry run, logging, stop conditions",
+        "Recommends semi-automation or fencing precondition with bounded scope",
+        "Quotes or references specific lines of the script"
+      ]
+    },
+    {
+      "id": "AR-2",
+      "title": "Rolling patch playbook without draining",
+      "source": "Book: Ch. 16; Ch. 20; Ch. 9 (Ansible specifics are repository additions)",
+      "prompt": "Here's our Ansible playbook for monthly compute patching. OK to run on prod?\n\n```yaml\n- hosts: compute\n  become: true\n  tasks:\n    - name: update packages\n      ansible.builtin.dnf:\n        name: '*'\n        state: latest\n      ignore_errors: true\n    - name: reboot\n      ansible.builtin.reboot:\n```",
+      "available_evidence": [
+        "playbook targets all compute hosts with default forks, no serial",
+        "updates all packages to latest with ignore_errors",
+        "reboots hosts without draining instances"
+      ],
+      "missing_information": [
+        "inventory size and failure domains",
+        "whether instances tolerate reboot",
+        "forks setting",
+        "package repository pinning"
+      ],
+      "expected_reasoning": [
+        "blocking: reboots hosts with running instances without disabling compute service or moving instances",
+        "blocking: no serial/batching, so many hosts reboot at once (blast radius)",
+        "ignore_errors hides failures; no health checks or stop conditions between batches",
+        "state: latest on '*' is non-deterministic across hosts (unpinned changes, stacked uncertainty)",
+        "missing verification of host health and instance state after reboot",
+        "QEMU/libvirt updates only protect instances migrated or restarted since",
+        "links to a maintenance plan by criticality and capacity"
+      ],
+      "expected_output": [
+        "verdict not safe, findings with severities and suggested structure (serial, pre/post checks, disable/migrate, max_fail_percentage)"
+      ],
+      "critical_errors": [
+        "approves running the playbook on production as is",
+        "ignores the lack of instance draining"
+      ],
+      "criteria": [
+        "Flags rebooting without draining instances as blocking",
+        "Flags lack of batching (serial) as a blast-radius problem",
+        "Flags ignore_errors and missing stop conditions",
+        "Flags unpinned updates as uncontrolled change",
+        "Requires post-reboot verification",
+        "Refers to a maintenance plan based on criticality and capacity"
+      ]
+    },
+    {
+      "id": "AR-3",
+      "title": "Nightly cleanup deleting ERROR instances in all projects",
+      "source": "Book: Ch. 16; Ch. 10; Ch. 13 (scenario constructed)",
+      "prompt": "We want a nightly job: `openstack server list --all-projects --status ERROR -f value -c ID | xargs -n1 openstack server delete` but only for instances older than 24h. Stale ERROR instances eat quota and confuse capacity reports. Thoughts?",
+      "available_evidence": [
+        "proposal to delete all ERROR instances older than 24h across all projects nightly",
+        "motivation: quota and capacity distortion (reported)"
+      ],
+      "missing_information": [
+        "whether tenants are informed or consent",
+        "whether ERROR instances may hold data/volumes",
+        "count of affected instances",
+        "owner of the job"
+      ],
+      "expected_reasoning": [
+        "identifies delegated judgement: deleting tenant resources is a business decision",
+        "ERROR does not mean worthless: instances may have volumes or data; tenants own them",
+        "requires dry run/report, explicit scope, guard against unexpectedly large sets, logging",
+        "recommends semi-automation: report to owners, delete after consent or policy",
+        "connects to stale-state hygiene but notes cleanup itself must follow change discipline",
+        "note: the proposed one-liner as written does not actually filter by age"
+      ],
+      "expected_output": [
+        "verdict should be semi-automated, with design and safeguards"
+      ],
+      "critical_errors": [
+        "approves autonomous deletion of tenant instances without consent or dry run",
+        "provides a completed deletion script without safeguards"
+      ],
+      "criteria": [
+        "Identifies deletion of tenant resources as delegated judgement needing a policy or owner decision",
+        "Requires dry run/report and a guard on the target set size",
+        "Recommends semi-automation or owner notification",
+        "Requires logging/observability and an owner",
+        "Notices the command as written does not implement the 24h filter"
+      ]
+    }
+  ]
+}

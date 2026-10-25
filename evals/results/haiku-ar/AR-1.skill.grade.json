@@ -1,0 +1,50 @@
+{
+  "criteria": [
+    {
+      "criterion": "Marks absence of fencing as blocking",
+      "verdict": "pass",
+      "evidence": "Findings #1 'Blocking | lines 4–7 | Evacuates without fencing... Require fencing (out-of-band power-off via BMC/Redfish, verified off) as a precondition for every evacuation.'"
+    },
+    {
+      "criterion": "Explains why a down service is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"The signal it acts on (`state == 'down'`) only means the Nova API has not heard a heartbeat from that service recently. It does not show that the host is dead\"; also says guests can keep running after the nova-compute agent or messaging path fails, giving duplicated VMs on shared storage."
+    },
+    {
+      "criterion": "Identifies mass-evacuation risk from control-plane/network failure (unbounded scope)",
+      "verdict": "pass",
+      "evidence": "Finding #2 (Blocking): 'A controller or RabbitMQ blip can make many computes look down at once... a transient event can trigger a cloud-wide evacuation.' Scope section: 'There is no count guard.'"
+    },
+    {
+      "criterion": "Identifies missing dry run, logging, stop conditions",
+      "verdict": "pass",
+      "evidence": "Safeguards table: 'Preview / dry run | No', 'Monitoring | No | No logging', 'Stop conditions | No | No threshold on hosts down...'; Findings #9 and #11; it also flags the missing lock (#5) and the minute-by-minute repeats (#4)."
+    },
+    {
+      "criterion": "Recommends semi-automation or fencing precondition with bounded scope",
+      "verdict": "pass",
+      "evidence": "'this is a semi-automation case: the script should detect, gather evidence and page'; Stage 1–3 plan, where Stage 3 needs 'fencing is confirmed', 'at most one host is affected (or the N% limit is not exceeded)', and a kill switch."
+    },
+    {
+      "criterion": "Quotes or references specific lines of the script",
+      "verdict": "pass",
+      "evidence": "It quotes `conn.compute.services(binary='nova-compute')` (line 3), `servers(all_projects=True, host=svc.host)` (line 5) and `disable_service(svc, svc.host, 'nova-compute')`, and the findings table gives a line for each finding."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the script with minor tweaks without adding fencing",
+      "committed": false,
+      "evidence": "Verdict: 'not safe. Redesign before it runs unattended.' Missing fencing is marked Blocking and is a precondition in Stage 3."
+    },
+    {
+      "error": "suggests evacuating on heartbeat loss as acceptable practice",
+      "committed": false,
+      "evidence": "It says evacuation can be automated only 'after host failure is confirmed by something independent of the Nova heartbeat, which in practice means fencing.'"
+    }
+  ],
+  "faithfulness_issues": [
+    "Minor misstatement of the input: the response says the pasted snippet is '9 lines' (and later 'only 9 lines'). The script in the prompt has 7 lines, and the response's own line references (lines 1–7) match 7 lines."
+  ],
+  "summary": "This is a strong, well-structured review. It concludes the script is not safe and needs redesign. It marks missing fencing, unbounded mass-evacuation scope and local-storage data loss as blocking. It explains why a missed heartbeat does not prove the host is dead. It flags the missing dry run, logging, stop conditions, lock and idempotency. It proposes a staged path: detect and page first, then fencing, then bounded automation. It names the specific lines behind each finding. It does not commit either critical error and makes no book citations. The only faithfulness issue is small: it calls the 7-line script '9 lines'."
+}

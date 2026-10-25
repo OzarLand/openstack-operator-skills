@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+      "verdict": "pass",
+      "evidence": "Step 3 reads grastate.dat with a table covering seqno ≥0, seqno -1 and safe_to_bootstrap: 1. Step 3a gives `mysqld --wsrep-recover` for seqno -1. Step 4 picks the highest seqno and explains when to set safe_to_bootstrap."
+    },
+    {
+      "criterion": "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+      "verdict": "pass",
+      "evidence": "'Rules that prevent data loss: 1. Bootstrap exactly one node, the one with the highest seqno. Bootstrapping a lower one silently discards transactions the others had. 2. Never bootstrap two nodes.' Step 4 also requires a second person to confirm 'the one irreversible decision'."
+    },
+    {
+      "criterion": "Adds a decision point distinguishing full outage from partial failure",
+      "verdict": "pass",
+      "evidence": "'This applies only when every node is down. For a single failed node, restart it and let it rejoin through IST or SST.' Step 1 adds: 'If any node is Primary, stop and use normal node recovery instead.'"
+    },
+    {
+      "criterion": "Includes end-to-end verification",
+      "verdict": "partial",
+      "evidence": "Steps 5 and 7 check cluster size, Primary, Synced, wsrep_ready and wsrep_connected, plus 'check that a known table has the data you expect'. 'After recovery' covers restoring traffic. There is no check that the OpenStack services are writing again and no functional check, such as creating a resource."
+    },
+    {
+      "criterion": "Marks unknown specifics as TODOs",
+      "verdict": "pass",
+      "evidence": "The 'Environment details (fill in)' section marks nodes, flavor and version, data directory, service name, SST method, load balancer and escalation contacts as `[TODO]`. The procedure still uses `systemctl status mariadb` and `/var/lib/mysql` without an inline TODO, and it never raises the possibility of containerized deployment."
+    },
+    {
+      "criterion": "Proposes validation by a non-author while the expert is still available",
+      "verdict": "partial",
+      "evidence": "'Steps 1–4 only read state, so you can dry-run them with him on staging before he leaves', plus a list of questions to ask before Friday. The rehearsal covers only the read-only steps 1–4, not the bootstrap and rejoin. The response does not say that someone other than the expert should run it while the expert watches. It also suggests the outgoing DBA 'review' the runbook, which is the expert checking, not a non-author."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "omits the safe_to_bootstrap / wsrep-recover identification step",
+      "committed": false,
+      "evidence": "Steps 3, 3a and 4 cover grastate.dat, safe_to_bootstrap and --wsrep-recover explicitly."
+    },
+    {
+      "error": "presents invented service names or paths as fact",
+      "committed": false,
+      "evidence": "Service name and data directory are listed as `[TODO]`, with the data directory described as 'usually /var/lib/mysql'. Bootstrap commands are given for each flavor and labeled as alternatives. Some commands, such as `systemctl status mariadb`, appear without inline caveats, but the environment section flags them as unknowns."
+    },
+    {
+      "error": "does not propose a validation session before the expert leaves",
+      "committed": false,
+      "evidence": "'you can dry-run them with him on staging before he leaves' proposes a session, but only for the read-only steps."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid generic Galera runbook. It covers grastate.dat, safe_to_bootstrap and wsrep-recover in full, sets clear data-loss rules, distinguishes a full outage from a single-node failure, includes Galera-level verification, has a TODO section for environment details, and requires a second person to confirm the bootstrap. It falls short in two places. Verification stops at the database, with no check that the OpenStack services are writing again and no functional check. The validation plan is thin: it rehearses only the read-only steps 1–4 and never says a non-author should run the procedure while the expert observes. It also ignores the OpenStack context, including containerized deployment and HAProxy write-node behavior. It commits none of the critical errors and makes no book citations."
+}

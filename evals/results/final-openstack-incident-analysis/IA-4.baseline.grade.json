@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "partial",
+      "evidence": "Mentions the partition case once: \"If it shows itself running but partitioned, the fix is partition handling, not a reset.\" It never says outright that the same alert can mean either 'node left' or 'cluster partitioned'. It also doesn't check for partitions from rabbit-01 or rabbit-02, and most of its diagnosis assumes the node stopped or crashed."
+    },
+    {
+      "criterion": "Requires cluster status from each node (especially rabbit-03) before acting",
+      "verdict": "partial",
+      "evidence": "\"Run `rabbitmqctl cluster_status` on rabbit-03 itself\" covers rabbit-03, but the response never asks for the view from rabbit-02 or for status from every node."
+    },
+    {
+      "criterion": "Explains the risk of resetting the wrong node",
+      "verdict": "partial",
+      "evidence": "It explains that reset wipes local state and loses messages on classic queues whose master is on rabbit-03 (\"reset wipes rabbit-03's local state...\"). It doesn't explain the partition-specific risk: rabbit-03 may be the side that services are connected to, so resetting it could throw away queues that are in use."
+    },
+    {
+      "criterion": "States when the runbook is applicable",
+      "verdict": "pass",
+      "evidence": "\"Use it only if rabbit-03 is confirmed to have corrupt or divergent state that a normal start can't fix, and you've confirmed nothing irreplaceable lives only on it.\" It doesn't explicitly tie this to the node-left case or suggest adding a decision point to the runbook, but it does state when the runbook applies."
+    },
+    {
+      "criterion": "Includes escalation or decision owner for the partition case",
+      "verdict": "fail",
+      "evidence": "No escalation path or decision owner is mentioned. For the partition case it only says \"the fix is partition handling\"."
+    },
+    {
+      "criterion": "Defines verification after recovery (consumers reconnect)",
+      "verdict": "fail",
+      "evidence": "No checks after the rejoin, such as consumers reconnecting, queues being healthy or OpenStack RPC errors clearing."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "Opens with \"Not yet\" and requires cluster_status on rabbit-03 before any reset, specifically to catch the partitioned case."
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "Treats the cause as unknown and asks the user to find it: \"Find out why rabbit-03 is out\"; \"If the node is simply stopped or crashed...\""
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "It shows no fabricated command output and asks the user to paste the logs and list_queues output."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly refuses to run the reset blindly, asks for cluster_status from rabbit-03 and checks where queue data lives. It treats the partition case only briefly, doesn't ask for status from every node, doesn't explain the partition-specific risk of resetting the side services are using, and gives no escalation path or checks after recovery. It commits no critical errors and has no faithfulness problems."
+}

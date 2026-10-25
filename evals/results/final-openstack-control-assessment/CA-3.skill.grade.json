@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Declines or heavily qualifies a single score and gives a profile",
+      "verdict": "pass",
+      "evidence": "\"I won't give you a single score out of 10. A lone number would hide the one thing that matters here.\" It then gives an evidence/confidence table for RabbitMQ recovery, lists what it can't rate yet, and offers to \"build the full per-capability assessment.\""
+    },
+    {
+      "criterion": "Does not rate RabbitMQ as Recoverable given single-person recovery",
+      "verdict": "pass",
+      "evidence": "Heading: \"RabbitMQ recovery: Understood at best, not Recoverable\". It says the evidence fails the Recoverable test (\"recovery shown by someone other than the procedure's author\")."
+    },
+    {
+      "criterion": "Questions per-service dashboards vs dependency visibility",
+      "verdict": "partial",
+      "evidence": "It rates the dashboards only as \"Visible... I don't know if anyone has established what each alert means.\" It also lists \"which capabilities depend on RabbitMQ\" as unknown. It never says that per-service dashboards don't show dependency paths."
+    },
+    {
+      "criterion": "Questions the 400-page wiki as evidence (validation, ownership)",
+      "verdict": "pass",
+      "evidence": "\"About 400 wiki runbook pages | Coverage. It says nothing about whether the pages are accurate or usable\"; \"Volume is not control\"; \"Whether the runbook has been reviewed or updated\"; \"Whether the other 399 pages have the same single-author pattern.\""
+    },
+    {
+      "criterion": "Names the single-expert dependency",
+      "verdict": "pass",
+      "evidence": "\"Single-expert dependency is your top gap. If the lead engineer is away, sick or gone during a broker failure, you have an untested runbook and nobody who has used it.\""
+    },
+    {
+      "criterion": "Proposes concrete confidence tests",
+      "verdict": "pass",
+      "evidence": "\"Pick a second engineer and have them walk through the RabbitMQ runbook with the lead engineer observing but not helping... in a test or staging environment\". Then a full recovery in a controlled environment, then a supervised one. It also proposes tracking a single-recoverer metric."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "gives a single numeric score as the answer",
+      "committed": false,
+      "evidence": "It explicitly refuses: \"I won't give you a single score out of 10.\""
+    },
+    {
+      "error": "rates RabbitMQ as Recoverable or Sustainable",
+      "committed": false,
+      "evidence": "\"Understood at best, not Recoverable\"; \"Only then can you claim Recoverable.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response declines a single score, rates RabbitMQ recovery at most Understood and not Recoverable, names the single-expert dependency, challenges the 400-page wiki as evidence and proposes concrete recovery exercises for a second engineer. Its main weakness is the dashboards: it questions what the alerts mean but never says per-service dashboards don't give dependency-path visibility. The profile also covers only RabbitMQ, though it offers to extend it. It commits neither critical error. It frames its environment assumptions as assumptions (that this is OpenStack, that the lead engineer wrote the runbook), so I found no invented facts."
+}

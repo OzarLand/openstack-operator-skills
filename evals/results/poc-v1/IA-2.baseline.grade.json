@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"'nova-compute down' only means the agent has stopped reporting. It doesn't mean the host or its guests are dead.\" It also names agent crash, RabbitMQ partition and management-network failure as possible causes."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"evacuate starts a second copy of each VM on the same RBD image. Two writers on one database disk will corrupt it\". It also explains that exclusive-lock only protects you if the old client is blocklisted."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "partial",
+      "evidence": "Step 1 says to power off through the BMC and calls it \"the only real guarantee\". But step 2 lets the operator skip fencing when the BMC can't be reached: \"check at least that the host is dead... ping it, SSH to it, and look at its console\". Ceph blocklisting is only \"Optionally\", switch isolation is never mentioned, and the closing line allows evacuation if \"you've otherwise verified the VMs aren't running\"."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "partial",
+      "evidence": "Read-only checks (ping, SSH, console, `rbd status` watchers) appear only as a fallback in step 2. The first recommended step is an action: power-off through the BMC. There is no read-only check of BMC power state before powering off."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Do the customer databases first, then the rest. Don't fire off all 40 at once. Use batches of about 5–10\". It does not ask for consumer input."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "fail",
+      "evidence": "No checks after evacuation: nothing on instances being ACTIVE on new hosts, reachability, disk or database consistency, or confirming nothing is still on the old host. The only follow-up is not letting the old host come back unattended."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "No decision owner or authorization step is mentioned. It ends with \"go ahead right now\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": true,
+      "evidence": "Step 2 allows proceeding without fencing when the BMC is unreachable, based on ping/SSH/console checks. A failed ping or SSH is exactly what an isolated host that is still running guests looks like. The close says \"or you've otherwise verified the VMs aren't running, go ahead right now\", and Ceph blocklisting is only optional."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "It explicitly warns that two writers on one RBD image will cause corruption and that exclusive-lock doesn't reliably protect against it."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No such automation is recommended."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "It makes no claim that instances have been or will be recovered."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response explains the core risk well: a 'down' service is not a dead host, two writers on the same RBD image cause corruption, and Ceph exclusive-lock is no safeguard. It puts BMC power-off first and evacuates databases first, in batches. But when the BMC can't be reached it accepts weak checks (ping/SSH) as a stand-in for fencing, so it conditionally approves evacuation without confirmed fencing. Its first step is power-off, not a read-only check. It defines no verification after evacuation and names no one who must authorize it."
+}

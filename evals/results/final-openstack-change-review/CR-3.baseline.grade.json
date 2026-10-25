@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags incomplete online data migrations as a blocker",
+      "verdict": "pass",
+      "evidence": "Blocker #1: \"Online data migrations were never run after the last upgrade. This is the most serious item... The result can be failed DB sync, services that won't start\". It tells the user to run nova-manage/cinder-manage online_data_migrations until 0 remain, as a separate change before the window."
+    },
+    {
+      "criterion": "Explains the limits of the SLURP promise beyond OpenStack services",
+      "verdict": "partial",
+      "evidence": "Item 5 says the tool's support claim is \"necessary, not sufficient\" and asks the user to check \"your OS/Python baseline\". It never says that SLURP covers only OpenStack services, and it does not mention RabbitMQ, MariaDB, or network and storage backend support for the jump."
+    },
+    {
+      "criterion": "Requires upgrade check commands",
+      "verdict": "pass",
+      "evidence": "\"Run `nova-status upgrade check` and the equivalent checks for other services on the current release\"; nova-status upgrade check also appears in Blocker #1."
+    },
+    {
+      "criterion": "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+      "verdict": "pass",
+      "evidence": "Blocker #2: \"The restore has not been tested in two years... Restore them into a scratch environment and confirm services start... Nobody on staff has done a restore, so assume the runbook is stale.\" The suggested path puts the restore in \"This week\"."
+    },
+    {
+      "criterion": "Includes policy/RBAC testing",
+      "verdict": "pass",
+      "evidence": "Item 4 covers secure RBAC defaults (scoped tokens, reader/member roles) and warns of 403s for \"automation and users depending on the old admin-ish behaviour\". It asks for policy diffs with oslopolicy-policy-generator and oslopolicy-list-redundant. It leans on diffing rather than explicitly testing against users and automation, though the staging rehearsal partly covers that."
+    },
+    {
+      "criterion": "Addresses local patches against the target release",
+      "verdict": "pass",
+      "evidence": "Blocker #3: \"For each of the 9 patches, decide whether it is merged upstream, needs a rebase, or can be dropped. Rebase and test the scheduler ones first\", plus a request for regression tests."
+    },
+    {
+      "criterion": "Gives a clear not-ready verdict with ordered conditions",
+      "verdict": "pass",
+      "evidence": "\"Verdict: not ready for next week.\" Conditions are numbered, and a sequenced \"Suggested path\" follows (this week / next week / following window). There is no readiness table and no decision record draft, which the expected output calls for."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "declares the upgrade ready next week",
+      "committed": false,
+      "evidence": "\"Verdict: not ready for next week.\" Its fallback for a fixed date still makes migrations, the restore test and the scheduler patches mandatory, and otherwise recommends postponing."
+    },
+    {
+      "error": "ignores the incomplete online data migrations",
+      "committed": false,
+      "evidence": "Listed as Blocker #1, \"the most serious item\"."
+    },
+    {
+      "error": "treats SLURP support as covering the whole stack",
+      "committed": false,
+      "evidence": "Item 5 calls the tool's claim \"necessary, not sufficient\" and asks for an OS/Python baseline check. Coverage of the rest of the stack is incomplete, but it does not claim the whole stack is covered."
+    },
+    {
+      "error": "invents specific release names as the user's current/target versions",
+      "committed": false,
+      "evidence": "No release names are given. It asks: \"If you tell me your start and target releases and your deployment tool, I can make it specific.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a solid not-ready verdict. It treats the online data migrations, the untested restore and the scheduler patches as blockers, and it covers policy/RBAC, upgrade checks and a sequenced path. Its main weakness is the SLURP limits: it mentions only an OS/Python baseline, not RabbitMQ, MariaDB or the network and storage backends. It also lacks the expected readiness table and decision record draft. No critical errors were committed and there are no faithfulness issues."
+}

@@ -1,0 +1,27 @@
+{
+  "name": "openstack-operator-skills",
+  "owner": {
+    "name": "Soufian Zaouam"
+  },
+  "metadata": {
+    "description": "Agent Skills for operating production OpenStack, derived from the book 'OpenStack, the Day After Tomorrow'",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "openstack-operations",
+      "description": "Incident analysis, change review, maintenance planning, operational decisions, control assessment, automation review and runbook authoring for production OpenStack platforms",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/openstack-incident-analysis",
+        "./skills/openstack-change-review",
+        "./skills/openstack-maintenance-planning",
+        "./skills/openstack-operational-decisions",
+        "./skills/openstack-control-assessment",
+        "./skills/openstack-automation-review",
+        "./skills/openstack-runbook-authoring"
+      ]
+    }
+  ]
+}

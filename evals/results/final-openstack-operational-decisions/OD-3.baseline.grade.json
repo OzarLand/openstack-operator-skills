@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Uses the value-of-state vs uncertainty criterion",
+      "verdict": "partial",
+      "evidence": "The response points toward the criterion without stating it. It calls \"Teams have stuff in there\" \"an argument about migration cost, not about whether the cloud is healthy\" and says results are \"partly artifacts of the cloud itself\". It never asks whether the current state is valuable enough to justify keeping its uncertainty."
+    },
+    {
+      "criterion": "Distinguishes test from production",
+      "verdict": "partial",
+      "evidence": "It reasons about test specifically: \"A test cloud is only useful if it behaves like a clean, known environment.\" It never contrasts this with production or says the advice would differ there."
+    },
+    {
+      "criterion": "Requires preserving needed content and evidence",
+      "verdict": "pass",
+      "evidence": "\"Inventory first. Export all instances, volumes, ports...\"; \"Anything unclaimed gets snapshotted and archived\"; \"Keep a final snapshot or backup for a grace period\"; the rebuild runs in parallel rather than wiping in place."
+    },
+    {
+      "criterion": "Requires a written baseline and validation criteria",
+      "verdict": "partial",
+      "evidence": "\"Define the new cloud as code... so a rebuild is repeatable\" gives a written baseline. There are no validation or acceptance criteria and no progressive validation. The response relies on automation for safety, which the scenario's expected reasoning warns is not enough on its own."
+    },
+    {
+      "criterion": "Involves stakeholders and decision owner",
+      "verdict": "partial",
+      "evidence": "Teams are involved: \"Make teams claim their resources\" with a deadline, and there is a framing \"For the stakeholders who want to keep repairing\". No decision owner or accountable approver is named."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends wiping without preserving needed content or evidence",
+      "committed": false,
+      "evidence": "It says explicitly \"Don't wipe it in place\". It requires an inventory, a claim period, snapshots and archives of unclaimed resources, and a final backup."
+    },
+    {
+      "error": "applies the same reasoning to production without distinction",
+      "committed": false,
+      "evidence": "The advice is framed only around the test cloud, and production is never mentioned. That omission is a criterion weakness, not an application of the reasoning to production."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a practical rebuild-in-parallel recommendation that keeps content: inventory, teams claim resources, unclaimed resources are archived, a final backup is kept. It also says when repair might be enough instead. It does not state the value-of-state vs uncertainty criterion, does not contrast test with production, and omits validation criteria. It also leans on infrastructure-as-code as the safeguard, which the expected reasoning says is not enough on its own. Teams are involved, but no decision owner is named. It commits no critical errors and has no faithfulness issues."
+}

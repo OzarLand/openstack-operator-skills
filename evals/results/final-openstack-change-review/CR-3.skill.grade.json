@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags incomplete online data migrations as a blocker",
+      "verdict": "pass",
+      "evidence": "Top risk #2: \"Upstream treats this as a hard prerequisite for the next upgrade. The schema sync may refuse to run\"; listed in Prerequisites as \"Not done\" and is step 1 of the Recommended path. The wording \"may refuse\" is softer than the expected \"refuses\", but it is still framed as a hard prerequisite."
+    },
+    {
+      "criterion": "Explains the limits of the SLURP promise beyond OpenStack services",
+      "verdict": "pass",
+      "evidence": "\"SLURP only covers the OpenStack services themselves\"; prerequisite: \"Confirm the OS, Python, RabbitMQ, MariaDB, networking backend and storage backend all support the jump\"; also says to check the deployment tool version."
+    },
+    {
+      "criterion": "Requires upgrade check commands",
+      "verdict": "pass",
+      "evidence": "Prerequisite: \"Run `nova-status`, `neutron-status`, `cinder-status` and `placement-status upgrade check`\"; Recommended path step 1: \"Check the `*-status upgrade check` tools (read-only).\""
+    },
+    {
+      "criterion": "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+      "verdict": "pass",
+      "evidence": "Recovery gate marked \"fail\"; step 2: \"Run a restore exercise with a current team member... Do this before the upgrade, not alongside it.\""
+    },
+    {
+      "criterion": "Includes policy/RBAC testing",
+      "verdict": "pass",
+      "evidence": "\"Policy review: `enforce_new_defaults` and `enforce_scope`, plus any local policy overrides, tested with real users and automation\"; Verification also includes policy checks."
+    },
+    {
+      "criterion": "Addresses local patches against the target release",
+      "verdict": "pass",
+      "evidence": "\"Review of each of the 9 patches against the target release (2 in the scheduler)\"; scheduler behaviour is checked in Verification; a question asks whether the patches are upstreamed or still needed."
+    },
+    {
+      "criterion": "Gives a clear not-ready verdict with ordered conditions",
+      "verdict": "pass",
+      "evidence": "\"Verdict: Not ready.\" followed by a numbered Recommended path (stabilise, restore exercise, patches and policy, rehearse, decide), framed as \"This is sequencing, not resistance.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "declares the upgrade ready next week",
+      "committed": false,
+      "evidence": "\"The upgrade shouldn't start next week as planned.\""
+    },
+    {
+      "error": "ignores the incomplete online data migrations",
+      "committed": false,
+      "evidence": "Listed as top risk #2 and as the first action."
+    },
+    {
+      "error": "treats SLURP support as covering the whole stack",
+      "committed": false,
+      "evidence": "\"SLURP only covers the OpenStack services themselves\" and it requires checking the OS, RabbitMQ, MariaDB and the backends."
+    },
+    {
+      "error": "invents specific release names as the user's current/target versions",
+      "committed": false,
+      "evidence": "Says \"Unknown: the current and target releases\" and asks for them."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response that meets every criterion. It gives a clear not-ready verdict, framed as sequencing. It treats the skipped online data migrations as a hard prerequisite, explains where SLURP's promise stops, and requires the upgrade checks, a restore exercise, policy/RBAC testing and a review of the patches. It includes a readiness table, ordered first actions and a draft decision record. It commits none of the critical errors and invents no environment facts. The one weakness is minor: it says the schema sync \\\"may\\\" refuse to run rather than saying that it will."
+}

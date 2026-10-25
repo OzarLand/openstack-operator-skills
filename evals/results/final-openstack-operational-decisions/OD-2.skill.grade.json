@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"Backporting is the legitimate case when an advisory's fix exists upstream but not for your series.\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "pass",
+      "evidence": "Condition 1 lists \"the upstream change, the OSSA, the owner, how you tested it, and the exit condition\". The suggested record also adds a reason, which covers why they are not upgrading: \"upgrade isn't feasible before [date]\"."
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "pass",
+      "evidence": "\"Seven local security backports on an unmaintained series is a lifecycle problem that no single patch fixes\" and \"Seven is a warning sign... a lifecycle decision, not a security one.\""
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "pass",
+      "evidence": "Asks: \"Is there a dated upgrade plan...?\" Proposes a stopping threshold (\"eight patches or a given date\"). Says to check that the other six backports have records with exit conditions, and that any decision to make backports the strategy should be \"made openly\"."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "partial",
+      "evidence": "The vendor comes up only for lifecycle status: \"Check releases.openstack.org and your vendor, since lifecycle facts change.\" The response never asks whether the distribution or vendor already ships the fix for this OSSA."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": false,
+      "evidence": "The approval is conditional. Owner, test and exit condition are treated as gates: \"Each of these is a gate, not a nice-to-have.\""
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "The lifecycle signal is stated up front and again under \"Seven is a warning sign.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets the expected output: a conditional yes to the backport, plus a recommendation to make a lifecycle decision. It gates the backport on a full record (upstream change, owner, test, exit condition), testing and a reproducible place to apply the patch. It treats the growing number of backports as a lifecycle problem and asks for a dated upgrade plan and a threshold for stopping. Its one gap is that it never asks whether the distribution or vendor already ships the fix; the vendor appears only as a source for lifecycle status. It commits neither critical error and makes no claims attributed to the book."
+}

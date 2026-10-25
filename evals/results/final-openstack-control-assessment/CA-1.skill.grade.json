@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against immediate transformation and explains why",
+      "verdict": "pass",
+      "evidence": "\"moving to a new deployment tool and redesigning networking both add uncertainty to a system nobody fully understands... The new engineers' proposals belong in the last step, not the first.\" It also says \"Don't say no. Say not yet\" and sets conditions."
+    },
+    {
+      "criterion": "Uses the restoration sequence or an equivalent staged approach",
+      "verdict": "pass",
+      "evidence": "States the full order: \"Discover → Protect → Assess → Stabilize → Recover knowledge → Simplify → Establish control → Evolve.\""
+    },
+    {
+      "criterion": "Lists concrete first-30-day outputs",
+      "verdict": "pass",
+      "evidence": "The 'First 30 days' section is split into week-by-week steps. The closing names the deliverables: \"a 30-day baseline: the current-state map, critical risks, guardrails, ownership and recovery gaps, and a control roadmap.\""
+    },
+    {
+      "criterion": "Requires owners and removal conditions for guardrails",
+      "verdict": "pass",
+      "evidence": "\"Every guardrail needs an owner, a reason, a removal condition and a review date. Otherwise the emergency state becomes permanent.\""
+    },
+    {
+      "criterion": "Mentions the exception for unmaintained, vulnerable releases",
+      "verdict": "pass",
+      "evidence": "\"The exception is if the release is so old that it's unmaintained or has unpatched vulnerabilities. In that case, moving may be the only way to stabilize.\""
+    },
+    {
+      "criterion": "Starts from business capabilities",
+      "verdict": "pass",
+      "evidence": "Step 1 is \"Start from the business, not the component list (week 1)\". It traces the chain \"capability → OpenStack service → technical dependency → team...\""
+    },
+    {
+      "criterion": "Defines exit criteria for restoration",
+      "verdict": "pass",
+      "evidence": "\"Define 'control restored' up front, for example: demonstrated recovery for critical capabilities, ownership gaps closed, critical dependencies visible, recurring incidents understood, and a credible lifecycle plan.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses starting with the deployment tool migration and network redesign",
+      "committed": false,
+      "evidence": "It defers both explicitly: \"The new engineers' proposals belong in the last step, not the first\" and \"Say not yet, and put a condition on each.\""
+    },
+    {
+      "error": "proposes a single maturity score as the outcome",
+      "committed": false,
+      "evidence": "\"Don't produce a single score. Rate each capability separately...\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all seven criteria and commits neither critical error. It advises restraint, gives the full restoration sequence, starts from business capabilities, and lists the 30-day deliverables. It requires an owner and a removal condition for every guardrail, notes the exception for unmaintained releases, and defines what \"control restored\" means. One shortfall against the expected output: it offers a guardrails table but doesn't include one. It cites no book chapters and presents no invented facts about the environment as known. The commands and component names are clearly examples or questions."
+}

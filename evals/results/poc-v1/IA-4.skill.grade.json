@@ -1,0 +1,28 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "pass",
+      "evidence": "Check step 2 'Is it a partition?... If rabbit-03 is running but partitioned, the fix is partition handling, not a reset', and separate paths for 'Node stopped or crashed' vs 'Partition'."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "Opens with 'Not yet.' and requires read-only checks, including the partition check, before any reset; reset only 'if the logs show unrecoverable state'."
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "Treats node state as unknown: 'Is the node alive?' and 'Being out of the running list doesn't show that.'"
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "No fabricated command output. It asks the user to paste the logs and the cluster_status partition section."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly refuses to run the reset runbook blindly. It explains what reset destroys on rabbit-03 and separates the crashed-node, partition and won't-rejoin cases, with sensible read-only checks. It commits none of the critical errors. Its weaknesses: cluster_status is only checked from rabbit-01, not from rabbit-03 and rabbit-02. The 'wrong side' risk in a partition is not covered. For a partition it says 'resolve it and restart the minority side' without any escalation or decision owner. It gives no verification steps after recovery, such as consumers reconnecting or queues being healthy."
+}

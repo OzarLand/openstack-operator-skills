@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Uses the value-of-state vs uncertainty criterion",
+      "verdict": "pass",
+      "evidence": "\"This is a test cloud, so the main question is whether the information in its current state is worth preserving. Mostly it isn't. Years of accumulated experiments are the thing making it untrustworthy.\" It also notes that repair \"is no longer converging on a known state.\""
+    },
+    {
+      "criterion": "Distinguishes test from production",
+      "verdict": "pass",
+      "evidence": "It frames the answer around the cloud being a test cloud. Under 'When I'd change my answer' it says irreplaceable state \"makes it closer to production, and the calculus flips.\" The gaps list asks \"Is this truly test-only, or do any teams treat it as pre-production?\""
+    },
+    {
+      "criterion": "Requires preserving needed content and evidence",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Inventory and snapshot, read-only first... Back up the databases and configs as evidence.\" Steps 2 and 4 cover owner claims and migrating the claimed resources."
+    },
+    {
+      "criterion": "Requires a written baseline and validation criteria",
+      "verdict": "pass",
+      "evidence": "Step 3: \"A defined baseline and validation criteria. Decide what 'good' means before building... version-controlled config, a smoke test... restore test. Automated installation alone doesn't prove the result matches the baseline.\""
+    },
+    {
+      "criterion": "Involves stakeholders and decision owner",
+      "verdict": "pass",
+      "evidence": "Step 2 sends each project owner their list with a claim deadline. Under 'Decision rights': \"Someone with authority over the shared environment... has to accept losing unclaimed state... one named person decides.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends wiping without preserving needed content or evidence",
+      "committed": false,
+      "evidence": "It explicitly calls for \"a managed migration rather than a wipe\". It requires an inventory, backups of the databases and configs as evidence, and owner claims, and it migrates the claimed resources before the rebuild."
+    },
+    {
+      "error": "applies the same reasoning to production without distinction",
+      "committed": false,
+      "evidence": "Its reasoning is limited to the test context. It says the calculus flips when the environment is closer to production."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a strong conditional recommendation. It rebuilds through a managed migration and applies the value-of-state criterion. It separates the test context from production, preserves evidence and claimed content, and defines a baseline and validation criteria. It notes that automation alone is not enough, involves the owners, and names one decision owner. It commits neither critical error, makes no book citations, and invents no facts about the environment."
+}

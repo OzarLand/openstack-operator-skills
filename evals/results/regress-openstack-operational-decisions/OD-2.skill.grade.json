@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"Backporting this one is defensible\" ... \"If you proceed, treat it as a bounded deviation.\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "pass",
+      "evidence": "Record lists \"the OSSA, the upstream change it derives from, and why you're not upgrading\", \"a named owner\", \"how you test it\", rollback, and \"an exit condition... needs a date or a trigger\"."
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "pass",
+      "evidence": "\"Six local backports already means this series is too old to stay on through patching... the upgrade decision is being made by default each time one lands.\""
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "pass",
+      "evidence": "\"Bring the bigger decision to whoever owns the platform... 'backport vs upgrade', with a trigger\"; also suggests recording these fields \"for the other six too\", and covers SLURP path and upgrade readiness."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "pass",
+      "evidence": "\"Does your distro or vendor already ship the fix for your series? If so, take theirs.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": false,
+      "evidence": "Approval is conditional: \"If you proceed... Record these\", which include a named owner, a test approach and an exit condition."
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "Says outright that \"The seventh local security backport on an unmaintained series suggests you're making a lifecycle decision without calling it one.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion and commits neither critical error. It gives a conditional yes and asks for a full backport record: origin change, why not upgrade, owner, test and exit condition. It treats the six existing backports as a sign the series is too old and recommends a backport-vs-upgrade decision with a trigger. It also checks whether the distro or vendor already ships the fix. It cites no book claims and presents its assumptions as assumptions."
+}

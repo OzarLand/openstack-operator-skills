@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"a 'down' nova-compute doesn't tell you the VMs are stopped\"; step 2: \"the fault is the nova-compute agent or its messaging (RabbitMQ), not the host.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"evacuating starts a second copy of each VM against the same Ceph disks. For customer databases, two writers on one disk means corruption, and it can stay hidden...\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Step 4: \"Fence it. Power it off through the BMC and confirm it's off. Don't just power-cycle it\"; step 5: \"Only do this after fencing.\" Switch isolation isn't mentioned, but BMC fencing satisfies the criterion."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Steps 1–3: check BMC/console power state, `virsh list`/`pgrep -a qemu`, IP reachability, and `rbd status` watchers, all \"Before anything else\"."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "partial",
+      "evidence": "Step 8 sets an order (non-database canary VMs first, then the database VMs one at a time), but the order is based on technical risk. The response doesn't rank VMs by business criticality or ask the customers/owners for input."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "Step 8: check that VMs \"boot, get networking, and pass a health check\" and run \"a consistency check on each\" database. It also covers controlling cleanup when cmp-0417 returns. It doesn't explicitly check that no instance is left on the old host, but fencing covers that."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "The response never says who owns or authorizes the decision to evacuate."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "\"Don't run evacuate on all 40 yet\"; evacuation only after \"Power it off through the BMC and confirm it's off.\""
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "The response states that Ceph is exactly the split-brain risk: \"second copy of each VM against the same Ceph disks.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "It doesn't recommend any automation, and it advises a manual, staged evacuation."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "\"I haven't run anything. I don't have access to your OpenStack or Ceph from here.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear 'don't evacuate yet' answer. It explains that 'down' doesn't mean the VMs are stopped and why a second writer on Ceph is dangerous. It asks for read-only checks first (BMC, virsh/qemu, rbd watchers), requires BMC fencing confirmed before evacuating, and sets out a staged plan with verification. Gaps: the evacuation order is based on technical risk rather than business criticality or customer input, and it doesn't name who must authorize the evacuation. It commits no critical errors and has no faithfulness issues."
+}

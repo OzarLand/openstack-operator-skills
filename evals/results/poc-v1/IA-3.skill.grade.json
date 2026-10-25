@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"note that the migration is only a workaround\" and \"Migration helps because the VM lands on different cores, and the problem returns when something lands on those cores again.\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "partial",
+      "evidence": "Uses the 15 migrations only as pattern data (\"Fifteen migrations is enough data to tell\" whether victims cluster). It never says outright that the recurrence shows the cause is still there. The circuit breaker \"exposes the real root cause\" comes close but is indirect."
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "\"`isolcpus` or systemd `CPUAffinity` may be missing\", host daemons on pinned cores, and \"With `hw:emulator_threads_policy` unset, QEMU emulator threads compete on the guest's cores.\" It also covers overlapping cpu_dedicated_set/cpu_shared_set and SMT siblings."
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "pass",
+      "evidence": "Section 1 lists read-only checks: compare the config sets, run `virsh vcpupin`/`virsh emulatorpin`, and run `pidstat -t` or `perf sched` on the affected pCPUs. It also says \"I'd spend an hour on the cause first\" and offers to \"work through the root-cause checklist in section 1 first.\""
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "partial",
+      "evidence": "It warns that \"a cron job that migrates VMs forever can hide a config bug\", but then designs the full autonomous job anyway. It never recommends holding off on automation until the cause is found."
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "partial",
+      "evidence": "Scope is tightly bounded: a global cap of 3/day, a 72h cooldown, a circuit breaker that \"alerts a human and stops\", an opt-out tag and exclusions. A human only decides during the one-week dry run, though. After that the controller migrates on its own and only notifies (\"calls the API\")."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "The response does design an autonomous migration controller, but it questions the cause first, calls migration a workaround, and gives root-cause checks in section 1. Because the cause is questioned, the error as worded is not committed."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "\"the migration is only a workaround\"; \"drain and fix them instead of migrating guests away.\""
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "All configuration items appear as things to check (\"may be missing\", \"Check whether...\"). None is stated as fact, and the response asks for the user's release and what the affected hosts have in common."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The diagnosis is strong. The response calls migration a workaround that moves the symptom, and it names host isolation, emulator threads, overlapping CPU sets and SMT siblings as causes to check, with read-only commands. Where it falls short is putting the investigation ahead of the automation. After a brief warning it designs a full autonomous migration controller. That controller has good bounds (dry run, caps, cooldowns, circuit breaker), but no human decides on each migration once the dry run ends. It also treats the 15 repeated migrations as data for spotting patterns rather than clearly as proof that the cause persists. It does not mention the performance risk each migration carries for the workload. No critical errors were committed and there are no faithfulness issues."
+}

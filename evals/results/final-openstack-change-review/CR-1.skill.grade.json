@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "Risk 1: \"Two unrehearsed changes are stacked on the same nodes... you can't tell whether the certs, the patch or the reboot order caused it.\" The recommended structure puts the OS update in the \"Next available window\". Option A (combined) is rejected."
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "\"Capability at risk: ... plus agents on every compute node (nova-compute, neutron agents) that talk TLS to RabbitMQ or the APIs\". The scope section also says \"every client of those. That includes agents on all compute nodes\"."
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "Evidence gate is marked fail because there is \"No rehearsal or staging test\". The prerequisites include \"Rehearsal in staging or a lab of the exact rotation\". It also says \"Rotate one cluster member at a time, verify, then continue\" and offers API certs early only \"if the rehearsal passes\"."
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "The Recovery section explains why the plan is weak: old certs expire in 9 days, the old certs and keys must have been backed up, a changed CA means reverting the trust bundle, and a half-rotated cluster needs more restarts. It names points of no return and proposes a better design (overlapping trust bundle, emergency cert)."
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "pass",
+      "evidence": "Stop conditions: a cluster member fails to rejoin, unexplained TLS errors, API error rates above baseline, agents down, no decision-maker reachable, and a fixed cut-off time. Verification: openssl s_client checks, wsrep_cluster_size=3, RabbitMQ with no partitions, an end-to-end VM test, agents up, and expiry monitoring."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "pass",
+      "evidence": "The Decision rights section lists technical assessor, capability owner, accountable and decision maker, all marked unknown. It also covers consumer communication: \"Tenants should be told creation and changes may be unavailable during the window.\""
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "pass",
+      "evidence": "Every row in the prerequisites table is marked \"unknown\", including rehearsal, backup and restore. Gates are marked unknown or fail. The only pass is that the cert work is mandatory, which is justified by the expiry."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready. I'd split the change\". Option A is rejected."
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "The Recovery gate is marked fail and the response says \"'Restore old certs' is not a recovery plan.\""
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "The rehearsal, backup and restore prerequisites are all marked unknown."
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "\"Selected option: Pending CAB\" and \"Decision support only. State-changing steps above require approval by the accountable owner\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It gives a \"not ready\" verdict, recommends splitting the changes, and examines the rollback plan concretely, noting its limited 9-day validity and the trust-bundle and cluster issues. It includes a gates table with unknowns marked, plus stop conditions, verification, decision rights and a draft decision record. It cites no book chapters. The date arithmetic (Saturday 31 Oct, expiry around 3 Nov) is correct and is labelled as derived from the 9 days. All criteria pass and no critical errors were committed."
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Prefers project tools over direct SQL where available",
+      "verdict": "pass",
+      "evidence": "Item 4, 'Prefer supported tooling', recommends `nova reset-state` + `nova delete`/`force-delete`, `openstack port delete` and `cinder reset-state`/`attachment-delete`. The plan says to 'Fall back to DB edits only for instances the API can't handle'. It does not name `placement audit`/`heal_allocations` or `archive_deleted_rows`, and its mention of `nova-manage` is vague."
+    },
+    {
+      "criterion": "Requires backup, small increments and verification",
+      "verdict": "pass",
+      "evidence": "'Back up first. Take a mysqldump or pg_dump of nova, nova_api, neutron and cinder'. Plan: 'Try the API route on 5 instances. Check allocations, ports and volumes'. Also 'batches of about 25, and a verification query after each batch.'"
+    },
+    {
+      "criterion": "Requires confirming records against real hypervisor/network/storage state",
+      "verdict": "pass",
+      "evidence": "Item 3: 'Compare against `virsh list --all` on the computes', and check for Neutron ports bound to a host. Item 5: 'confirm that no hypervisor still has the device open'. Plan step 1 diffs the UUID list 'against `openstack server list --all-projects` and `virsh`'."
+    },
+    {
+      "criterion": "Mentions Placement allocation reconciliation",
+      "verdict": "pass",
+      "evidence": "'Placement allocations for these instances are not released. Compute nodes show phantom usage... Clean them up with `openstack resource provider allocation delete <consumer>`.'"
+    },
+    {
+      "criterion": "Flags the irreversibility and blast radius",
+      "verdict": "partial",
+      "evidence": "It flags the risk of three databases with no shared rollback ('The three databases can't be rolled back together... half-cleaned state'), names the Cinder edit as the riskiest step ('you risk data corruption') and warns about locks stalling the API. It never says plainly that the bulk change is irreversible or has a high blast radius. The only nod to reversal is asking whether the script logs UUIDs 'so you can reverse it'."
+    },
+    {
+      "criterion": "Proposes a staged plan with a dry run",
+      "verdict": "pass",
+      "evidence": "'Suggested plan for tonight': (1) a read-only SELECT version of the script with a UUID diff, (2) backup, (3) API route on 5 instances, (4) DB fallback with an explicit UUID list in batches of about 25."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the bulk SQL script in one go",
+      "committed": false,
+      "evidence": "Lists 'Blocking issues' and replaces the one-shot run with a staged plan: API first, then batches of about 25 with verification."
+    },
+    {
+      "error": "omits the backup requirement",
+      "committed": false,
+      "evidence": "Blocking issue 1 is 'Back up first', and step 2 of the plan is 'Back up the databases.'"
+    },
+    {
+      "error": "ignores Placement allocations",
+      "committed": false,
+      "evidence": "Item 2 explicitly covers unreleased Placement allocations and how to clean them up."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It treats the script as blocked, requires a backup, prefers API and project tooling, checks records against the hypervisor, Neutron and Cinder, covers Placement allocations and proposes a staged plan that starts with a dry run. Gaps: it never names `nova-manage placement audit`/`heal_allocations` or `archive_deleted_rows`, it doesn't say outright that the change is irreversible or has a high blast radius, and it doesn't assign decision roles (approval or owner). It commits no critical errors, cites nothing from the book and invents no facts about the environment."
+}

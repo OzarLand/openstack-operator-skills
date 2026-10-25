@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"Yes, backporting is a reasonable call. A small, self-contained security patch is the usual way to handle an unmaintained series\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "fail",
+      "evidence": "The response never asks for a backport record. It covers testing (unit tests, a reproducer) and points at the upstream origin through the OSSA and its linked reviews. It says nothing about an owner, why not upgrade, or an exit condition."
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "partial",
+      "evidence": "\"You're also at the point where the carrying cost matters. With seven local security patches, each new OSSA means more rebasing work...\" This treats the count as a carrying cost. It does not call it a sign that the series is too old and needs a lifecycle decision, and it opens with \"doing it for the seventh time doesn't change that.\""
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "partial",
+      "evidence": "\"If you aren't already planning an upgrade to a maintained series, this is a good time to put one on the roadmap.\" It does recommend the upgrade, but only conditionally, and it does not suggest reviewing the exit conditions of the existing backports."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "fail",
+      "evidence": "Distribution or vendor packages are never mentioned. The response suggests the upstream unmaintained/<series> branch instead, which is a different thing."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": true,
+      "evidence": "The response approves outright (\"Yes, backporting is a reasonable call\"). It does recommend tests, but it never requires an owner or an exit condition."
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "It addresses the count of backports through carrying cost and suggests putting an upgrade on the roadmap, though only weakly."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives sound technical advice on backporting: code drift, prerequisite commits, interactions with the existing patches, and tests. It also accepts security backports as legitimate and mentions an upgrade. It misses the backport record, especially the owner and exit condition, and approves without those safeguards. It treats the accumulated backports only as a carrying cost, not as a lifecycle signal, and never checks whether the distribution already ships the fix."
+}

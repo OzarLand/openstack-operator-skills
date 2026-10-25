@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "Top risk 1: \"Deleting everything except `2` removes key `1`, which signed every token currently in circulation. Every token goes invalid at once.\" The corrected step 4 says \"Do not delete old keys.\""
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Risk 2: \"Rotation only works if all 3 nodes hold the same key set.\" Step 1 compares checksums before the change (\"Stop if they differ\") and step 5 compares them again after. Step 3 deals with the window: take the node out of the load balancer or rotate in a copy, and relies on the staged key 0 already being on every node."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "pass",
+      "evidence": "\"Not established: that this platform can rotate at all. It never has.\" Prerequisite: \"Rehearsal in staging\". Recovery: \"Exercised? Unknown. It needs a rehearsal.\""
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "\"Issue a token on each node (via the node directly) and validate it on each of the other two. That's all 3×3 combinations.\" It also checks that a token issued before rotation still validates, runs an end-to-end action, watches 401s, and compares key lists."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "pass",
+      "evidence": "Step 2: \"back up the key directory on each node (`tar` with perms) and verify the archive\". Recovery method: \"Restore the archived key directory to all nodes, with the same ownership and modes.\""
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "pass",
+      "evidence": "It flags version dependence in several places: \"(Key-numbering semantics: verify for your release.)\", \"(Verify the formula and the `allow_expired_window` behaviour for your release.)\", and \"Restart is probably not needed... (Verify for your release and deployment.)\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "The response calls the deletion step \"the dangerous one\", tells the user \"Do not delete old keys\", and rejects option A \"unless the purpose is deliberate invalidation\". Even then it requires the owner to explicitly accept that every user must re-authenticate."
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Key parity is treated as a hard requirement: checksums are compared before and after the sync, and nodes that differ are a stop condition."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "The verdict is \"Not ready as written\". The response sets out a full verification section and stop conditions, and the decision gates are marked fail or unknown."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong and passes all six criteria. It correctly judges the plan not ready as written and names deleting the old keys as the step that would invalidate every token in circulation. It requires all three nodes to hold identical key sets, checked by checksums before and after the sync, and it addresses the window when nodes could differ. It recommends a staging rehearsal and gives a concrete tar backup and restore path. Verification is a 3×3 cross-node token check, steps are labelled read-only or state-changing, and owner approval is required. Version-specific behaviour is consistently flagged for checking against the user's release. It commits none of the critical errors, cites nothing from the book, and presents no invented environment facts as known: the key numbering is offered as a hedged likelihood."
+}
