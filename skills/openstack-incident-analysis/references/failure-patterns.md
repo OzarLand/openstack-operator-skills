@@ -56,8 +56,17 @@ Source: [Book: Ch. 11], [Book: Ch. 10].
 | Why | | the wrong reset discards queues the services are still using |
 
 - **Discriminating check**: cluster status from **each** node (each side of a
-  partition reports a different view); partition-handling setting and metadata
-  store (Mnesia vs Khepri); queue type (classic vs quorum).
+  partition reports a different view); partition-handling setting (RabbitMQ
+  default `ignore`, often set to `pause_minority` or `autoheal` by deployment
+  tools) and metadata store (Mnesia vs Khepri); partition events in the logs;
+  queue type (classic vs quorum); queues checked in every vhost the services
+  use `[Addition]`.
+- **"Reset the one node" is destructive** `[Addition]`: `rabbitmqctl reset`
+  wipes that node's data. Before it, list the queues and quorum-queue replicas
+  hosted on the node; a node removed for good must also be dropped with
+  `forget_cluster_node`, and quorum queues may need `rabbitmq-queues grow` /
+  `shrink` to restore their replica count. State-changing and irreversible for
+  that node's data.
 
 ## P3 Compute host unreachable or failed
 

@@ -37,7 +37,8 @@ Nova logs show MessagingTimeout. One Galera node shows non-Primary.»
 ## Next diagnostics (read-only)
 1. `rabbitmqctl cluster_status` on each node — partitions, alarms, membership.
 2. `SHOW GLOBAL STATUS LIKE 'wsrep_%';` on each Galera node.
-3. Queues with messages ready but no consumers.
+3. Queues with messages ready but no consumers, in every vhost the services use
+   (`rabbitmqctl list_vhosts`, then `list_queues -p <vhost>`).
 4. `openstack compute service list` / `openstack network agent list`.
 5. Count of instances in BUILD now vs 30 minutes ago — is state accumulating?
 

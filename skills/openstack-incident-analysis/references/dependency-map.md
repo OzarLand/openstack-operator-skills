@@ -64,7 +64,7 @@ or in network/storage beneath them.
 | Component | Key signals | Failure notes |
 |---|---|---|
 | MariaDB Galera | `wsrep_cluster_size`; `wsrep_cluster_status` (non-Primary ⇒ node refuses writes); `wsrep_flow_control_paused` | Writable only with quorum. Full-outage recovery bootstraps from the most advanced node (`grastate.dat` seqno and `safe_to_bootstrap`; after unclean stop find it with `--wsrep-recover`). Wrong node ⇒ lost transactions. Usually written through one node behind the LB. |
-| RabbitMQ | messages ready / unacknowledged per queue; consumers per queue; memory/disk alarms; partitions | Queue accumulating while consumers vanish = a service that stopped processing, whatever its process list says. Quorum queues need a majority of members. Partition behaviour: `cluster_partition_handling` (`pause_minority` usual) applies to the Mnesia metadata store; not to Khepri — check which store the cluster uses. |
+| RabbitMQ | messages ready / unacknowledged per queue; consumers per queue; memory/disk alarms; partitions | Queue accumulating while consumers vanish = a service that stopped processing, whatever its process list says. Quorum queues need a majority of members. Partition behaviour: `cluster_partition_handling` (RabbitMQ default `ignore`; the book calls `pause_minority` the usual choice for OpenStack, and several deployment tools set it — check `rabbitmq.conf`) applies to the Mnesia metadata store, not to Khepri — check which store the cluster uses. OpenStack services may use one or several non-default vhosts (check `transport_url`) `[Addition]`. |
 | memcached | availability, latency | Loss makes every API call slow or failing (token validation). |
 | Load balancer / VIP | backend health, API latency and error rates | The VIP is what makes "stop the APIs" a controlled action. |
 | TLS certificates | expiry dates on every endpoint, bus and DB | A common cause of complete control-plane outage on long-lived platforms. |
@@ -96,7 +96,8 @@ Commands are examples; adapt to the deployment. All are read-only as written.
 | Placement | `openstack resource provider list` / `openstack resource provider usage show <uuid>` (needs osc-placement) | Addition |
 | Galera | `SHOW GLOBAL STATUS LIKE 'wsrep_%';` on each node | Addition (signals: Book: Ch. 8) |
 | RabbitMQ | `rabbitmqctl cluster_status` (members, partitions, alarms) | Addition |
-| RabbitMQ | `rabbitmqctl list_queues name messages_ready messages_unacknowledged consumers` (can be slow on a degraded cluster; use a timeout) | Addition (signals: Book: Ch. 8) |
+| RabbitMQ | `rabbitmqctl list_vhosts`, then for each OpenStack vhost `rabbitmqctl list_queues -p <vhost> --timeout 60 name messages_ready messages_unacknowledged consumers`. Without `-p`, only the default vhost `/` is listed: on platforms that use per-service vhosts this shows few or no queues, which is **not** evidence that queues or consumers are gone. Can be slow on a degraded cluster. | Addition (signals: Book: Ch. 8) |
+| RabbitMQ | `rabbitmqctl list_queues -p <vhost> name type leader members` (which queues and quorum replicas live on which node) | Addition |
 | Certificates | `openssl s_client -connect <host>:<port> </dev/null 2>/dev/null \| openssl x509 -noout -enddate` | Addition |
 | Fernet | compare checksums of the key repository across Keystone nodes | Addition |
 | Upgrade state | `nova-status upgrade check` (read-only; for an upgrade it must run with the *target* release's code before services restart — with installed code it only checks the current release) | Book: Ch. 14 |
