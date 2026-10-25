@@ -35,19 +35,29 @@ evacuation for the running release.
 
 ## Instances that cannot or should not be live-migrated
 
-- PCI passthrough or SR-IOV direct ports.
-- vGPU on versions without mediated-device migration support.
+Migratability depends on the release, the hypervisor stack and the device.
+Classify against the running release; verify each item in the Nova
+"Live-migrate instances" and Neutron SR-IOV documentation for that release.
+
+**Not live-migratable** — restart or cold migration is a technical necessity
+rather than a business choice [Book: Ch. 20]:
+
+- Flavor-based PCI passthrough (`pci_passthrough:alias`) and Neutron
+  `direct-physical` ports.
 - Memory-intensive workloads whose pages change faster than they can be copied,
   unless auto-converge or post-copy is enabled.
 
-For the three cases above, restart (or cold migration) is a technical
-necessity rather than a business choice.
+**Live-migratable with conditions** `[Addition]`:
 
-Separate case, release-dependent [Book: Ch. 15]: instances with a NUMA
-topology / pinned CPUs live-migrate NUMA-aware from Train (Nova 20.0.0); only
-on earlier releases were such migrations refused (Stein, unless a workaround
-was enabled) or able to produce overlapping pinning. Check the running
-release before classifying them.
+| Device | Since | Conditions and side effects |
+|---|---|---|
+| SR-IOV `direct` port | Train (Nova 20.0.0), libvirt driver | The port is hot-unplugged before the migration and re-plugged on the destination: the guest loses that interface briefly while the instance keeps running. Ask the owner whether the interruption is acceptable; check NIC and driver support. Indirect ports (`macvtap`, `virtio-forwarder`) migrate without that unplug. |
+| vGPU (mediated devices) | 2024.1 (Caracal) | Both hosts need libvirt ≥ 8.6.0, QEMU ≥ 8.1.0 and kernel ≥ 5.18, and the same mdev type must be available on the destination. |
+| NUMA topology / pinned CPUs | Train (Nova 20.0.0) | NUMA-aware since Train; earlier releases refused such migrations (Stein, unless a workaround was enabled) or could produce overlapping pinning [Book: Ch. 15]. |
+
+Note on the source: the book lists SR-IOV direct ports among instances that
+cannot be live-migrated [Book: Ch. 20]. Upstream Nova has supported it since
+Train, as described above; this file follows upstream.
 
 ## Patched binaries
 
