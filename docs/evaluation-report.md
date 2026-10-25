@@ -265,6 +265,15 @@ AR-4 (a playbook containing a credential) was added for rule 11. Runs
 The AR-4 baseline also redacted the credential, so the scenario guards against
 regression rather than showing a difference.
 
+**Plugin install from GitHub.** In an empty Claude Code configuration,
+`claude plugin marketplace add soufian-zaouam/openstack-operator-skills` then
+`claude plugin install openstack-operations@openstack-operator-skills`
+installed all seven skills. An evacuation prompt (similar to IA-2) triggered
+`openstack-operations:openstack-incident-analysis`. In `claude -p` without
+permissions, reading the skill's `references/` from the plugin cache was
+denied and the answer said so; with `--allowedTools Read` the references were
+read. Not graded; a check that installation works, not a scored run.
+
 ## 10. Limitations and what has not been tested
 
 - **One run per cell.** Differences of a few points are within noise (see IA-4
@@ -274,8 +283,9 @@ regression rather than showing a difference.
 - **Same author.** Scenarios, skills and rubrics were written in the same
   session; scenarios contributed by operators would be a stronger test.
 - **Surfaces.** Only Claude Code was exercised. claude.ai upload, the Skills
-  API and the Agent SDK were not tested; the plugin manifest was validated but
-  an end-to-end install from GitHub was not performed.
+  API and the Agent SDK were not tested. The plugin install from GitHub was
+  tested once end to end (section 9); in `claude -p` the plugin's reference
+  files are only read when `Read` is allowed (see `docs/installation.md`).
 - **Models.** Full run on Sonnet only; Haiku on three scenarios; Opus only as
   grader. Haiku under-triggered once.
 - **Multi-turn use** (pasting diagnostic output back, continuing an incident)

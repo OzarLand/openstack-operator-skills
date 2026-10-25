@@ -14,8 +14,17 @@ place you use Claude. Source: Anthropic, *Agent Skills overview* (Oct 2026).
 
 Plugin skills are namespaced, e.g. `/openstack-operations:openstack-incident-analysis`.
 The manifest (`.claude-plugin/marketplace.json`) passes
-`claude plugin validate --strict`; an end-to-end install from GitHub has not
-been tested for this release.
+`claude plugin validate --strict`, and the install above was tested end to end
+from GitHub (all seven skills installed; the incident skill triggered on a
+test prompt).
+
+Plugin skills live outside your project (in the plugin cache under
+`~/.claude/plugins/`), so the first time a skill opens its `references/`
+files Claude Code asks for permission to read them. Allow it: without the
+references a skill falls back to its `SKILL.md` alone and says so. In
+non-interactive runs (`claude -p`), nobody can answer the prompt, so allow
+reads in advance, e.g. `claude -p --allowedTools Read "..."`. Copied skills
+(Option B) inside a project do not need this.
 
 ### Option B — copy the skills
 
