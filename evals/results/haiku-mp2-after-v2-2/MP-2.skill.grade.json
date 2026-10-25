@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"No, I wouldn't do this for a patching campaign. Evacuation is a recovery tool for hosts that have actually failed\"; it also says \"Keep evacuation as a break-glass procedure for hosts that are truly dead\"."
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"If the original hypervisor is still running those VMs, two QEMU processes can write to the same disks, which corrupts filesystems. Ceph's exclusive lock reduces this risk but doesn't remove it\"."
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"The main risk: stopping nova-compute does not stop the guests. The QEMU/libvirt processes keep running on the host.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "partial",
+      "evidence": "It covers live-migration tuning (concurrency, bandwidth, auto-converge/post-copy) and cold migration \"for workloads that can accept a short outage\", plus a proper drain sequence. It never ties raising concurrency to destination capacity or headroom, and it does not offer coordinated in-place restarts for workloads that can tolerate downtime."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "It explicitly warns against this: \"Evacuation is only safe after the host is powered off or fenced (IPMI/BMC) and you've confirmed the guests are gone.\""
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "\"Ceph's exclusive lock reduces this risk but doesn't remove it, and you shouldn't depend on it.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear no with the right reason. It explains that stopping nova-compute leaves the guests running and that both copies would write to the same Ceph disks. It avoids both critical errors. The alternatives are reasonable and mostly come with conditions. However, they leave out the capacity limit on parallel live migration and the option of coordinated restarts, so that criterion is only partial."
+}

@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"Non, je ne recommande pas cette approche pour une campagne de patchs... c'est un outil de reprise après panne, pas de maintenance planifiée.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"la même instance peut tourner à deux endroits sur les mêmes volumes RBD. Deux écritures concurrentes peuvent corrompre les disques. Nova ne fence pas l'hôte à votre place.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Les VMs continuent de tourner sur l'hôte. Arrêter nova-compute n'arrête pas les processus QEMU.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Alternatives 1–3: parallel live migrations in batches \"dans la limite de vos baselines, par hôte et par domaine de panne\" with stop conditions; \"openstack server stop, puis cold migrate ou reboot de l'hôte\" for restart-tolerant workloads; tuning of max_concurrent_live_migrations, bandwidth, auto-converge/post-copy."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response rejects the proposal. Option 4 allows evacuate only \"après extinction physique confirmée de l'hôte (IPMI ou équivalent), vérifiée par virsh list\". That is fencing, so the host is no longer running its instances."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It says evacuate \"fonctionne mécaniquement\" on Ceph, then explains the concurrent-write corruption risk on the shared RBD volumes. It never presents Ceph as making the evacuation safe."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear, reasoned no. It names evacuate as a recovery tool for failed hosts. It explains that QEMU keeps running after nova-compute stops, which leads to double writes on the shared RBD volumes. It offers conditioned alternatives: batched live migration within capacity, stop/cold migrate/restart for tolerant workloads, and a landing zone. It allows evacuate only with confirmed fencing. No critical errors were committed. There are no book citations, and no environment facts were invented."
+}

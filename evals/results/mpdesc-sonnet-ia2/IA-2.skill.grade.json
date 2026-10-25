@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"A 'down' nova-compute only means the heartbeat stopped. Nova can't tell a dead host from one that is cut off from the control plane.\" The hypotheses table also lists 'Host is up but isolated' and 'Only nova-compute has died, and the VMs are still running'."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"evacuating starts a second copy of each VM on other hosts. Both copies then write to the same Ceph RBD images, which can corrupt the customer databases.\" It also says: \"Ceph makes evacuation fast. It does not make it safe.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"Don't evacuate until cmp-0417 is confirmed powered off or isolated.\" Corrective path step 1: \"Fence. Power the host off through the BMC or isolate it at the switch, then verify its power state.\""
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "The 'Next diagnostics (all read-only)' section lists: BMC/IPMI/Redfish power state and event log, ping/SSH on each network, switch-port state, neighbouring hosts, server list --host, and what changed at 03:12."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Evacuate in priority order, not all 40 at once. Get the order from the VM owners; start with the customer databases.\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "The 'Verification before calling it recovered' section: each VM ACTIVE on its new host, reachable, application health checks pass; database owners confirm data integrity; \"No VM is left on cmp-0417 in the Nova records.\" It also says to check that the host cleaned up local copies when it returns."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "partial",
+      "evidence": "It names the on-call lead as approver for powering off an isolated host and says state-changing steps need \"approval by the accountable owner\". But it leaves the evacuation decision owner as an open question (\"Who is the decision owner who approves fencing and evacuating?\") rather than naming a role."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "It explicitly says not to evacuate until the host is fenced, and the corrective path is labelled 'not yet authorized'."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"Ceph makes evacuation fast. It does not make it safe.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "It suggests only 'fencing-aware tooling such as Masakari'."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "\"I can't reach your environment from here, so I haven't verified any of this against your systems.\" Recovery depends on verification."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response that matches the expected reasoning. It answers clearly: do not evacuate until the host is fenced. It explains that a down service is not proof the host is dead, that two running copies could write to the same Ceph images, and that Ceph makes evacuation fast but not safe. It gives the sequence read-only checks, then fence via BMC or switch, then force down, then evacuate in priority order. It defines thorough verification and covers handling the host when it returns. The only weakness is authorization: the evacuation approver is left as an open question rather than named as a specific role. It commits no critical errors and has no faithfulness issues: it cites nothing from the book and labels unknowns as gaps or assumptions."
+}

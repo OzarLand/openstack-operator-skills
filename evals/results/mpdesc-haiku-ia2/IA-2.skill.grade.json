@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"'Down' in the compute service list means no heartbeat. The host could be powered off, hung, or still running its VMs while its nova-compute cannot reach RabbitMQ or Nova's API.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Ceph doesn't stop a second writer... evacuating them starts a second copy on the same RBD images. Two copies writing to a database's data files can corrupt it\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"On means it is alive but isolated, so you must fence it before evacuating\"; \"If the host is alive: Don't evacuate. Fence it first (BMC power-off or isolating its switch ports)\"; safe path step 1 requires confirmed power off."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "\"Checks to run first (all read-only...)\" table: BMC power status, rbd status/lock ls watchers, alternate-path reachability/virsh list, nova-compute logs and RabbitMQ status, server list --host."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Evacuate in waves, customer databases first, with the owners agreeing the order. Check each wave's result before starting the next.\" Also mentions replicas/backups shaping priority."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "Step 4: \"ACTIVE on the new host, its console boots, and its Ceph watcher now shows the new host. Databases then need their own crash-recovery and consistency checks\"; step 5 checks cleanup of old copies on cmp-0417."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "pass",
+      "evidence": "\"Decision owner: evacuation is disruptive and needs a named owner. Who is accountable for the 40 VMs...?\" and \"State-changing steps above require approval by the accountable owner\" (also forced-down as \"a named, approved step\")."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Says \"Don't run openstack server evacuate on all 40 VMs yet\"; the evacuation path is gated on confirmed power-off/fencing."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "Explicitly: \"Ceph doesn't stop a second writer.\" Watcher absence is used only as an additional check alongside power-off."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation is recommended; evacuation is manual, in waves, with approval."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "\"I have not checked any system... send me the outputs\"; no recovery claims made."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion and commits none of the critical errors. It answers clearly: don't evacuate yet. It explains that \"down\" only means the heartbeat stopped, and that a second copy writing to the same Ceph volumes can corrupt data. It requires fencing through the BMC or switch isolation before evacuating. It lists concrete read-only checks to run first, including BMC power state and RBD watchers/locks. It then lays out evacuation in waves ordered by criticality, with the owners agreeing the order. It defines verification after evacuation and cleanup of the old host, and requires approval from an accountable owner. It cites nothing from the book and does not invent facts about the environment."
+}
