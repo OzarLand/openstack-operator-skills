@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-label="OpenStack Operator Skills: senior-operator judgement for Claude">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="0.65" stop-color="#1e1b3a"/>
+      <stop offset="1" stop-color="#4a1426"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ED1944"/>
+      <stop offset="1" stop-color="#D97757"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="320" rx="24" fill="url(#bg)"/>
+  <rect width="1200" height="320" rx="24" fill="url(#grid)"/>
+
+  <!-- rack -->
+  <g transform="translate(90 70)">
+    <rect x="0" y="0" width="150" height="180" rx="14" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.18"/>
+    <g fill="#ffffff" fill-opacity="0.12">
+      <rect x="18" y="20" width="114" height="30" rx="6"/>
+      <rect x="18" y="62" width="114" height="30" rx="6"/>
+      <rect x="18" y="104" width="114" height="30" rx="6"/>
+    </g>
+    <circle cx="116" cy="35" r="5" fill="#22c55e"/>
+    <circle cx="116" cy="77" r="5" fill="#22c55e"/>
+    <circle cx="116" cy="119" r="5" fill="#f59e0b"/>
+    <g stroke="#ffffff" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round">
+      <line x1="32" y1="35" x2="72" y2="35"/>
+      <line x1="32" y1="77" x2="88" y2="77"/>
+      <line x1="32" y1="119" x2="62" y2="119"/>
+    </g>
+    <!-- shield -->
+    <g transform="translate(96 118)">
+      <path d="M36 0 L70 12 V40 C70 62 54 76 36 84 C18 76 2 62 2 40 V12 Z" fill="url(#accent)"/>
+      <path d="M21 42 L32 53 L52 31" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="320" y="132" fill="#ffffff" font-size="56" font-weight="800" letter-spacing="-1">OpenStack Operator Skills</text>
+    <rect x="322" y="152" width="120" height="5" rx="2.5" fill="url(#accent)"/>
+    <text x="320" y="200" fill="#cbd5e1" font-size="26">Senior-operator judgement for Claude, from the book</text>
+    <text x="320" y="234" fill="#cbd5e1" font-size="26" font-style="italic">OpenStack, the Day After Tomorrow</text>
+    <g font-size="17" font-weight="600" fill="#ffffff">
+      <rect x="320" y="258" width="214" height="34" rx="17" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
+      <text x="427" y="281" text-anchor="middle">Investigate before acting</text>
+      <rect x="546" y="258" width="160" height="34" rx="17" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
+      <text x="626" y="281" text-anchor="middle">Read-only first</text>
+      <rect x="718" y="258" width="186" height="34" rx="17" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
+      <text x="811" y="281" text-anchor="middle">Always a way back</text>
+      <rect x="916" y="258" width="200" height="34" rx="17" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
+      <text x="1016" y="281" text-anchor="middle">Humans decide</text>
+    </g>
+  </g>
+</svg>
