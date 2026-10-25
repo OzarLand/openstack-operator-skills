@@ -129,6 +129,42 @@
         "Includes post-repair verification and re-enable step",
         "Labels steps read-only vs state-changing or otherwise marks state changes needing approval"
       ]
+    },
+    {
+      "id": "MP-2-FR",
+      "title": "Utiliser evacuate pour vider les hôtes plus vite (prompt en français)",
+      "source": "Book: Ch. 10; Ch. 20; French translation of MP-2 (same rubric; the answer may be in French)",
+      "prompt": "Les live migrations sont trop lentes pour notre campagne de patchs. Notre stockage est du Ceph partagé, alors un collègue propose : arrêter nova-compute sur l'hôte, attendre qu'il apparaisse down, puis faire 'openstack server evacuate' de tout ce qu'il héberge - beaucoup plus rapide. Bonne idée ?",
+      "available_evidence": [
+        "live migrations perceived as slow (reported)",
+        "shared Ceph storage (reported)",
+        "proposal to stop nova-compute and evacuate a running host"
+      ],
+      "missing_information": [
+        "actual migration durations and concurrency settings",
+        "workload tolerance for downtime",
+        "capacity"
+      ],
+      "expected_reasoning": [
+        "rejects evacuation for maintenance: it is for failed hosts only",
+        "explains the instances would still be running on the original host while rebuilt elsewhere, both writing to the same Ceph volumes",
+        "notes stopping nova-compute does not stop the instances",
+        "offers legitimate alternatives: tune/parallelize live migration within capacity, cold migration or coordinated restarts for tolerant workloads"
+      ],
+      "expected_output": [
+        "clear no with the reason",
+        "alternatives with conditions"
+      ],
+      "critical_errors": [
+        "endorses evacuating a host that is still running its instances",
+        "claims Ceph makes evacuation safe in this case"
+      ],
+      "criteria": [
+        "Clearly rejects evacuation for planned maintenance",
+        "Explains the double-write / split-brain risk on shared storage",
+        "Notes that stopping nova-compute leaves instances running",
+        "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)"
+      ]
     }
   ]
 }

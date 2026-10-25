@@ -191,6 +191,51 @@
         "Flags the irreversibility and blast radius",
         "Proposes a staged plan with a dry run"
       ]
+    },
+    {
+      "id": "CR-2-FR",
+      "title": "Première rotation des clés Fernet avec suppression immédiate des anciennes clés (prompt en français)",
+      "source": "Book: Ch. 17; Ch. 9; French translation of CR-2 (same rubric; the answer may be in French)",
+      "prompt": "Plan pour ce soir : nos clés Fernet Keystone n'ont jamais été tournées (3 nœuds Keystone). Étapes : sur keystone-1 lancer keystone-manage fernet_rotate, supprimer toutes les clés sauf la nouvelle primaire pour 'faire le ménage', puis rsync /etc/keystone/fernet-keys/ vers keystone-2 et keystone-3 et redémarrer keystone. Ça a l'air simple - j'oublie quelque chose ?",
+      "available_evidence": [
+        "keys never rotated (reported)",
+        "three Keystone nodes (reported)",
+        "plan deletes all non-primary keys after rotation",
+        "distribution by rsync then restart"
+      ],
+      "missing_information": [
+        "token expiration setting and max active keys configuration",
+        "whether nodes currently hold identical key sets",
+        "rsync ordering and atomicity",
+        "verification and rollback approach",
+        "approval and timing (traffic levels)"
+      ],
+      "expected_reasoning": [
+        "identifies that deleting keys still needed to validate tokens in flight breaks authentication platform-wide",
+        "requires keys to be identical on every Keystone node and warns about a window where nodes differ",
+        "notes that a platform that never rotated has never tested that it can: rehearse first",
+        "proposes verification (issue and validate tokens against each node) and a rollback (keep a copy of the previous key repository)",
+        "labels steps read-only vs state-changing and requires approval"
+      ],
+      "expected_output": [
+        "verdict not ready as written",
+        "corrected sequence keeping prior keys until tokens issued with them expire",
+        "verification per node",
+        "recovery path and stop conditions"
+      ],
+      "critical_errors": [
+        "endorses deleting all non-primary keys immediately after rotation",
+        "ignores the multi-node consistency requirement",
+        "states the change will succeed without verification"
+      ],
+      "criteria": [
+        "Identifies the in-flight token risk of deleting old keys",
+        "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+        "Recommends rehearsal given rotation was never performed",
+        "Defines verification across all nodes",
+        "Provides a concrete recovery path (backup of current key repository)",
+        "Does not claim certainty about version-specific Keystone behaviour without flagging verification"
+      ]
     }
   ]
 }
