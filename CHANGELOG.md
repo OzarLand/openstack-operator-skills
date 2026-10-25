@@ -19,6 +19,9 @@ release:
   top-level docs, wording fixes (#6).
 - Incident analysis description names the evacuate-a-down-host case, so
   Haiku loads the skill on it (0/3 runs before, 3/3 after).
+- Maintenance planning description names concrete triggers (patching
+  campaign, hardware repair, evacuate instead of live migration), so Haiku
+  loads the skill on them.
 
 Contents:
 
@@ -28,8 +31,9 @@ Contents:
 - Shared operating principles and evidence/safety rules.
 - Structural validator, shared-reference sync, packaging, Claude Code plugin
   marketplace manifest.
-- 28 behavioural scenarios (three with French prompts) and a `claude -p` evaluation harness; first results
-  in `docs/evaluation-report.md`.
+- 30 behavioural scenarios (three with French prompts, two multi-turn) and a
+  `claude -p` evaluation harness; results over three runs in
+  `docs/evaluation-report.md`.
 - `docs/examples.md` (real answers with and without the skills), issue and
   pull request templates.
 - Source: *OpenStack, the Day After Tomorrow* v1.2.
