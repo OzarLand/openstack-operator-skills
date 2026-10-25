@@ -1,0 +1,78 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "pass",
+      "evidence": "\"Fixed (Reported): kernel + QEMU fix on all 300 hosts within 3 weeks\" vs \"To design: how to get there safely... Security's accountable owner decides on the exposure trade-off.\""
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "pass",
+      "evidence": "\"Nova only sees instances... that has to come from tenants\"; per-project criticality table collected in week 1; per-host step 1 \"confirm each is classified and owners are informed\"; class D \"Never restart without an owner decision.\""
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "Formula \"hosts that can be in maintenance at once per AZ ≤ (spare host-equivalents in that AZ − reserve)\"; \"The platform total of 8 is the wrong number to plan against\"; asks how the spare hosts are spread across AZs."
+    },
+    {
+      "criterion": "Handles SR-IOV instances by release: live migration with a brief interface interruption (owner agreement) where supported, restart or cold migration otherwise",
+      "verdict": "pass",
+      "evidence": "Class B: \"Live migration, possible since Train (verify for your release). The guest loses that interface briefly... owner acceptance is needed\"; Class C: flavor-based PCI passthrough → \"Cold migration or coordinated restart\"; open question asks which release."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "pass",
+      "evidence": "\"Landing zone first... patch them first... migration from newer to older QEMU isn't supported. Only move instances toward patched hosts.\""
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"a QEMU fix protects only instances that were migrated or restarted after the host was patched. A patched host with old guests still running is not done.\""
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "pass",
+      "evidence": "The \"Boundaries and stop conditions\" list (migration failures, capacity below reserve, decision-maker unreachable, etc.) and \"Campaign completion criteria\" (every instance migrated or restarted since the patch, or on the exception list)."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "\"Do not use evacuation for planned maintenance. It is for failed hosts only, and it can duplicate guests that are still running.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "Rolling waves of 1 host per AZ with a reserve; restart-tolerant and class C workloads are rebooted in place; exceptions route goes to Security."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "Restarts need project owner sign-off; \"It must never mean 'restart'\"; class D: \"Never restart without an owner decision.\""
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "Explicitly warns against evacuation for planned maintenance."
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "Tracks status per instance; completion requires every instance migrated or restarted since the patch."
+    },
+    {
+      "error": "classes all SR-IOV instances as requiring a restart without considering the release",
+      "committed": false,
+      "evidence": "SR-IOV direct ports are put in a live-migratable class \"since Train (verify for your release)\"."
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "\"Assumption: about 100 hosts per AZ. Please verify.\" The 2.67-per-AZ figure is explicitly an even-spread illustration, and the response warns that one AZ may have only 1–2. Per-AZ spread is listed as an open question."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a strong, complete plan. It keeps the security requirement fixed and collects criticality per project from owners before any restart. It frames capacity per AZ and labels its assumptions as assumptions. SR-IOV handling depends on the release, with owner agreement for the brief interface interruption on direct ports. It covers the landing zone and the rule against migrating from newer to older QEMU, and states that instances are only protected once migrated or restarted. It rules out evacuation for maintenance and defines stop conditions, completion criteria, decision rights and follow-up. All criteria pass and it commits none of the critical errors. One small looseness: it says \\\"guarantee 2\\\" per AZ under the even-spread assumption, but that is hedged and followed by a more conservative recommendation."
+}

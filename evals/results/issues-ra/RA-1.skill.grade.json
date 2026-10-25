@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes decision points distinguishing partition from node loss",
+      "verdict": "pass",
+      "evidence": "Decision point table: 'Nodes agree, one node absent, the rest are a majority, no partition events' → 'Node-left case: not this runbook' vs 'Differing views, a listed partition...' → Section B. It also separates Galera states: 'Fewer nodes than expected, or a node not Primary' vs 'If no node is Primary, stop and escalate'."
+    },
+    {
+      "criterion": "Gates stopping APIs and purging queues behind an authorized decision",
+      "verdict": "pass",
+      "evidence": "Step 3: 'Approval gate: the named owner accepts that provisioning stops and queues are purged ... No approver: stop'. Step 5 is labelled 'state-changing, destructive', and Recovery says 'Point of no return: step 5 ... Lost in-flight messages can't be restored.' Reopening the APIs needs a separate approval."
+    },
+    {
+      "criterion": "Includes explicit must-not-do actions",
+      "verdict": "pass",
+      "evidence": "'Do not do without escalation' section: 'Don't purge queues or restart RabbitMQ before checking for a partition and getting approval', 'Don't restart all MariaDB nodes at once, or bootstrap Galera', 'Don't evacuate or fence hosts...'. Step 2 warns 'A wrong reset discards queues still in use'."
+    },
+    {
+      "criterion": "Keeps end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "Step 10 runs Verification before step 11 reopens the APIs. The Verification section covers RabbitMQ agreement and consumers, Galera size/Primary/synced, compute services and agents, and test VM create/ACTIVE/ping/delete. The do-not list includes 'Don't reopen the APIs before the end-to-end test passes.'"
+    },
+    {
+      "criterion": "Marks missing details as TODOs rather than inventing them",
+      "verdict": "pass",
+      "evidence": "'Commands aren't in the notes. Use your deployment's commands'. Each state-changing step has a TODO, e.g. 'TODO: which vhosts, and by what method?' and 'TODO: node order, rolling or not'. Owner and escalation contact are TODO. The only commands named are generic (cluster_status, partition-handling modes), with 'Verify for your release'."
+    },
+    {
+      "criterion": "Includes owner, validation plan by a non-author, and draft status",
+      "verdict": "pass",
+      "evidence": "'Status: Draft, not yet validated ... nobody other than the author has run it.' 'Owner: TODO.' 'Validation plan: a platform engineer who didn't write it runs a tabletop first. They then run it in a non-production environment...'"
+    },
+    {
+      "criterion": "Records why steps exist (reasoning), not only commands",
+      "verdict": "pass",
+      "evidence": "The procedure table has a 'Why' column, e.g. 'The purge and restart destroy it', 'Stops new requests adding broken state', 'Prove the capability before taking user traffic'. Author notes explain why the gates were added."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "turns the incident sequence into an unconditional procedure (always purge and restart)",
+      "committed": false,
+      "evidence": "The purge and restart run only in Section B, after the partition check and the approval gate. The MariaDB restart runs 'only if Galera was unhealthy'. The decision table says 'Do not restart MariaDB' when Galera is healthy."
+    },
+    {
+      "error": "invents environment-specific commands or hostnames as fact",
+      "committed": false,
+      "evidence": "No hostnames or environment-specific commands appear. The response says 'Commands aren't in the notes', and every specific detail is a TODO."
+    },
+    {
+      "error": "labels the runbook validated",
+      "committed": false,
+      "evidence": "'Status: Draft, not yet validated ... Last validation: never.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong runbook. It scopes the failure mode and says what it does not cover. Its decision points separate a RabbitMQ partition from a node leaving, and Galera quorum states from each other. Stopping the APIs and purging queues sit behind a named-owner approval, and the response states that the purge loses in-flight messages. It includes stop/escalate and do-not lists, keeps end-to-end verification before the APIs reopen, and gives the reason for each step. Unknowns are marked as TODOs. The runbook is labelled a draft and includes a validation plan run by a non-author. No critical errors were committed and there are no faithfulness issues. One small gap: the response does not explain how to find the most advanced Galera node. It forbids a bootstrap without escalation instead."
+}
