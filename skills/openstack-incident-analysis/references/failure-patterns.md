@@ -77,7 +77,25 @@ Source: [Book: Ch. 10] (field passage and technical note), [Book: Ch. 20].
   cannot know.
 - **Required sequence**: confirm via out-of-band management (or isolate at the
   switch), power off / fence, **then** evacuate. Nova requires the compute
-  service to be reported down before evacuating, but that is not proof.
+  service to be reported down before evacuating, but that is not proof
+  [Book: Ch. 10]. Nova steps that go with it `[Addition]` (verify commands and
+  behaviour for your release):
+  1. Fence the host and verify its power state.
+  2. Mark the service forced down —
+     `openstack compute service set --down <host> nova-compute` (compute API
+     microversion ≥ 2.11), state-changing — instead of waiting for the
+     heartbeat to time out (`service_down_time`). External fencing and HA tools
+     (e.g. Masakari) are expected to do the same.
+  3. Evacuate instance by instance, in business-priority order agreed with the
+     owners; verify each instance (active on the new host, reachable, disks
+     consistent).
+- **When the failed host comes back** `[Addition]`: keep it disabled and
+  forced down. On start, `nova-compute` destroys the local copies of the
+  instances evacuated from it, provided the evacuations completed and their
+  migration records exist. Check networking and storage, start `nova-compute`,
+  confirm it cleaned up the evacuated instances, and only then unset forced
+  down (`--up`) and re-enable (`--enable`) as separate approved steps. Bringing
+  it back earlier recreates the two-copies risk from the other end.
 - **Dangerous moves**: evacuating on a missing heartbeat; automation that
   evacuates without fencing. Evacuation is for failed hosts only — never for
   planned maintenance.

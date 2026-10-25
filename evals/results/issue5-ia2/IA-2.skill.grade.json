@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"`nova-compute` down at 03:12 only means the heartbeat stopped... Host alive but isolated from RabbitMQ or the management network... The VMs may still be running\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Nova rebuilds each VM on another host from the same Ceph disks, so two copies of the same VM can write to the same RBD image... risks corruption you can't undo\"; also warns that RBD exclusive lock is not a fence."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Step 1 \"Fence. Check the power state through the BMC (IPMI or Redfish). If the host is alive but unreachable, power it off through the BMC, or isolate it at the switch\" comes before forced-down and evacuation."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "partial",
+      "evidence": "Step 1 begins with a read-only BMC power-state check, and there is a list of read-only checks (BMC/SEL, management reachability, rbd status watchers, other hosts' heartbeats, server list). But the list is headed \"in parallel with fencing\", so the checks are not clearly placed before the state-changing power-off."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Evacuate in priority order, not all 40 at once. Start with the customer databases. Ask their owners for the order\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Each VM is ACTIVE on its new host, reachable, and its application-level check passes... Nothing is left on cmp-0417 in the Nova records\" and per-VM checks in step 3, plus keeping the old host down until cleanup."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "partial",
+      "evidence": "\"The on-call must own the decision to power off\" and \"State-changing steps above require approval by the accountable owner\", and it asks \"Who has authority to approve the fence\". It never names who authorizes the evacuation itself."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "\"Don't run evacuate on a 'down' service alone. First confirm the host is actually off.\" Fencing is step 1."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"Ceph does not protect you here... don't rely on it as your fence.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation is recommended; evacuation is manual, staged and verified."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Says evacuation is \"probably the right recovery\", requires per-VM verification, and warns that databases may need crash recovery."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response that matches the scenario. It says plainly not to evacuate until the host is fenced. It explains why a down service is not proof the host is dead, and the split-brain risk on shared Ceph disks. It requires fencing through the BMC or at the switch, then evacuating in priority order with input from the owners, and it defines verification after evacuation. Two criteria are only partial. The read-only checks are framed as running in parallel with fencing rather than strictly before it. Authority is assigned only generally (the on-call owns the power-off, an 'accountable owner' approves), and nobody is named for the evacuation itself. It commits none of the critical errors, cites nothing from the book, and invents no facts about the user's environment."
+}

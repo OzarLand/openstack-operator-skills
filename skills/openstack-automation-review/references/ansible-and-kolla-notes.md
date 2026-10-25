@@ -64,7 +64,9 @@ versions in use.
 - State-changing API calls (migrate, evacuate, delete, reset state) need a dry
   run mode that prints the intended actions.
 - Rate limiting and concurrency limits per failure domain.
-- Evacuation logic must fence the host first [Book: Ch. 10].
+- Evacuation logic must fence the host first [Book: Ch. 10], then mark the
+  compute service forced down before evacuating, and must not return the host
+  to service before `nova-compute` has cleaned up the evacuated instances.
 - Migration automation should account for capacity and the libvirt/QEMU
   direction constraint after partial patching [Book: Ch. 20].
 - Cleanup automation for stale records: prefer project tools

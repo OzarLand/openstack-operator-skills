@@ -112,6 +112,7 @@ a decision owner.
 - `openstack server set --state ...` (reset state), `openstack server delete`,
   `nova evacuate` / `openstack server evacuate`, any migration
 - `openstack compute service set --disable|--enable`
+- `openstack compute service set --down|--up` (forced down; microversion ≥ 2.11)
 - `rabbitmqctl reset|forget_cluster_node|stop_app|purge_queue`, restarting nodes
 - Galera bootstrap (`galera_new_cluster` or equivalent), editing `grastate.dat`
 - Restarting any OpenStack service, agent or OVN controller
