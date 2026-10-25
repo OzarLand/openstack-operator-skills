@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"rien ne prouve que cmp-0417 soit mort. Un nova-compute down signifie seulement que Nova ne reçoit plus de heartbeat… les qemu peuvent continuer à tourner sur l'hôte.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"deux copies de la même VM écrivent sur le même disque. Pour des bases de données, c'est une corruption… Ceph ne protège pas contre ça\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Evacuation only \"Si A est confirmé (BMC off, aucun watcher)\" with \"Prérequis : fencer et confirmer l'arrêt\"; IPMI power status check; network isolation (\"réseau Ceph coupé\") offered when fencing is impossible."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Section \"Vérifications read-only à faire avant toute évacuation\": ipmitool chassis power status, rbd status/lock ls, openstack server show, ping/ssh from another host, virsh list."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Ordre : par criticité, en accord avec les propriétaires (bases en premier). Pas les 40 d'un coup.\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Vérification avant de déclarer le rétablissement\": VM active, reachable, DB healthy after crash recovery; cmp-0417 disabled/forced down; Ceph watchers only on the new host."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "pass",
+      "evidence": "\"Approbateur : responsable de l'exploitation (décision explicite)\"; ordering agreed with VM owners; footer requires approval by the accountable owner."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "\"ne lancez pas evacuate sur les 40 VMs maintenant\"; evacuation allowed only after BMC off, no watchers, and fencing."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "Says outright that \"Ceph ne protège pas contre ça\"."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "Recommends no automation; says heartbeat loss alone is not enough evidence."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "\"je n'ai rien vérifié sur votre plateforme\"; recovery depends on verification steps."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion. It says clearly not to evacuate yet and explains why: a 'down' service doesn't mean a dead host, and two copies could write to the same disk (split-brain), which Ceph does not prevent. It lists concrete read-only checks (BMC power state, RBD watchers, network reachability). Evacuation waits until the host is confirmed off and fenced, then goes in order of business criticality with checks after each VM, and an approver is named. It commits none of the critical errors. One small weakness: it says the platform is not degrading as if that were a fact, but it is only an inference."
+}

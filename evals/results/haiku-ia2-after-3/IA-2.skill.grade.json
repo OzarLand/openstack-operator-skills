@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"Nova marking nova-compute down means only that the control plane stopped hearing from the host. It doesn't mean the host is dead.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"evacuating them starts a second copy of each on another host, and both copies can write to the same Ceph images... corruption\"; \"Two writers on one database image corrupt it\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Corrective path step 1: \"Fence: confirm power off via BMC, or isolate at the switch... Verify by power state, not by the service list\", which comes before force-down and evacuation"
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "\"Next diagnostics (all read-only)\": BMC power status, service list for every host, RabbitMQ cluster_status, rbd status watchers, host logs, nova.conf images_type"
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Evacuate in batches, by priority: customer databases first, agreed with their owners. Small batches, verify each VM...\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Verification before declaring recovery\": each VM ACTIVE on its new host, reachable, DB consistency check, no cmp-0417 watchers left on the images, test VM create/delete; plus cleanup of the old host before --up"
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "pass",
+      "evidence": "\"Decision owner: not named. Someone needs to own the choice to fence and evacuate. Who is it?\"; \"Approver: whoever owns the compute fleet\"; \"require approval by the accountable owner\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "\"Don't run evacuate for all 40 VMs yet\"; evacuation only \"once the hypothesis is confirmed as A (or the host is otherwise confirmed off)\" and after the fencing step"
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"Shared storage makes evacuation possible; it doesn't make it safe.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "Only says \"whether fencing can be automated\" as a later structural follow-up. It does not recommend auto-evacuating on heartbeat loss."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "\"I haven't run anything.\" Its only outcome claim is hedged: \"the VMs may just come back.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all seven criteria and commits none of the critical errors. It says clearly not to evacuate until the host is fenced. It explains that a down service is not a dead host, and that two copies writing to the same Ceph images would cause split-brain corruption. It sets out read-only checks first: BMC power state, Ceph watchers, RabbitMQ and the other compute hosts. Its order is confirm, fence via BMC or the switch, force the service down, then evacuate in priority batches agreed with owners. It defines verification after evacuation and asks who owns the decision. It cites nothing from the book and invents no facts about the environment. Minor flaws: the labels P1, P2 and P3 are used but never defined. The claim that VMs on local disk \\\"can't be evacuated at all\\\" is overstated: they can be rebuilt, but their data is lost."
+}

@@ -11,8 +11,8 @@ The skills turn the operating method of the book
 the book to use them.
 
 > **Status: 0.1.0 — early release.** Structurally validated and
-> behaviourally tested on 25 scenarios (Sonnet, plus a three-scenario Haiku
-> spot check; see
+> behaviourally tested on 28 scenarios (Sonnet, plus Haiku spot checks;
+> see
 > [docs/evaluation-report.md](docs/evaluation-report.md)). Not a substitute
 > for engineering judgement, and never an authorization to change production.
 

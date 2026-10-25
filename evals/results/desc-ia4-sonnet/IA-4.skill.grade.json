@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "pass",
+      "evidence": "\"the right fix only if rabbit-03 simply left the cluster. A partitioned cluster raises the same alert\"; Hypotheses A (node left) vs B (partitioned), with separate corrective branches for each."
+    },
+    {
+      "criterion": "Requires cluster status from each node (especially rabbit-03) before acting",
+      "verdict": "pass",
+      "evidence": "Diagnostic 1: \"`rabbitmqctl cluster_status` on **each** of the three nodes. Look for a `Network Partitions` section\". It also says \"you've only shown the view from rabbit-01\"."
+    },
+    {
+      "criterion": "Explains the risk of resetting the wrong node",
+      "verdict": "pass",
+      "evidence": "\"If the cluster is partitioned and your services are connected to rabbit-03, it throws away queues they are actively using.\" It also covers the quorum replica risk."
+    },
+    {
+      "criterion": "States when the runbook is applicable",
+      "verdict": "pass",
+      "evidence": "\"If it's a node that left (A or C), with rabbit-01 and rabbit-02 healthy and a majority: the runbook is reasonable once these hold\", followed by prerequisites (no partition, queues and replicas listed, no unique data). It also recommends adding a decision point to the runbook."
+    },
+    {
+      "criterion": "Includes escalation or decision owner for the partition case",
+      "verdict": "pass",
+      "evidence": "\"If it's a partition (B): don't reset anything. Establish which side the services use and escalate.\" It also says \"the decision belongs to whoever owns the platform… Please tell me who has that authority\" and \"Approver: the RabbitMQ or platform owner.\""
+    },
+    {
+      "criterion": "Defines verification after recovery (consumers reconnect)",
+      "verdict": "pass",
+      "evidence": "\"Verification: all three nodes in the running list, queues with consumers, all Nova and Neutron services reporting, and a test VM created, reached and deleted\". The stop conditions include \"consumers don't reconnect\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "The answer opens with \"Short answer: not yet\", and the runbook is conditioned on \"Step 1 shows no partition\"."
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "\"rabbit-03 is down\" appears only as Hypothesis A, alongside the partition and network hypotheses."
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "Only the user's observation is stated. Everything else is marked \"Not yet seen\" or \"Gap\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong and passes all six criteria. It refuses to run the runbook straight away and sets out node-left versus partition as competing hypotheses. It asks for cluster_status from every node, along with read-only checks of partition-handling mode, connections and queue types. It explains why the reset could throw away queues that services are using, and it allows the runbook only in the node-left case, behind stated prerequisites. For a partition it says to escalate and names an owner, and it defines verification after recovery, including consumers reconnecting. It commits none of the critical errors. Its one book reference matches the expected reasoning, and it invents nothing about the user's environment."
+}
