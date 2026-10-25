@@ -278,6 +278,10 @@ Technical statements in the book that upstream documentation contradicts.
 The skills follow upstream, say so where the point appears, and list the
 point here as a candidate erratum for the book.
 
+The SR-IOV point below was corrected in the book's repository
+([pull request #4](https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow/pull/4),
+for v1.3); the skills follow the same wording.
+
 | Book statement | Upstream behaviour | Where handled |
 |---|---|---|
 | Instances with SR-IOV direct ports cannot be live-migrated (Ch. 20 technical note) | Live-migratable with the libvirt driver since Train: the port is unplugged and re-plugged, so the guest loses that interface briefly. vGPU instances are live-migratable since 2024.1 with recent libvirt, QEMU and kernel. | `openstack-maintenance-planning` (SKILL.md step 3, `host-maintenance-mechanics.md`) |

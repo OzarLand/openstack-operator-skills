@@ -209,7 +209,7 @@ docs/evaluation-report.md       what was tested, how, and the results
 docs/knowledge-map.md           what the book contains and what each skill uses
 docs/design.md                  why these skills and how they are built
 docs/installation.md            installation per surface
-evals/scenarios/                behavioural test scenarios (28)
+evals/scenarios/                behavioural test scenarios (30)
 evals/results/                  raw outputs and grades of every recorded run
 tools/                          validator, sync, eval harness, packaging
 assets/                         images used in this README

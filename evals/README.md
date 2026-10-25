@@ -45,6 +45,7 @@ errors are reported separately and matter more than the average.
 | `id`, `title` | identifier and short name |
 | `source` | book chapters the scenario comes from; "scenario constructed" when it is not a documented book situation |
 | `prompt` | what the user says |
+| `followups` | optional: later user turns, for a multi-turn scenario; the harness keeps one session (`--session-id`, then `--resume`) and the grader sees the whole conversation |
 | `available_evidence` | what the prompt actually establishes |
 | `missing_information` | what a good answer should notice is missing |
 | `expected_reasoning` | the reasoning steps the book's method implies |
@@ -57,6 +58,7 @@ errors are reported separately and matter more than the average.
 - Model grading is itself a model judgement; spot-check the raw outputs in
   `results/`.
 - One run per cell is noisy; differences of a few points are not meaningful.
+  Run the same suite with several `--run-id`s to measure the spread.
 - Scenarios were written by the same author as the skills; independent
   scenarios from operators are the most valuable contribution.
 - Claude Code only; claude.ai and the API were not exercised.
