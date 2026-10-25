@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"No. Don't do this. Evacuation is built for a host that has failed, not for planned maintenance.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"That gives you two live copies of the same VM on the same RBD disks... risks filesystem corruption and split-brain (duplicate IPs and MACs, two writers).\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"'Service down' only means the agent stopped reporting. The guests are still running under libvirt/QEMU on that host.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Auto-converge/post-copy and \"Raising concurrency within what your network and Ceph can absorb\"; \"Cold-migrate or restart the ones whose owners agree to downtime\"; \"Check capacity per failure domain\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response rejects the plan outright and says evacuate is only for a genuinely failed host: \"Even then, fence it first.\""
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "\"Why the 'faster' plan is risky even on shared Ceph\"; it also says Ceph locks are not a safety net: \"Don't treat them as your safety net.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It gives a clear no and explains why: stopping nova-compute leaves the guests running, so evacuating creates two writers on the same RBD disks. It offers alternatives with conditions attached: tuning live migration within capacity, cold migration or restarts the workload owners agree to, and draining hosts in parallel based on capacity per failure domain. It commits neither critical error. It does not invent facts about the user's environment and makes no book citations."
+}

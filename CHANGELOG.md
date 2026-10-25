@@ -17,6 +17,8 @@ release:
   return it safely (#5).
 - `weighted_score.py` input validation and ties, ruff in CI, link check on the
   top-level docs, wording fixes (#6).
+- Incident analysis description names the evacuate-a-down-host case, so
+  Haiku loads the skill on it (0/3 runs before, 3/3 after).
 
 Contents:
 
@@ -26,6 +28,6 @@ Contents:
 - Shared operating principles and evidence/safety rules.
 - Structural validator, shared-reference sync, packaging, Claude Code plugin
   marketplace manifest.
-- 25 behavioural scenarios and a `claude -p` evaluation harness; first results
+- 28 behavioural scenarios (three with French prompts) and a `claude -p` evaluation harness; first results
   in `docs/evaluation-report.md`.
 - Source: *OpenStack, the Day After Tomorrow* v1.2.

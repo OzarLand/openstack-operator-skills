@@ -20,13 +20,15 @@ development session; raw outputs and grades are under `evals/results/`.
 
 | Check | Result |
 |---|---|
-| Structural validation (7 skills, 25 scenarios) | 0 errors, 0 warnings |
+| Structural validation (7 skills, 28 scenarios) | 0 errors, 0 warnings |
 | Plugin marketplace manifest (`claude plugin validate --strict .`) | passed |
 | `weighted_score.py` reproduces the book's Ch. 18 example | passed |
 | Full behavioural run, model under test claude-sonnet-5-5, 24 scenarios | with skills: mean 0.97, expected skill triggered 24/24, 0 critical errors; baseline without skills: mean 0.68, 3 critical errors |
 | Regression after fixes (8 scenarios) | mean 0.98, 8/8 triggered, 0 critical errors |
 | Haiku spot check (3 scenarios) | skill triggered 2/3; 0 critical errors either way |
 | Regression after issues #1–#6 (5 scenarios, incl. new AR-4) | mean 0.97, 5/5 triggered, 0 critical errors |
+| French prompts (3 scenarios, Sonnet) | with skills: mean 0.95, 3/3 triggered; baseline: mean 0.75; 0 critical errors |
+| Haiku on IA-2 after description fix | skill triggered 3/3 (was 0/3), mean 1.00 |
 
 These are single runs per cell, graded by a model. They show a consistent
 direction, not precise effect sizes.
@@ -274,6 +276,39 @@ permissions, reading the skill's `references/` from the plugin cache was
 denied and the answer said so; with `--allowedTools Read` the references were
 read. Not graded; a check that installation works, not a scored run.
 
+**French prompts.** IA-2-FR, MP-2-FR and CR-2-FR are translations of IA-2,
+MP-2 and CR-2 with the same rubrics (runs `fr-*`). All three skills triggered
+and answered in French.
+
+| Scenario | Mode | Model | Skill(s) invoked | Criteria score | Critical errors committed |
+|---|---|---|---|---:|---|
+| CR-2-FR | baseline | claude-sonnet-5-5 | — | 0.67 | none |
+| CR-2-FR | skill | claude-sonnet-5-5 | openstack-change-review | 0.92 | none |
+| IA-2-FR | baseline | claude-sonnet-5-5 | — | 0.71 | none |
+| IA-2-FR | skill | claude-sonnet-5-5 | openstack-incident-analysis | 0.93 | none |
+| MP-2-FR | baseline | claude-sonnet-5-5 | — | 0.88 | none |
+| MP-2-FR | skill | claude-sonnet-5-5 | openstack-maintenance-planning | 1.00 | none |
+
+**Haiku triggering on IA-2.** With the original description Haiku did not
+load the incident skill on IA-2 in 3 of 3 runs (`haiku-ia2-before-*`, not
+graded). The description now names the case (compute host down, `openstack
+server evacuate`) and the "is it safe to run this command" question. After
+the change (`haiku-ia2-after-*`, `haiku-ia2fr-after`, `haiku-mp2-after`,
+`desc-*`):
+
+| Scenario | Mode | Model | Skill(s) invoked | Criteria score | Critical errors committed |
+|---|---|---|---|---:|---|
+| IA-2 (3 runs) | skill | claude-haiku-5-5 | openstack-incident-analysis | 1.00 each | none |
+| IA-2-FR | skill | claude-haiku-5-5 | openstack-incident-analysis | 1.00 | none |
+| IA-4 | skill | claude-sonnet-5-5 | openstack-incident-analysis | 1.00 | none |
+| MP-2 | skill | claude-sonnet-5-5 | openstack-maintenance-planning | 1.00 | none |
+| MP-2 | skill | claude-haiku-5-5 | — | 1.00 | none |
+
+The broader description did not take MP-2 (evacuate as a drain shortcut)
+away from maintenance planning. Haiku still loaded no skill on MP-2, although
+its answer met every criterion: maintenance-planning triggering on Haiku
+remains open.
+
 ## 10. Limitations and what has not been tested
 
 - **One run per cell.** Differences of a few points are within noise (see IA-4
@@ -286,8 +321,8 @@ read. Not graded; a check that installation works, not a scored run.
   API and the Agent SDK were not tested. The plugin install from GitHub was
   tested once end to end (section 9); in `claude -p` the plugin's reference
   files are only read when `Read` is allowed (see `docs/installation.md`).
-- **Models.** Full run on Sonnet only; Haiku on three scenarios; Opus only as
-  grader. Haiku under-triggered once.
+- **Models.** Full run on Sonnet only; Haiku on a handful of scenarios; Opus
+  only as grader. Haiku still under-triggers maintenance planning (MP-2).
 - **Multi-turn use** (pasting diagnostic output back, continuing an incident)
   was not tested; all scenarios are single prompts.
 - **No real infrastructure.** Skills were never connected to an OpenStack

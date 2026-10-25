@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "Opens with \"**No, don't do that.**\" Step 3 says to use \"a clean shutdown and a cold migration, not evacuation\", and step 5 keeps evacuation for when \"the host is really dead\"."
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"On shared Ceph, two qemu processes can write to the same RBD images. RBD's exclusive-lock feature reduces this risk but doesn't remove it... Don't rely on it as a fence.\" It also says evacuating \"can start a second copy of each instance while the first is still running\" and covers duplicate IP/ARP conflicts."
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Stopping `nova-compute` doesn't stop the VMs\" and \"Stopping it leaves libvirt and the qemu processes running, so the guests keep running on the host with their disks open.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Suggests raising max_concurrent_live_migrations \"carefully, based on what the migration network can handle\", a dedicated migration network, and auto-converge or post-copy with their tradeoffs. Also: \"decide with its owner between a clean shutdown and a cold migration\" and \"a planned restart for the worst ones\", with batches sized to the concurrency limit. It does not mention the compute capacity of destination hosts, but the conditions it gives are enough."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response rejects the proposal outright. It allows evacuation only after the host is powered off through BMC/IPMI and no qemu processes are confirmed to remain."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It says the opposite: on shared Ceph two qemu processes can write to the same RBD images, and exclusive-lock should not be relied on as a fence."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear no for the right reasons. It explains that stopping nova-compute leaves the guests running, that evacuation does not fence the source host, and that two copies can write to the same Ceph RBD images, plus network conflicts. Its alternatives come with conditions: live-migration tuning within network limits, cold migration, and a clean shutdown agreed with the VM owner. Evacuation is reserved for truly dead hosts that have been fenced. It does not commit either critical error. It cites nothing as coming from the book, and it presents nothing about the user's environment as known; it frames those points as things to verify."
+}

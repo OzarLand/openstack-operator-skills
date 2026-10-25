@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"'Down' does not mean dead. Nova only knows the heartbeat stopped. The host may be powered on, isolated from the control plane ... and still running the VMs.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"starts a second copy of each VM against the same Ceph RBD images. Two writers on a database disk is the worst outcome\"; the opening also says \"corruption, not just downtime\"."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Evacuation is allowed only under Option B, \"Host is confirmed powered off and fenced\". The response also says to check power through the BMC/iDRAC/iLO with ipmitool, says the forced-down override \"is only safe after the host is fenced\", and Option C says \"fence first. Do not evacuate on a guess.\" It does not name switch-port isolation explicitly, but it does require out-of-band confirmation and fencing."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "The \"Next diagnostics (all read-only)\" section covers the service list, the server list for the host, BMC power status, rbd status and lock ls, tenant reachability from monitoring, and the console/logs."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Start with one non-critical canary VM, verify it, then continue in batches ordered by criticality. Get the criticality order from the owners; do not assume it.\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "The \"Verification before declaring recovery\" section asks for: ACTIVE on a healthy host, reachable from the tenant network, DB owners confirm application checks, one Ceph watcher per disk, nothing in ERROR or MIGRATING, and cmp-0417 kept disabled and forced down until cleanup is confirmed."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "pass",
+      "evidence": "\"Approver: the named incident owner with authority over customer impact, plus the DB owners for their own systems.\" Open questions also ask \"Who is the decision owner for the customer-impact call?\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Evacuation is allowed only under Option B, \"confirmed powered off and fenced\". Option A says \"Do not evacuate\" if the host is powered on."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"Ceph is not automatically a fast path\", and it explains that two writers on the same RBD images corrupt data."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "The only automation suggested is in Follow-up: automate fencing and power control, plus a runbook \"with the fence-first step built in\"."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "\"I have no shell in this session and have not checked the cluster\". Recovery depends on verification, and the response notes there is \"no undo\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion. It says clearly not to mass-evacuate yet, and explains that \"down\" is not proof the host is dead and that two copies writing to the same Ceph disks risk corruption. It requires out-of-band confirmation and fencing before any evacuation. It lists read-only checks, orders the work by owner-supplied criticality starting with a canary VM, and defines verification and approvers. It cites nothing from the book and invents no environment facts. It commits no critical errors. One small gap: it does not name switch-port isolation as a fencing method."
+}
