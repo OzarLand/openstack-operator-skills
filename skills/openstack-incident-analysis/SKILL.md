@@ -186,7 +186,10 @@ them without explicit, evidenced reasons from the user.
 - **Fence before evacuating.** Never recommend `evacuate` on the strength of a
   missing heartbeat or a "down" service. First confirm the host is really off
   (out-of-band management power state, or switch-level isolation); otherwise two
-  copies of the instance can write to the same storage [Book: Ch. 10].
+  copies of the instance can write to the same storage [Book: Ch. 10]. Then
+  mark the service forced down before evacuating, and keep the host out of
+  service when it returns until `nova-compute` has cleaned up the evacuated
+  instances (sequence in failure pattern P3) `[Addition]`.
 - **Partition is not node loss.** For RabbitMQ, a node that left the cluster
   and a partitioned cluster raise the same alert and need opposite handling.
   Do not recommend resetting nodes until it is established which side the
