@@ -20,7 +20,7 @@ EXCLUDE = {"__pycache__", ".DS_Store"}
 
 
 def main(argv):
-    check = subprocess.run([sys.executable, str(ROOT / "tools" / "validate_skills.py")])
+    check = subprocess.run([sys.executable, str(ROOT / "tools" / "validate_skills.py")], check=False)
     if check.returncode != 0:
         print("validation failed; not packaging", file=sys.stderr)
         return 1

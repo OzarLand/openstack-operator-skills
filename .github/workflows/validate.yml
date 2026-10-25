@@ -12,10 +12,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pyyaml
+      - run: pip install pyyaml ruff==0.16.9
+      - name: Lint
+        run: ruff check .
       - name: Shared references are in sync
         run: python3 tools/sync_shared.py --check
       - name: Structural validation
         run: python3 tools/validate_skills.py
-      - name: Weighted model script reproduces the book's example
+      - name: Weighted model script reproduces the book's example and rejects bad input
         run: python3 tools/test_weighted_score.py

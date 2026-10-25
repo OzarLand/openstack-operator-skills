@@ -89,7 +89,7 @@ def run_claude(prompt, cwd, extra_args, model):
     ] + extra_args
     if model:
         cmd += ["--model", model]
-    proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=RUN_TIMEOUT_S)
+    proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=RUN_TIMEOUT_S, check=False)
     events = []
     for line in proc.stdout.splitlines():
         line = line.strip()

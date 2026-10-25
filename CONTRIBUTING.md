@@ -39,6 +39,8 @@ ones come from production experience.
 ```bash
 python3 tools/sync_shared.py
 python3 tools/validate_skills.py         # must report 0 errors
+python3 tools/test_weighted_score.py
+ruff check .                             # configuration in ruff.toml
 ```
 
 If you change a skill's behaviour, run its scenarios when you can:

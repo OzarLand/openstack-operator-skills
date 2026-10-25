@@ -15,7 +15,9 @@ Two kinds of checks, kept separate on purpose.
 - shared reference copies are identical to `shared/`;
 - `[Book: ...]` citations point to chapters, appendices and figures that exist
   in the book (v1.2);
-- every skill has a scenario file with at least 3 complete scenarios.
+- every skill has a scenario file with at least 3 complete scenarios;
+- relative links in `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`,
+  `evals/README.md` and `docs/` resolve.
 
 These checks say nothing about whether a skill gives good advice.
 

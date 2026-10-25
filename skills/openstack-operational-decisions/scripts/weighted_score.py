@@ -13,21 +13,34 @@ import sys
 
 SCALE = (1, 5)
 WEIGHT_TOLERANCE = 1e-6  # weights should sum to 1; allow float rounding
+TIE_TOLERANCE = 1e-9  # score differences below this are float noise, i.e. a tie
+
+
+def is_number(value):
+    # bool is a subclass of int in Python; true/false are not scores or weights
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
 def load(path):
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
+    if not isinstance(data, dict):
+        sys.exit("error: the top level must be an object with 'weights' and 'options'")
     weights = data.get("weights")
     options = data.get("options")
     if not isinstance(weights, dict) or not weights:
         sys.exit("error: 'weights' must be a non-empty object of dimension -> weight")
     if not isinstance(options, dict) or len(options) < 1:
         sys.exit("error: 'options' must be a non-empty object of option -> scores")
+    for dim, w in weights.items():
+        if not is_number(w) or w < 0:
+            sys.exit(f"error: weight for '{dim}' must be a number >= 0, got {w!r}")
     total = sum(weights.values())
     if abs(total - 1.0) > WEIGHT_TOLERANCE:
         sys.exit(f"error: weights sum to {total:.4f}, expected 1.0")
     for name, scores in options.items():
+        if not isinstance(scores, dict):
+            sys.exit(f"error: option '{name}' must be an object of dimension -> score")
         missing = set(weights) - set(scores)
         extra = set(scores) - set(weights)
         if missing:
@@ -35,7 +48,7 @@ def load(path):
         if extra:
             sys.exit(f"error: option '{name}' scores unknown dimensions: {', '.join(sorted(extra))}")
         for dim, s in scores.items():
-            if not isinstance(s, (int, float)) or not SCALE[0] <= s <= SCALE[1]:
+            if not is_number(s) or not SCALE[0] <= s <= SCALE[1]:
                 sys.exit(f"error: option '{name}' dimension '{dim}' score {s!r} outside {SCALE[0]}..{SCALE[1]}")
     return weights, options
 
@@ -48,7 +61,11 @@ def flips(weights, upper, lower, s_upper, s_lower):
     """Single-score changes that would make `lower` rank at or above `upper`."""
     gap = score(weights, s_upper) - score(weights, s_lower)
     found = []
+    if gap < TIE_TOLERANCE:
+        return gap, None  # tied: any change to a weighted dimension separates them
     for dim, w in weights.items():
+        if w == 0:
+            continue  # a zero-weight dimension cannot change the ranking
         # report only the smallest sufficient change per dimension and direction
         for delta in (1, 2):
             if s_lower[dim] + delta <= SCALE[1] and w * delta >= gap - 1e-9:
@@ -75,7 +92,9 @@ def main():
     for upper, lower in zip(ranked, ranked[1:]):
         gap, found = flips(weights, upper, lower, options[upper], options[lower])
         print(f"  {upper} vs {lower}: gap {gap:.2f}")
-        if found:
+        if found is None:
+            print("    - tied: any change to a weighted dimension separates them")
+        elif found:
             for f in found:
                 print(f"    - {f}")
         else:
