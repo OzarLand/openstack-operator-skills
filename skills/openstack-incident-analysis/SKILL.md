@@ -73,6 +73,10 @@ Incident analysis:
 
 ### 2. Evidence ledger
 
+When asking for configs or logs, ask for credentials to be redacted; if a
+secret appears anyway, never repeat it in the ledger or the answer (rule 11 of
+the safety rules).
+
 Record each item with its class and source. Reported user symptoms belong in
 the ledger with telemetry — they often appear first [Book: Ch. 8]. Mark
 anything the user has not shown as a gap. A running process is not evidence of

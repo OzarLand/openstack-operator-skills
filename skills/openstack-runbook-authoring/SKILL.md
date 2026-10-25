@@ -62,6 +62,10 @@ disruptive steps [Book: Ch. 13].
 
 ### 3. Gather knowledge
 
+Notes and chat logs often contain passwords or tokens: apply rule 11 of the
+safety rules and never carry a secret into the runbook (write `<redacted>` or
+point to the secret store).
+
 Ask for, or extract from the material provided:
 - the reason behind each step and each unusual configuration — otherwise a new
   operator cannot tell a mistake to correct from a constraint to respect
