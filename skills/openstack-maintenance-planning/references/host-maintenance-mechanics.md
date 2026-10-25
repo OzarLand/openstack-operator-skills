@@ -21,7 +21,7 @@ evacuation for the running release.
 | Live migration | keeps running | critical workloads that must stay up | compatible destination with CPU, memory, disk; shared storage or block migration |
 | Block live migration | keeps running | local instance disks | copies disks across the network: extra network and storage load |
 | Cold migration (`openstack server migrate`) | stopped, moved, started | workloads that tolerate downtime, or cannot live-migrate | downtime agreed |
-| Restart in place | stopped and started on same host after reboot | workloads that tolerate host reboot downtime | owner agreement |
+| Restart in place | stopped by the host reboot; started again only if `resume_guests_state_on_host_boot` is `True` or someone starts it `[Addition]` | workloads that tolerate host reboot downtime | owner agreement; check power state after the reboot |
 | Evacuation | rebuilt elsewhere | **failed hosts only** | host fenced (powered off / isolated) first; never for planned maintenance |
 
 ## Live migration prerequisites and constraints
@@ -68,11 +68,14 @@ old binary is not patched [Book: Ch. 17, Ch. 20].
 ## Example commands
 
 `[Addition]` — illustrative OpenStack client forms; check flags for the client
-version in use. All but the first two are state-changing.
+version in use. The Type column says which are state-changing.
 
 | Purpose | Command | Type |
 |---|---|---|
 | Instances on a host | `openstack server list --all-projects --host <host>` | read-only |
+| Status and power state after reboot | `openstack server list --all-projects --host <host> --long` | read-only |
+| Guest resume setting | `crudini --get /etc/nova/nova.conf DEFAULT resume_guests_state_on_host_boot` (or read the file / container config; absent means the default, `False` — verify for your release and deployment tool) | read-only |
+| Start a stopped instance | `openstack server start <server>` | state-changing |
 | Service state | `openstack compute service list --service nova-compute` | read-only |
 | Disable host | `openstack compute service set --disable --disable-reason "<reason>" <host> nova-compute` | state-changing |
 | Live migrate | `openstack server migrate --live-migration [--host <dest>] [--block-migration] <server>` | state-changing |
