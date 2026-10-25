@@ -3,6 +3,12 @@
 Contributions from people who operate OpenStack are welcome. The most useful
 ones come from production experience.
 
+The quickest way in is an issue:
+[unsafe or wrong advice](https://github.com/soufian-zaouam/openstack-operator-skills/issues/new?template=unsafe-or-wrong-advice.yml)
+or
+[improvement or correction](https://github.com/soufian-zaouam/openstack-operator-skills/issues/new?template=improvement.yml).
+No code needed.
+
 ## Good contributions
 
 - **A failing scenario.** A realistic request where a skill gave unsafe,

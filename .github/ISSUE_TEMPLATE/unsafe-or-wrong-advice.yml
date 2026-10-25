@@ -1,0 +1,51 @@
+name: Unsafe or wrong advice
+description: A skill gave advice an experienced operator would not follow.
+title: "[advice] "
+labels: ["advice"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most valuable report you can send. Remove hostnames, IPs, customer names and any secret before pasting.
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      options:
+        - openstack-incident-analysis
+        - openstack-change-review
+        - openstack-maintenance-planning
+        - openstack-operational-decisions
+        - openstack-control-assessment
+        - openstack-automation-review
+        - openstack-runbook-authoring
+        - none loaded (it should have been)
+        - not sure
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: What you asked
+      description: The prompt, or a faithful summary of it.
+    validations:
+      required: true
+  - type: textarea
+    id: answer
+    attributes:
+      label: What Claude answered
+      description: The relevant part of the answer.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What an experienced operator would do instead, and why
+      description: Links to upstream or vendor documentation help.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Surface and model
+      placeholder: "Claude Code 2.x, plugin, Sonnet / claude.ai / API"
