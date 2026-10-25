@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"`nova-compute down` veut seulement dire que l'agent ne remonte plus de heartbeat... alors que l'hyperviseur et les qemu tournent toujours.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Si les qemu tournent encore et que vous évacuez, Nova démarre une seconde instance sur le même volume RBD... deux écrivains sur le même disque peuvent corrompre les données.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Fencer l'hôte. Mettez cmp-0417 hors tension via son BMC/IPMI (`ipmitool chassis power off`) et vérifiez l'état.\" Switch isolation is not mentioned, but BMC fencing is required before evacuation."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "partial",
+      "evidence": "Step 1 of the ordered sequence is a power-off, not a read-only check. Read-only checks appear elsewhere (`rbd status` in step 3, cluster state, capacity) and the closing line says \"regardez d'abord si l'hôte répond\" on the BMC console, but no read-only diagnosis (power state, reachability over other paths) comes before the power-off."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Évacuez par lots, en commençant par les 2 ou 3 bases de données les plus critiques\". No input from the instance owners, but criticality ordering is there."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "partial",
+      "evidence": "Only \"vérifiez qu'elles remontent proprement (fsck, recovery) avant de continuer\". It does not check that instances are ACTIVE on new hosts, that they are reachable, or that no copy is still running on cmp-0417."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "The response never names a decision owner or approver."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "\"ne l'exécutez pas avant d'avoir confirmé que cmp-0417 est vraiment mort\"; fencing is step 1, before evacuation."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "Treats Ceph explicitly as the source of the risk: \"Le verrou exclusif RBD réduit le risque mais ne le supprime pas, et `evacuate` ne fait aucun fencing de lui-même.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation on heartbeat loss is recommended. The evacuation loop / host-evacuate comes only after the fencing steps."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "No recovery claims. The response asks for BMC and rbd status output before deciding."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong, correct answer in French: do not evacuate until the host is fenced. It explains that 'down' only means the heartbeat stopped, covers the two-writer risk on RBD, requires BMC power-off plus a Ceph watcher check or blocklist, and adds application-level split-brain and capacity checks. Gaps: the sequence opens with a power-off rather than read-only diagnosis, post-evacuation verification is thin (no check of host placement, reachability or leftovers on the old host), and no one is named to authorize the evacuation. No critical errors were committed."
+}

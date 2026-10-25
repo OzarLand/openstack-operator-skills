@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "« nova-compute down » veut seulement dire que le heartbeat a disparu. Nova ne sait pas si l'hôte est mort ou simplement isolé du plan de contrôle. The response then lists three cases that give the same symptom, including a crashed service with VMs still running and an isolated host that still reaches Ceph."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "Si les VM tournent encore et que vous évacuez, chaque VM existera en double. Les deux copies écrivent sur le même volume RBD... cela peut corrompre les données sans retour possible. It also says Ceph is what makes double writes possible."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Opening line: ne lancez pas l'évacuation tant que l'hôte n'est pas fencé. Step 2: Fencer : éteindre l'hôte via le BMC (ou l'isoler au niveau du switch), puis vérifier l'état d'alimentation. If the BMC cannot be reached, it says to escalate and adds Ne contournez pas cette étape."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Step 1 is marked (read-only) and covers BMC power state, ping, SSH and console. A separate section, Vérifications avant de décider (read-only), covers BMC state, compute service list to look for other down hosts, events around 03:12, and rbd status watchers."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "Évacuer instance par instance, pas les 40 d'un bloc. L'ordre se fixe avec les propriétaires : bases clients d'abord, puis le reste."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "Step 4: vérifiez qu'elle est active sur le nouvel hôte, joignable, et que les données sont cohérentes. Step 6 says to keep the old host forced-down until nova-compute has cleaned up local copies of the evacuated VMs."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "partial",
+      "evidence": "Names the 'accountable owner' and the 'propriétaire de l'infrastructure' (for other isolation methods), and says the evacuation order is set 'avec les propriétaires'. However, it lists 'qui décide de l'évacuation' as unknown and never names a specific role that authorizes the evacuation."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Evacuation is step 4, after fencing (step 2) and force-down (step 3). The response says explicitly not to evacuate before fencing."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "Le fait que le stockage soit sur Ceph rend l'évacuation rapide, mais c'est aussi ce qui rend le double accès en écriture possible."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation is recommended. Evacuation is manual, one instance at a time, after fencing."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Makes no recovery claims. It says restarting the service 'peut tout rétablir' (conditional only) and requires verification after each evacuation."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response answers clearly that nothing should be evacuated before the host is fenced, and gives the sequence confirm → fence → force-down → evacuate. It explains why a down service is not a dead host and why two copies writing to the same Ceph volume can corrupt data. It proposes concrete read-only checks (BMC, other down services, rbd watchers), orders evacuations by business criticality with the owners, and defines checks after evacuation and for when the old host comes back. Its only weakness is authorization: it refers generically to the accountable owner and the infrastructure owner, and lists 'qui décide' as missing information instead of naming the person who authorizes the evacuation. No critical errors were committed and there are no faithfulness problems."
+}

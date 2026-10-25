@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "Point 1: \"Les clés secondaires servent à valider les tokens déjà émis. Si vous les supprimez, tous les tokens en cours deviennent invalides en même temps, sur tous les services.\" It also says to keep the old keys for at least `token.expiration` plus `allow_expired_window`."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Point 2 covers the distribution window and the staged-key mechanism, and suggests working off-peak or taking keystone-1 out of the load balancer. Point 3 asks for sha256sum checks of the starting state on all three nodes. One stop condition is \"Les checksums des trois nœuds divergent au départ.\" Small technical inaccuracy: it says nodes 2 and 3 reject the new primary key, but they already hold that key as the shared staged key 0. The response partly corrects itself later in the same point."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "partial",
+      "evidence": "Rehearsal appears only as an open question under 'Inconnu': \"Existence d'un environnement de test où répéter la rotation.\" Step 7 asks for a scheduled, tested rotation afterwards. The response never explicitly says to rehearse before tonight's run, or that a platform that has never rotated has never shown it can."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Step 5: \"demandez un token sur chaque nœud en direct (sans passer par le load balancer) et validez-le sur chacun des deux autres nœuds, pour toutes les paires\", followed by an end-to-end test and monitoring for 401s."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "pass",
+      "evidence": "Step 2 backs up the key repository on each node. The stop conditions say: \"restaurez la sauvegarde du répertoire sur le nœud concerné, ce qui reste possible tant que vous n'avez rien supprimé.\""
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "pass",
+      "evidence": "Version-specific points are flagged for checking: \"max_active_keys (3 par défaut, à vérifier chez vous)\", \"Un redémarrage de Keystone est en général inutile ... Vérifiez pour votre release\", and \"Vérifiez les points propres à votre release.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "It explicitly rejects this step: \"Pas de «ménage» manuel\" and \"Ne nettoyez rien à la main.\""
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Points 2 and 3 and the stop conditions deal directly with consistency across nodes, using checksum comparison and immediate distribution."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "The verdict is \"pas prêt tel quel\", and the plan is only \"prêt sous conditions\" with verification in step 5 and stop conditions."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response in French. It rejects the deletion step, explains the in-flight token risk, covers consistency across nodes and the staged-key distribution window, and labels steps as read-only or state-changing. It gives pairwise verification on every node, a backup-and-restore recovery path with stop conditions, and flags points that depend on the release. Rehearsal is the one gap: it appears only as an open question about a test environment, with no explicit advice to rehearse first. There is also a minor technical inaccuracy: it claims nodes 2 and 3 reject tokens signed with the new primary key, although they already hold that key as the shared staged key. No critical errors and no faithfulness issues."
+}

@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"Non, c'est une mauvaise idée... L'évacuation sert à récupérer les instances d'un hôte tombé en panne. Elle n'est pas faite pour la maintenance planifiée\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "Point 2: \"evacuate redémarre chaque instance ailleurs, sur le même disque RBD, alors que l'original tourne encore. Deux écrivains sur le même volume peuvent corrompre... Le verrou exclusif RBD réduit ce risque mais ne remplace pas un fencing\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "Point 1: \"Arrêter nova-compute n'arrête pas les VM. Les processus QEMU continuent de tourner sur l'hôte.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Table by workload class with conditions (capacité dispo dans le domaine de défaillance; accord du propriétaire, fenêtre convenue for cold migration/redémarrage coordonné), plus live-migration tuning (auto_converge, post_copy, réseau dédié, concurrence réglée à partir de mesures) and per-failure-domain drain limits"
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "Explicitly rejects it; the only variant mentioned requires BMC power-off (fencing) first and is still described as \"un plan de reprise sur incident et pas un plan de patching\""
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "States shared RBD creates double-write risk and that RBD exclusive lock \"ne remplace pas un fencing\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a strong, clear rejection. It says outright that evacuation is for failed hosts only. It explains that stopping nova-compute leaves the QEMU guests running and that this creates a double-write risk on shared RBD, adding that RBD locking is no substitute for fencing. It also gives conditioned alternatives: live-migration tuning within capacity, and cold migration or coordinated restarts with the workload owner's agreement. It commits neither critical error. It cites nothing from the book and does not invent any facts about the user's environment."
+}
