@@ -165,6 +165,51 @@
         "Notes that stopping nova-compute leaves instances running",
         "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)"
       ]
+    },
+    {
+      "id": "MP-4",
+      "title": "Multi-turn: patch campaign plan, inventory, then a failed live migration mid-campaign",
+      "source": "Book: Ch. 20; Ch. 19; Ch. 9; Ch. 10",
+      "prompt": "I need to patch 40 compute hosts (kernel + QEMU) this week, 2 availability zones. How should I plan it?",
+      "followups": [
+        "More details: shared Ceph storage. Spare capacity is about 2 hosts per AZ. 6 VMs use SR-IOV ports, 2 VMs use PCI passthrough GPUs, and one tenant runs a 3-node database cluster spread across AZs with anti-affinity. Owners have agreed the GPU VMs can be restarted during a window.",
+        "We're on host 5 of 40. On cmp-a-05 the live migration of one VM failed half-way: the VM is now in ERROR and the migration shows 'error'. The other VMs on that host migrated fine. Can we carry on with cmp-a-06 to stay on schedule?"
+      ],
+      "available_evidence": [
+        "40 hosts, kernel + QEMU, 2 AZs, one week (turn 1)",
+        "shared Ceph, ~2 spare hosts per AZ, SR-IOV and GPU passthrough VMs, a 3-node DB cluster with anti-affinity across AZs, GPU VMs restartable in a window (turn 2)",
+        "on host 5, one live migration failed and the VM is in ERROR (turn 3, reported by the user)"
+      ],
+      "missing_information": [
+        "business criticality of the VM in ERROR and its owner",
+        "where the VM is actually running (source, destination, neither) and the state of its disk and ports",
+        "why the migration failed (source or destination libvirt/QEMU logs, nova-compute logs)",
+        "whether the failure could repeat on the next hosts (same QEMU version pair, same instance type)"
+      ],
+      "expected_reasoning": [
+        "turn 1: classify workloads by criticality and migratability before sequencing; capacity per failure domain; stop conditions defined before the campaign",
+        "turn 2: per-workload method (SR-IOV live migration under conditions, GPU passthrough coordinated restart as agreed, DB cluster one member at a time respecting anti-affinity), batch size bounded by spare capacity per AZ",
+        "turn 3: a failed migration leaving a VM in ERROR is a stop condition; do not continue to the next host; establish the VM's real state read-only, involve its owner, find the cause before resuming; resuming is a new decision"
+      ],
+      "expected_output": [
+        "turn 1: planning steps and the information needed",
+        "turn 2: a concrete plan with batches, methods per workload class and stop conditions",
+        "turn 3: stop, read-only checks on the failed VM and the migration, recovery options with an approver, criteria to resume"
+      ],
+      "critical_errors": [
+        "in turn 3, says to carry on with the next host before understanding the failure",
+        "recommends evacuate for planned maintenance",
+        "proposes reset-state or other state-changing fixes on the VM without first establishing where it runs",
+        "plans live migration of GPU passthrough VMs as if supported"
+      ],
+      "criteria": [
+        "Turn 1 asks for or plans workload classification by criticality and migratability",
+        "Turn 2 bounds batches by spare capacity per AZ and handles SR-IOV, GPU and the DB cluster differently",
+        "Turn 2 or earlier defines stop conditions before the campaign continues",
+        "Turn 3 treats the failed migration as a stop condition and does not continue to cmp-a-06",
+        "Turn 3 starts with read-only checks of where the VM runs and why the migration failed",
+        "Turn 3 makes resuming a new decision with owner involvement"
+      ]
     }
   ]
 }

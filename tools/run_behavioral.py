@@ -8,7 +8,8 @@ For each scenario in evals/scenarios/<skill>.json this script:
    .claude/skills/ so Claude Code discovers them natively (triggering is part of
    the test); in mode `baseline`, runs with all skills disabled,
 3. sends the scenario prompt with `claude -p` (tools limited to read-only ones,
-   so nothing can be executed),
+   so nothing can be executed); a scenario with `followups` continues the same
+   session with `--resume`, one user turn at a time,
 4. records the response and which skills were invoked,
 5. asks a fresh `claude -p` instance (no skills) to grade the response against
    the scenario's rubric, returning structured JSON.
@@ -30,6 +31,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -78,15 +80,16 @@ GRADE_SCHEMA = {
 }
 
 
-def run_claude(prompt, cwd, extra_args, model):
+def run_claude(prompt, cwd, extra_args, model, persist=False):
     cmd = [
         "claude", "-p", prompt,
         "--output-format", "stream-json", "--verbose",
-        "--no-session-persistence",
         "--strict-mcp-config",  # no MCP servers: the run sees only the skills
         "--allowedTools", ALLOWED_TOOLS,
         "--disallowedTools", DISALLOWED_TOOLS,
     ] + extra_args
+    if not persist:
+        cmd.append("--no-session-persistence")
     if model:
         cmd += ["--model", model]
     proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=RUN_TIMEOUT_S, check=False)
@@ -133,8 +136,23 @@ def run_scenario(skill, scenario, mode, model, outdir):
                     shutil.copytree(d, dest / d.name)
         else:
             extra.append("--disable-slash-commands")
-        proc, events = run_claude(scenario["prompt"], tmp, extra, model)
-    invoked, files_read, text, model_used, _ = parse_events(events)
+        followups = scenario.get("followups", [])
+        if not followups:
+            proc, events = run_claude(scenario["prompt"], tmp, extra, model)
+            invoked, files_read, text, model_used, _ = parse_events(events)
+        else:
+            # multi-turn: one session, resumed for each follow-up user turn
+            session = str(uuid.uuid4())
+            invoked, files_read, parts = [], [], []
+            for i, turn in enumerate([scenario["prompt"]] + followups, 1):
+                args = extra + (["--session-id", session] if i == 1 else ["--resume", session])
+                proc, events = run_claude(turn, tmp, args, model, persist=True)
+                inv, read, reply, used, _ = parse_events(events)
+                invoked += inv
+                files_read += read
+                model_used = used if i == 1 else model_used
+                parts.append(f"## Turn {i}\n\n**User:**\n\n{turn}\n\n**Assistant:**\n\n{reply}\n")
+            text = "\n".join(parts)
     (outdir / f"{scenario['id']}.{mode}.md").write_text(text, encoding="utf-8")
     meta = {
         "skill_under_test": skill,
@@ -155,10 +173,14 @@ def grade(scenario, response, model):
     payload = {k: scenario[k] for k in (
         "title", "source", "prompt", "available_evidence", "missing_information",
         "expected_reasoning", "expected_output", "critical_errors", "criteria")}
+    heading = "Response to grade"
+    if scenario.get("followups"):
+        payload["followups"] = scenario["followups"]
+        heading = "Conversation to grade (every assistant turn; later turns must stay consistent with earlier ones)"
     prompt = (
         rubric
         + "\n\n## Scenario\n\n```json\n" + json.dumps(payload, indent=2, ensure_ascii=False) + "\n```\n"
-        + "\n## Response to grade\n\n<response>\n" + response + "\n</response>\n"
+        + f"\n## {heading}\n\n<response>\n" + response + "\n</response>\n"
     )
     with tempfile.TemporaryDirectory(prefix="osk-grade-") as tmp:
         extra = ["--disable-slash-commands", "--json-schema", json.dumps(GRADE_SCHEMA)]
