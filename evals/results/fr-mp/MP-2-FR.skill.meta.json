@@ -1,0 +1,21 @@
+{
+  "skill_under_test": "openstack-maintenance-planning",
+  "scenario": "MP-2-FR",
+  "mode": "skill",
+  "model": "claude-sonnet-5-5",
+  "skills_invoked": [
+    "openstack-maintenance-planning"
+  ],
+  "triggered": true,
+  "reference_files_read": [
+    "evidence-and-safety.md",
+    "host-maintenance-mechanics.md",
+    "operating-principles.md"
+  ],
+  "exit_code": 0,
+  "stderr_tail": "",
+  "score": {
+    "criteria_score": 1.0,
+    "critical_errors_committed": []
+  }
+}

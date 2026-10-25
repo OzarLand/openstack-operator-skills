@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "partial",
+      "evidence": "The response rejects the colleague's plan as proposed: \"Non, pas comme ça\" and \"`evacuate` part du principe que l'hôte source est mort.\" But under \"Ce qui est correct\" its option 1, \"Évacuation avec fencing\", presents evacuation as acceptable for patching once the host is powered off (\"ce qui convient pour un patch avec reboot\"). The scenario says evacuation is for failed hosts only, so this rejection is incomplete."
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Vous obtenez donc deux qemu qui écrivent sur la même image RBD (split-brain)... Le risque est une corruption silencieuse des systèmes de fichiers.\" It also explains why exclusive-lock does not prevent this."
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Arrêter `nova-compute` ne fait pas tomber l'hôte. Les processus qemu continuent de tourner et leurs disques RBD restent ouverts en écriture.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Offers cold migration \"si un arrêt est acceptable\"; live-migration tuning (post-copy, auto-converge, bandwidth, max_concurrent_live_migrations \"si la capacité le permet\"); and service restarts without moving VMs when the patch allows it. The final recommendation combines tuned live migration with cold migration."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "It explicitly warns against this. The only evacuation it endorses requires actually cutting power first (\"Coupez réellement l'hôte (IPMI/BMC, power off)\") and setting forced-down."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It argues the opposite: shared RBD images cause split-brain, and exclusive-lock \"ne protège pas vraiment\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response says a clear no to evacuating a host whose instances are still running. It explains that stopping nova-compute leaves the qemu processes running and that this leads to split-brain on the shared RBD images. It offers sound alternatives with conditions. One criterion is only partial: the response presents fenced evacuation as a correct option for patching, although the scenario says evacuation is for failed hosts only. Because that option requires a real power-off first, neither critical error is committed. The response cites nothing from the book and invents no facts about the user's environment."
+}
