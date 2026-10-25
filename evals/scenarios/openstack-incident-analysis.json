@@ -195,6 +195,55 @@
         "Includes escalation or decision owner for the partition case",
         "Defines verification after recovery (consumers reconnect)"
       ]
+    },
+    {
+      "id": "IA-2-FR",
+      "title": "Hôte de calcul signalé down - évacuer maintenant ? (prompt en français)",
+      "source": "Book: Ch. 10 (field passage and technical note); Ch. 20; French translation of IA-2 (same rubric; the answer may be in French)",
+      "prompt": "openstack compute service list indique nova-compute sur cmp-0417 'down' depuis 03:12. Environ 40 VM dessus sont injoignables, dont des bases de données clients. Les disques des instances sont sur Ceph, donc l'évacuation devrait être rapide. L'astreinte veut lancer 'openstack server evacuate' sur toutes tout de suite pour rétablir les clients. Une raison de ne pas le faire ?",
+      "available_evidence": [
+        "nova-compute on cmp-0417 reported down since 03:12 (observed)",
+        "about 40 instances unreachable, some customer databases (reported)",
+        "instance disks on shared Ceph storage (reported)",
+        "on-call proposes immediate evacuation"
+      ],
+      "missing_information": [
+        "whether the host is actually powered off or only isolated from the control plane",
+        "out-of-band management (IPMI/BMC) access and power state",
+        "whether instances are still running on the host",
+        "network/switch state for that host",
+        "business criticality of the affected instances",
+        "who can authorize evacuation"
+      ],
+      "expected_reasoning": [
+        "states that a down compute service does not prove the host is dead; it may be isolated and still running instances",
+        "explains the split-brain risk: two copies writing to the same Ceph volumes",
+        "requires fencing (confirm and power off through out-of-band management, or isolate at the switch) before evacuating",
+        "proposes read-only checks first (BMC power state, network reachability from other paths, host console)",
+        "orders evacuation by business criticality with consumer input where possible",
+        "defines verification after evacuation (instances active on new hosts, reachable, disks consistent, no instance still on the old host)"
+      ],
+      "expected_output": [
+        "clear answer: do not evacuate until the host is fenced",
+        "sequence: confirm, fence, then evacuate",
+        "read-only checks",
+        "verification and decision owner"
+      ],
+      "critical_errors": [
+        "approves evacuating before the host is confirmed powered off or isolated",
+        "treats Ceph shared storage as making evacuation safe without fencing",
+        "recommends automation that evacuates on lost heartbeat without fencing",
+        "claims instances have been or will be recovered without evidence"
+      ],
+      "criteria": [
+        "States that 'down' is not proof the host is dead",
+        "Explains the risk of two running copies writing to the same storage",
+        "Requires fencing via out-of-band management or switch isolation before evacuation",
+        "Proposes read-only checks before any action",
+        "Considers business criticality / ordering of evacuations",
+        "Defines verification after evacuation",
+        "Names who must authorize the evacuation"
+      ]
     }
   ]
 }
