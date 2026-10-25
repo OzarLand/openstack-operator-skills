@@ -1,6 +1,6 @@
 # Evaluation report — v0.1.0
 
-Date: 2026-10-25. Everything below was actually run in this repository's
+Date: 2026-10-25 (section 9 added after issues #1–#6). Everything below was actually run in this repository's
 development session; raw outputs and grades are under `evals/results/`.
 
 ## Contents
@@ -13,18 +13,20 @@ development session; raw outputs and grades are under `evals/results/`.
 6. Independent fidelity audit and fixes
 7. Regression run after fixes
 8. Cross-model spot check (Haiku)
-9. Limitations and what has not been tested
+9. Regression after issues #1–#6
+10. Limitations and what has not been tested
 
 ## 1. Summary
 
 | Check | Result |
 |---|---|
-| Structural validation (7 skills, 24 scenarios) | 0 errors, 0 warnings |
+| Structural validation (7 skills, 25 scenarios) | 0 errors, 0 warnings |
 | Plugin marketplace manifest (`claude plugin validate --strict .`) | passed |
 | `weighted_score.py` reproduces the book's Ch. 18 example | passed |
 | Full behavioural run, model under test claude-sonnet-5-5, 24 scenarios | with skills: mean 0.97, expected skill triggered 24/24, 0 critical errors; baseline without skills: mean 0.68, 3 critical errors |
 | Regression after fixes (8 scenarios) | mean 0.98, 8/8 triggered, 0 critical errors |
 | Haiku spot check (3 scenarios) | skill triggered 2/3; 0 critical errors either way |
+| Regression after issues #1–#6 (5 scenarios, incl. new AR-4) | mean 0.97, 5/5 triggered, 0 critical errors |
 
 These are single runs per cell, graded by a model. They show a consistent
 direction, not precise effect sizes.
@@ -234,9 +236,36 @@ Runs `haiku-*`, model under test `claude-haiku-5-5`.
 
 With Haiku the incident skill **did not trigger** on IA-2 (evacuation); the
 answer avoided the critical error but scored below the baseline run. Triggering
-on smaller models is a known weakness to work on (section 9).
+on smaller models is a known weakness to work on (section 10).
 
-## 9. Limitations and what has not been tested
+## 9. Regression after issues #1–#6
+
+Issues #1–#6 (community review) changed maintenance planning (SR-IOV and vGPU
+live-migration classes, restart check after reboot), the RabbitMQ guidance
+(vhosts, default partition handling, reset caveats), the shared safety rules
+(rule 11, secrets), incident analysis (forced-down step, safe return of an
+evacuated host) and `weighted_score.py` (input validation, ties). Scenario
+AR-4 (a playbook containing a credential) was added for rule 11. Runs
+`issue4-ar4`, `issue5-ia2`, `issues-*`:
+
+| Scenario | Mode | Model | Skill(s) invoked | Criteria score | Critical errors committed |
+|---|---|---|---|---:|---|
+| AR-4 | baseline | claude-sonnet-5-5 | — | 1.00 | none |
+| AR-4 | skill | claude-sonnet-5-5 | openstack-automation-review | 1.00 | none |
+| IA-2 | skill | claude-sonnet-5-5 | openstack-incident-analysis | 0.86 | none |
+| IA-4 | skill | claude-sonnet-5-5 | openstack-incident-analysis | 1.00 | none |
+| MP-1 | skill | claude-sonnet-5-5 | openstack-maintenance-planning | 1.00 | none |
+| RA-1 | skill | claude-sonnet-5-5 | openstack-runbook-authoring | 1.00 | none |
+
+| Mode | Runs | Mean criteria score | Runs with ≥1 critical error | Expected skill triggered |
+|---|---:|---:|---:|---:|
+| skill | 5 | 0.97 | 0 | 5/5 |
+| baseline | 1 | 1.00 | 0 | n/a |
+
+The AR-4 baseline also redacted the credential, so the scenario guards against
+regression rather than showing a difference.
+
+## 10. Limitations and what has not been tested
 
 - **One run per cell.** Differences of a few points are within noise (see IA-4
   in the POC).
