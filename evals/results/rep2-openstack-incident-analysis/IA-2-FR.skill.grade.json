@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"Une alerte 'down' n'est pas la preuve que l'hôte est mort.\" It also says Nova cannot tell whether cmp-0417 is powered off or only isolated, and gives possible causes: a management network problem, the message bus, or a crashed nova-compute while libvirt keeps running."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"chaque VM aura deux copies actives sur les mêmes volumes Ceph... corruption de données, sans retour arrière.\" It adds that Ceph is what makes the concurrent-write risk real: \"Cela confirme le besoin de fencing et ne le remplace pas.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Step 3: \"Coupez l'alimentation via le BMC ou isolez-le au niveau du switch, puis confirmez l'état éteint.\" Fencing comes before forced-down (step 4) and evacuation (step 5)."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Step 1, \"Vérifier l'état réel de l'hôte, en lecture seule\": BMC/IPMI/Redfish power state, ping/SSH, Neutron ports, nova-compute and RabbitMQ logs. Step 2 checks whether other compute services are also affected."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "Step 5: \"Évacuer VM par VM, par ordre de criticité métier. Commencez par les bases de données clients, avec l'accord de leurs propriétaires.\" It also raises the capacity limit."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "Step 5 checks each VM: \"ACTIVE sur le nouvel hôte, joignable, données cohérentes\" before moving to the next. Step 6 keeps the old host disabled and forced down until nova-compute has cleaned up its local copies."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "partial",
+      "evidence": "It asks \"qui, côté astreinte ou direction, a l'autorité pour décider\", requires \"l'accord de leurs propriétaires\" and \"approval by the accountable owner\", and says \"Ce n'est pas à moi de l'autoriser.\" It does not name one definite decision owner."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "The answer is to not evacuate yet. Evacuation is allowed only after fencing with confirmation that the host is off, or after BMC confirms it is already off."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "It says outright that Ceph makes the concurrent-write risk real and does not replace fencing."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "It recommends no automation. It advises evacuating VM by VM instead of all 40 at once."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "It promises no recovery. Each VM is to be checked, and it lists the missing information as unknowns."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong answer in French. It refuses immediate evacuation, explains that 'down' does not prove the host is dead, and explains split-brain on Ceph. It requires BMC or switch fencing, gives read-only checks, orders evacuation by business criticality with owner approval, and defines checks after each VM is moved. The only weakness is authorization: it asks who has authority and points to the accountable owner instead of naming one clear decision owner. It commits no critical error, cites nothing from the book, and invents no facts about the environment."
+}

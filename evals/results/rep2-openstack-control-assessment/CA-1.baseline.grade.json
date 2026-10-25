@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against immediate transformation and explains why",
+      "verdict": "pass",
+      "evidence": "\"Don't migrate tooling or redesign networking yet... doing either on a system you can't observe or reproduce is how you get a worse outage than the ones you have now.\" Later: \"Networking changes are the hardest to do live.\""
+    },
+    {
+      "criterion": "Uses the restoration sequence or an equivalent staged approach",
+      "verdict": "pass",
+      "evidence": "The phases are learn what you have (Weeks 1–2), stop the bleeding (Weeks 2–6), upgrades (Months 2–6), then tooling and networking proposals (6 mo+). This roughly matches discover/protect/stabilize/evolve, but it has no explicit simplify or establish-control stage."
+    },
+    {
+      "criterion": "Lists concrete first-30-day outputs",
+      "verdict": "partial",
+      "evidence": "Weeks 1–2 and 2–6 list concrete activities: inventory versions and patches, verify a tested restore, categorize incidents, write runbooks for the top 5 failures, set up monitoring and change control. These are activities, not named deliverables. There is no current-state map, critical-risk list, ownership-gap list, recovery-gap list or control roadmap presented as 30-day outputs."
+    },
+    {
+      "criterion": "Requires owners and removal conditions for guardrails",
+      "verdict": "fail",
+      "evidence": "It proposes guardrails (\"no changes to production without a ticket, a rollback plan, and a second pair of eyes\") but never gives any guardrail an owner or a removal condition. There is no guardrails table."
+    },
+    {
+      "criterion": "Mentions the exception for unmaintained, vulnerable releases",
+      "verdict": "partial",
+      "evidence": "\"possibly on an unsupported one. That's a security risk, but it's also a hazard to rush.\" It flags the risk but never says that upgrading the release may itself be the stabilization step. It still schedules upgrades for Months 2–6."
+    },
+    {
+      "criterion": "Starts from business capabilities",
+      "verdict": "fail",
+      "evidence": "The starting point is component inventory (\"Record the OpenStack release and per-service versions... DB and RabbitMQ topology, Ceph\"). Business capabilities and how critical they are never come up."
+    },
+    {
+      "criterion": "Defines exit criteria for restoration",
+      "verdict": "fail",
+      "evidence": "There is no definition of what restored control means. The only hint is the 6 mo+ row, \"judged against measured pain\", and \"the first deliverable is visibility\". Neither is an exit criterion."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses starting with the deployment tool migration and network redesign",
+      "committed": false,
+      "evidence": "It explicitly defers both: \"Don't migrate tooling or redesign networking yet\", and \"Make it a design doc and a staging experiment, not a project yet.\""
+    },
+    {
+      "error": "proposes a single maturity score as the outcome",
+      "committed": false,
+      "evidence": "The response proposes no maturity score of any kind."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives sound, restrained advice. It defers the tooling and networking redesign, with reasons, and lays out a sensible staged plan of inventory, backup verification, incident mining, runbooks, monitoring, change control, staging and then upgrades. It falls short on several of the book's specifics. It does not start from business capabilities. Its guardrails have no owners or removal conditions. Its early work is a list of activities rather than named 30-day deliverables. It notes that an unsupported release is a security risk but does not say that upgrading it may be the stabilization itself. It never defines what restored control or exit criteria look like. It commits neither critical error, and it makes no book citations or invented claims about the user's environment."
+}

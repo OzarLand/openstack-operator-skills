@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Applies decision gates before comparing options",
+      "verdict": "pass",
+      "evidence": "The 'Options and gates' table gives each option a gate result ('Fails on recovery path, expertise and blast radius'; 'Passes if…'; 'Passes only time-boxed'; 'Keep as is… Fails the security gate') before the 'Why this ordering' trade-off discussion."
+    },
+    {
+      "criterion": "Links postponement's viability to a tested backport",
+      "verdict": "partial",
+      "evidence": "Option 3 is gated on time-boxing ('Passes only time-boxed'), not explicitly on the backport being tested. Phase 0 does require 'backport it in staging, test it, and record it', with compensating controls and an exit condition. It also says 'A second backport on this series would be the signal that postponing has become the problem.' The response never states outright that postponement passes the security gate only if a tested backport is credible."
+    },
+    {
+      "criterion": "Identifies the recovery exercise as the first action or key uncertainty reducer",
+      "verdict": "pass",
+      "evidence": "'Run a control-plane recovery exercise… Do this before touching the lifecycle… This is your largest hidden risk, and both upgrade hops depend on it.' Also: 'The recovery exercise fails. Fixing recovery becomes the project.'"
+    },
+    {
+      "criterion": "Recognizes team readiness as a constraint",
+      "verdict": "pass",
+      "evidence": "'without losing the ability to recover the control plane, with a team of four'; option 1 fails on 'expertise'; the exercise is to be run 'with the four people who are still here'; 'The team drops below four. Stop and reassess scope'; 'leaves the team more able to perform the next change.'"
+    },
+    {
+      "criterion": "States what would change the ranking (sensitivity)",
+      "verdict": "pass",
+      "evidence": "The 'What flips the recommendation' section covers a failed recovery exercise, business-critical Nova patches, the vendor shipping the fix, a second advisory, and the team dropping below four."
+    },
+    {
+      "criterion": "Assigns owner, review trigger or exit condition to retained deviations",
+      "verdict": "pass",
+      "evidence": "Backport: 'upstream change, owner, test method, exit condition… Exit condition: the backport is dropped when hop 1 lands'; 'Backport: one named owner. It is removed at hop 1.' The 12 patches each get a disposition (drop, replace, rewrite). Review triggers are listed under 'Reopen the decision when'."
+    },
+    {
+      "criterion": "Frames the output as decision support for a named or to-be-named owner",
+      "verdict": "pass",
+      "evidence": "'Decision owner: unknown. See \"Decision rights\"'; the 'Decision rights' section splits accountability (the business or service owner and security owner accept the exposure window); 'Decision support only. State-changing steps above require approval by the accountable owner.'"
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends postponement while carrying an untested backport without flagging the security gate",
+      "committed": false,
+      "evidence": "The response requires the backport to be tested in staging, with compensating controls, an owner, an expiry and risk acceptance by the security owner. 'Keep as is' explicitly fails the security gate."
+    },
+    {
+      "error": "presents a weighted score as the decision itself",
+      "committed": false,
+      "evidence": "The response uses no weighted scoring. It frames itself as 'Decision support only' and leaves the decision with the accountable owner."
+    },
+    {
+      "error": "recommends the immediate double hop without addressing recovery capability",
+      "committed": false,
+      "evidence": "Option 1 'Fails on recovery path, expertise and blast radius', and the recovery exercise is required before any hop."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, well-structured response. It applies gates before the trade-offs, rejects the double hop, and proposes a phased plan. Phase 0 covers the security exception, a recovery exercise and patch triage, and the recovery exercise is identified as the largest hidden risk. It also sets out sensitivity triggers, decision rights, and an owner and exit condition for the backport. Its one gap is that it does not state directly that postponement passes the security gate only if a tested backport is credible: option 3 is gated on time-boxing, and the testing requirement appears only in the Phase 0 actions. No critical errors were committed, and there are no book citations or invented environment facts."
+}

@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"A 'down' nova-compute only means the heartbeat stopped. It doesn't mean cmp-0417 is off.\" The response also lists hypotheses for an isolated or live host."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Evacuating then starts a second copy of each VM on the same Ceph RBD images... two writers on one disk corrupts them. An outage becomes data loss.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"Don't evacuate until the host is fenced.\" Corrective step 1: \"Power off through the BMC and verify the power state. If you can't reach the BMC, isolate the host at the switch.\""
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Under \"Next diagnostics (all read-only...)\": BMC/IPMI power state, service list for all hosts, ping/SSH on both networks, ceph -s and rbd status watchers, switch port state."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Evacuate in priority order, not all 40 at once. Start with the customer databases, in an order agreed with their owners.\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Verification before declaring recovery\" requires: each VM ACTIVE on its new host and answering on its service port, a database consistency check with owner confirmation, the old host fenced, and no RBD watcher from cmp-0417."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "pass",
+      "evidence": "\"approved by the on-call lead or incident commander\". Open question 5 asks whether the on-call has authority or the decision goes to the incident commander. The response also says the steps \"need approval from the accountable owner\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Evacuation is gated: \"If the host is confirmed dead or isolated and then fenced\", and fencing comes first."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "The response says shared Ceph RBD images are the reason two writers would corrupt data."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "The response recommends no automation."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Recovery is conditional on verification. The response also says \"there is none for a duplicated disk write\" and that it has \"no evidence either way yet\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all seven criteria and commits none of the critical errors. Its clear answer is to fence the host before evacuating. It explains that a \"down\" status is not proof the host is dead and that two copies writing to the same Ceph images would corrupt data. It sets out read-only checks first, including BMC state and RBD watchers. The order is fence, then force-down, then evacuate by priority with owner input, with a stop condition, post-evacuation verification and named approvers. It makes no book citations and invents nothing about the user's environment."
+}

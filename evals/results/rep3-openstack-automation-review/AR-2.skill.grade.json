@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags rebooting without draining instances as blocking",
+      "verdict": "pass",
+      "evidence": "Finding #2, severity **Blocking**, on the `reboot` task: \"Guests are not drained first... Disable scheduling on the host, live-migrate or otherwise handle the instances by workload class, confirm the host is empty... and only then reboot.\""
+    },
+    {
+      "criterion": "Flags lack of batching (serial) as a blast-radius problem",
+      "verdict": "pass",
+      "evidence": "Finding #1, severity **Blocking**, on `hosts: compute` with no `serial`: \"The blast radius is the whole compute fleet... Add `serial` (start at 1 host, or one per failure domain)\""
+    },
+    {
+      "criterion": "Flags ignore_errors and missing stop conditions",
+      "verdict": "pass",
+      "evidence": "Finding #3 says to remove `ignore_errors: true`: \"Register the result and `assert` success. A failed host should stop the run\". Finding #1 adds `max_fail_percentage: 0` or `any_errors_fatal`. Finding #7 says \"Decide the stop condition and who calls it.\""
+    },
+    {
+      "criterion": "Flags unpinned updates as uncontrolled change",
+      "verdict": "pass",
+      "evidence": "Finding #4 on `name: '*'`, `state: latest`: \"The package set isn't reviewed or pinned... Repos aren't pinned, so hosts can get different versions. Use a controlled repo snapshot or a mirror.\""
+    },
+    {
+      "criterion": "Requires post-reboot verification",
+      "verdict": "pass",
+      "evidence": "Finding #5: \"After each batch, check that the compute service is `up`/`enabled`, the network agent is alive, and the expected instances are back. Gate the next batch on this\""
+    },
+    {
+      "criterion": "Refers to a maintenance plan based on criticality and capacity",
+      "verdict": "pass",
+      "evidence": "Finding #2: \"handle the instances by workload class... See `openstack-maintenance-planning`\". Finding #1: \"Size how many hosts can be out at once from your actual spare capacity\". The judgement section says the call \"depends on which workloads are critical\". The closing offers \"the maintenance plan with the capacity sizing\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the playbook on production as is",
+      "committed": false,
+      "evidence": "\"Verdict: not safe to run on prod as written.\""
+    },
+    {
+      "error": "ignores the lack of instance draining",
+      "committed": false,
+      "evidence": "Finding #2 rates the missing drain as Blocking and sets out the steps: disable scheduling, migrate, then reboot."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets all six criteria and commits neither critical error. It says plainly the playbook is not safe for prod. It rates the missing drain and the missing serial batching as Blocking. It deals with ignore_errors and stop conditions, unpinned `state: latest`, and post-reboot verification. It also ties the work to a maintenance plan based on workload criticality and capacity. One expected reasoning point is missing: it never notes that a QEMU/libvirt update only protects instances that have been migrated or restarted since. That point is not a graded criterion. The response makes no book citations and invents no facts about the user's environment."
+}

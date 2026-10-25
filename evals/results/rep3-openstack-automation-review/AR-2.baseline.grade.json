@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags rebooting without draining instances as blocking",
+      "verdict": "partial",
+      "evidence": "Item 3 \"No drain or health gate. If these nodes run VMs... nothing moves workloads off before the reboot\" and the closing note \"Rebooting those without draining is the highest-risk part.\" The response does flag the missing drain, but only conditionally (\"If\"). The opening calls batching and ignore_errors \"the two biggest problems\", not draining. The safer version leaves draining as a comment placeholder and has no nova-compute disable or live-migration step."
+    },
+    {
+      "criterion": "Flags lack of batching (serial) as a blast-radius problem",
+      "verdict": "pass",
+      "evidence": "\"No `serial`... Every compute node would update and reboot at the same time, so you'd lose all your capacity at once.\" The safer version adds `serial: \"10%\"`."
+    },
+    {
+      "criterion": "Flags ignore_errors and missing stop conditions",
+      "verdict": "pass",
+      "evidence": "Item 2: \"ignore_errors: true... reboots a half-updated host. Remove it.\" Item 4: \"No max_fail_percentage or any_errors_fatal... would roll through the whole fleet.\" The safer version adds `max_fail_percentage: 0`."
+    },
+    {
+      "criterion": "Flags unpinned updates as uncontrolled change",
+      "verdict": "pass",
+      "evidence": "\"Confirm that the repos are pinned or mirrored, so the package set is what you tested in staging.\" It does not separately point out that `state: latest` can install different versions on different hosts."
+    },
+    {
+      "criterion": "Requires post-reboot verification",
+      "verdict": "partial",
+      "evidence": "Item 5 names the missing post-checks, and the safer version adds a `systemctl is-system-running` check. That check is generic OS health only: there is no check that the nova-compute service is up or that instances are in the expected state."
+    },
+    {
+      "criterion": "Refers to a maintenance plan based on criticality and capacity",
+      "verdict": "partial",
+      "evidence": "It mentions capacity (\"size to your spare capacity\"), a canary host and \"a maintenance window\". It does not tie the plan to workload criticality or failure domains."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the playbook on production as is",
+      "committed": false,
+      "evidence": "The response opens with \"**Not as written.**\" and lists the required changes."
+    },
+    {
+      "error": "ignores the lack of instance draining",
+      "committed": false,
+      "evidence": "Item 3 and the closing bullet both address draining (\"Rebooting those without draining is the highest-risk part\"), although only conditionally."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The verdict is correct: the playbook is not safe to run as written. The response covers serial batching, ignore_errors, stop conditions, repo pinning and adding post-checks well. Its main weakness is draining. It treats draining as conditional and generic (\"if these nodes run VMs\"), ranks it below batching and ignore_errors in the opening, and leaves the drain step as a placeholder. There is no OpenStack-specific guidance on disabling nova-compute, live-migrating instances or verifying instance state. It also misses the point that QEMU/libvirt updates only protect instances that have been migrated or restarted since, and the link between the maintenance plan and workload criticality. It commits no critical errors and has no faithfulness issues."
+}

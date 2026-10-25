@@ -1,0 +1,80 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "partial",
+      "evidence": "Keeps the 3-week deadline as given and sets out a differentiated strategy (leapfrog, an SR-IOV cohort, stragglers). It never states the separation explicitly, and it opens by asserting \"The capacity is enough, and so is the time\" before any of that is verified."
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "fail",
+      "evidence": "\"Unknown criticality: don't try to guess it. Assume everything is critical\" and \"Live-migratable instances ... are safe to move without asking anyone.\" The only owner contact is notice, opt-in windows and exceptions. Criticality is never collected from consuming teams before execution."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "partial",
+      "evidence": "Migrates only within an AZ and asks \"Is the free capacity spread evenly across the 3 AZs?\" However, the batch plan rests on an unverified even split: \"2–3 free hosts per AZ ... batches of 2 hosts per AZ.\""
+    },
+    {
+      "criterion": "Handles SR-IOV instances by release: live migration with a brief interface interruption (owner agreement) where supported, restart or cold migration otherwise",
+      "verdict": "partial",
+      "evidence": "Says live migration \"depends on your Nova, libvirt and neutron versions ... Older releases can't do it at all. Newer ones can\", with cold migration or reboot otherwise, and asks for the release. It does not mention the brief interface interruption or the owner agreement it needs. It also does not separate direct ports (migratable) from flavor-based PCI passthrough (not migratable)."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "partial",
+      "evidence": "\"Patch the empty hosts first. They become the already-patched destinations.\" This covers the landing zone. Nothing says migration from newer to older QEMU/libvirt must not happen."
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"A running guest keeps its old QEMU process until it is restarted or migrated, so patching a host in place does nothing for the guests on it.\""
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "partial",
+      "evidence": "\"Per-host automation (stop on first failure)\" and per-host verification steps are given. There are no campaign-level stop conditions (for example an error-rate or capacity threshold) and no campaign completion criteria."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "Evacuation is never suggested. The per-host procedure uses disable, live-migrate, then patch."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "Uses a rolling leapfrog in small batches with slack, and handles non-migratable instances separately."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "Borderline. The plan gives tenant notice, opt-in windows and a \"do not touch before X\" exception process before any forced reboot (\"or we do it on date X\"). Owners therefore get some input, even though criticality is never formally collected."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "Not mentioned."
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "Says explicitly that in-place patching does nothing for running guests."
+    },
+    {
+      "error": "classes all SR-IOV instances as requiring a restart without considering the release",
+      "committed": false,
+      "evidence": "\"depends on your Nova, libvirt and neutron versions ... Newer ones can\"; asks \"Which release are you running\"."
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": true,
+      "evidence": "\"With roughly 100 hosts and 2–3 free hosts per AZ, run batches of 2 hosts per AZ at a time. That leaves about 1 host of slack per AZ.\" This is stated as fact and drives the batch sizing and the timeline math. The per-AZ distribution is only questioned later, in section 2."
+    }
+  ],
+  "faithfulness_issues": [
+    "Presents \"2–3 free hosts per AZ\" and \"about 1 host of slack per AZ\" as known facts about the environment. The prompt gives only ~8 hosts in total, with no per-AZ distribution."
+  ],
+  "summary": "The response is a practical leapfrog patching plan. Its strongest points are the QEMU protection point (running guests are only protected after migration or restart), keeping migrations within an AZ, release-dependent handling of SR-IOV, and avoiding evacuation. It falls short in four places. It explicitly declines to collect consumer criticality and moves live-migratable instances without asking anyone. It sizes batches on an assumed even per-AZ split of spare capacity, which counts as committing the invented-per-AZ-numbers error. It leaves out the rule against migrating from newer to older QEMU/libvirt and the brief SR-IOV interface interruption that owners must accept. It has per-host stop-on-failure but no campaign-level stop conditions or completion criteria."
+}

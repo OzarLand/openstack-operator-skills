@@ -1,0 +1,145 @@
+[
+  {
+    "skill_under_test": "openstack-automation-review",
+    "scenario": "AR-1",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-automation-review"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "operating-principles.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-automation-review",
+    "scenario": "AR-1",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-automation-review",
+    "scenario": "AR-2",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-automation-review"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "ansible-and-kolla-notes.md",
+      "operating-principles.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-automation-review",
+    "scenario": "AR-2",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.667,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-automation-review",
+    "scenario": "AR-3",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-automation-review"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "operating-principles.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.9,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-automation-review",
+    "scenario": "AR-3",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.6,
+      "critical_errors_committed": [
+        "approves autonomous deletion of tenant instances without consent or dry run"
+      ]
+    }
+  },
+  {
+    "skill_under_test": "openstack-automation-review",
+    "scenario": "AR-4",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-automation-review"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "ansible-and-kolla-notes.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-automation-review",
+    "scenario": "AR-4",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  }
+]

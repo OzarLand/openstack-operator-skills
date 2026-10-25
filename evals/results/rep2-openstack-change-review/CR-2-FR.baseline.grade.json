@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"Ne supprimez pas les anciennes clés... tous les tokens émis avec les clés précédentes deviennent invalides\". It names the Horizon sessions and long jobs that would fail with 401, says the outage would last at least `[token] expiration`, and notes the staged key 0 would be lost."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Step 1 requires `sha256sum /etc/keystone/fernet-keys/*` to match on all 3 nodes before starting. It explains that keystone-2 and keystone-3 already hold the staged key that becomes primary, so they can validate keystone-1's tokens during the rsync window. It also asks for a checksum on every node after the sync."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "fail",
+      "evidence": "The response never suggests rehearsing in staging or a test environment, and never points out that a rotation has never been tested on this platform."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Step 6: \"Obtenez un token sur chaque nœud et validez-le sur les deux autres. Rechecksummez les 3 nœuds.\""
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "partial",
+      "evidence": "Step 2 backs up `/etc/keystone/fernet-keys/` on each node (`cp -a` or `tar`). It gives no restore procedure and no stop conditions for when to roll back."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "partial",
+      "evidence": "It says \"Redémarrage : normalement inutile. Keystone relit le dépôt de clés quand il change\" and gives defaults (1 h, max_active_keys=3) without asking the user to check them for their version or deployment. There is some hedging (\"normalement\", \"probablement\", \"ou ce qui convient à votre outil\")."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "It explicitly rejects this: \"Ne supprimez pas les anciennes clés\" and \"Distribuer sans rien supprimer\"."
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "It checks checksums on all 3 nodes before and after the rotation, and explains how the staged key keeps nodes compatible."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "Step 6 defines token issue and validation on every node plus checksums."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong on the main risk. It forbids deleting the old keys, gives the reason (in-flight tokens and the staged key) and corrects the sequence. It requires checksum consistency across the nodes, explains why the distribution window is safe, and defines verification on every node. Its weak points: it never recommends a rehearsal, even though rotation has never been done. Its recovery path is only a backup, with no restore steps or stop conditions. It states some version-dependent behaviour (no restart needed, defaults) with little hedging. It also never asks for approval or labels steps as read-only vs state-changing. It commits no critical errors."
+}

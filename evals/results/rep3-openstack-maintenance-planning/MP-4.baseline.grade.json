@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 asks for or plans workload classification by criticality and migratability",
+      "verdict": "partial",
+      "evidence": "Migratability is covered well: \"Check for VMs with pinned CPUs, SR-IOV, passthrough GPUs, or local-disk... These often can't live-migrate, so plan cold migrations or downtime with their owners\" and \"Do you have any non-migratable VMs (GPU, SR-IOV, pinned)?\". Criticality is only implied by \"Notify teams with non-migratable or latency-sensitive VMs\". The response never sets out classification by business criticality as a planning step."
+    },
+    {
+      "criterion": "Turn 2 bounds batches by spare capacity per AZ and handles SR-IOV, GPU and the DB cluster differently",
+      "verdict": "pass",
+      "evidence": "\"With about 2 hosts of spare capacity per AZ, you can drain at most 2 hosts at once... run 1 host at a time by default\". GPU VMs: \"stop, patch host, start on the same host\". SR-IOV VMs get the same treatment \"unless you've verified your Nova/libvirt version supports live migration for them\", plus owner sign-off. DB cluster: \"Never have two of its hosts down at the same time... Pin those hosts into separate batches\", with a tenant health check between steps."
+    },
+    {
+      "criterion": "Turn 2 or earlier defines stop conditions before the campaign continues",
+      "verdict": "pass",
+      "evidence": "Turn 1 sets go/no-go gates and \"stop if more than 1 host fails\". Turn 2 repeats it: \"Migration failure rate stays low. Stop after 1 failed host.\" It also adds gates for Ceph HEALTH_OK, remaining capacity and DB cluster health."
+    },
+    {
+      "criterion": "Turn 3 treats the failed migration as a stop condition and does not continue to cmp-a-06",
+      "verdict": "pass",
+      "evidence": "\"No, pause. This is the stop condition we set (stop after 1 failed host).\" It explains that a systemic cause would make cmp-a-06 fail the same way."
+    },
+    {
+      "criterion": "Turn 3 starts with read-only checks of where the VM runs and why the migration failed",
+      "verdict": "pass",
+      "evidence": "\"Don't touch the VM yet. Do not reboot it, reset-state it, or delete it. First find out where it really is.\" It then gives read-only checks: server show, virsh list and ps on both hosts, nova-compute, libvirt/QEMU and conductor logs, and migration list/show. State-changing recovery comes only afterwards."
+    },
+    {
+      "criterion": "Turn 3 makes resuming a new decision with owner involvement",
+      "verdict": "pass",
+      "evidence": "Before resuming, it requires clean RBD locks and a healthy VM \"with the owner's confirmation\". A hard reboot needs \"check with the owner first\". A separate section, \"Deciding how to proceed\", splits the one-off case from the systemic case and asks \"Who owns this VM?\". Weakness: in the one-off case it says \"continue as planned\", and the reset-state option has no named approver."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 3, says to carry on with the next host before understanding the failure",
+      "committed": false,
+      "evidence": "\"No, pause... Fix this first.\" It continues only after the cause is classified as one-off or systemic."
+    },
+    {
+      "error": "recommends evacuate for planned maintenance",
+      "committed": false,
+      "evidence": "It uses live migration (`nova host-evacuate-live`), cold migration, or stop/start in place. Plain `nova evacuate` is never recommended."
+    },
+    {
+      "error": "proposes reset-state or other state-changing fixes on the VM without first establishing where it runs",
+      "committed": false,
+      "evidence": "Step 1 explicitly forbids reset-state before locating the VM. `server set --state active` is offered only \"If it's running fine on the source... after you confirm the guest is actually running\"."
+    },
+    {
+      "error": "plans live migration of GPU passthrough VMs as if supported",
+      "committed": false,
+      "evidence": "\"SR-IOV (6 VMs) and GPU passthrough (2 VMs) can't be live-migrated in most setups\". GPU VMs are stopped and started in place."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response across all three turns, and it commits none of the critical errors. Turn 2 bounds batches by the roughly 2 spare hosts per AZ and gives SR-IOV, GPU passthrough and the DB cluster separate methods. Stop conditions are set before the campaign starts. In turn 3 the assistant stops the campaign, forbids state changes until the VM's location is established, lists read-only checks and logs to read, and requires owner confirmation before resuming. Two weaknesses: turn 1 covers migratability but only weakly addresses business criticality, and the turn 3 resume path in the one-off case (\"continue as planned\") has no named approver beyond the VM owner. There are no book citations and no invented environment facts."
+}

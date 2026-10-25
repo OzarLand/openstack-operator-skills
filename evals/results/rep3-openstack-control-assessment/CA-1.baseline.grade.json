@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against immediate transformation and explains why",
+      "verdict": "pass",
+      "evidence": "\"Don't migrate the deployment tool or redesign networking yet... changing the tooling and the network while you can't yet explain the incidents is how you create bigger ones.\" It also adds: \"A tool migration on a live cloud is often as risky as an upgrade. Don't combine them.\""
+    },
+    {
+      "criterion": "Uses the restoration sequence or an equivalent staged approach",
+      "verdict": "pass",
+      "evidence": "Phased plan: \"Weeks 1–2: Find out what you actually have\" (discover/protect), \"Weeks 2–6: Stop the bleeding\" (stabilize), \"Weeks 6–12: Build the safety net for change\", then \"Suggested sequencing\" with tool and network changes last (evolve). This covers the book's sequence in substance, though not by name."
+    },
+    {
+      "criterion": "Lists concrete first-30-day outputs",
+      "verdict": "partial",
+      "evidence": "It lists activities: inventory, finding the deployment source of truth, verifying backup restores, categorizing incidents, runbooks for the top 5 incidents, an observability baseline. It does not name the expected deliverables (current-state map, critical-risk list, guardrails, ownership gaps, recovery gaps, control roadmap) as outputs of the first 30 days."
+    },
+    {
+      "criterion": "Requires owners and removal conditions for guardrails",
+      "verdict": "fail",
+      "evidence": "The only guardrail-like rule is \"Add a rule that you capture state first.\" No guardrail is given an owner or a removal condition, and there is no guardrails table."
+    },
+    {
+      "criterion": "Mentions the exception for unmaintained, vulnerable releases",
+      "verdict": "partial",
+      "evidence": "\"Check your release's EOL status and any open CVEs. That may force the timeline.\" This hints at the exception but stops short of saying the release upgrade may itself be the stabilization. The upgrade stays at step 4, after staging."
+    },
+    {
+      "criterion": "Starts from business capabilities",
+      "verdict": "fail",
+      "evidence": "Discovery starts from components (release, services, hypervisors, storage, network backend, DB/MQ). The only business-facing step is interviewing \"the largest tenants\". There is no mapping of business capabilities or criticality."
+    },
+    {
+      "criterion": "Defines exit criteria for restoration",
+      "verdict": "partial",
+      "evidence": "It gates later transformation on \"stability metrics (for example, incident count down by X% and a successful staging upgrade)\" and proposes the metrics \"incident count, MTTR, time since last tested restore, release lag\". It never defines what \"control restored\" means as a set of exit criteria."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses starting with the deployment tool migration and network redesign",
+      "committed": false,
+      "evidence": "It explicitly defers both: \"Don't migrate the deployment tool or redesign networking yet\". The tool migration comes 5th and networking last in the sequencing."
+    },
+    {
+      "error": "proposes a single maturity score as the outcome",
+      "committed": false,
+      "evidence": "No maturity score is proposed. It suggests several operational metrics instead (incident count, MTTR, restore recency, release lag)."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid, restrained staged plan. It clearly warns against starting with the tool migration or network redesign, sequences discover, stabilize, safety net and then evolve, and commits neither critical error. It falls short on several book-specific elements. There are no guardrails with owners and removal conditions, and nothing starts from business capabilities. The first-30-day plan is a list of activities, not named deliverables. The exception for unpatched releases is only hinted at. Exit criteria appear only loosely, as example metrics, without a definition of what restored control means."
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against immediate transformation and explains why",
+      "verdict": "pass",
+      "evidence": "\"Don't start by improving the platform.\" It also says the redesign should not be the first step, because \"a new deployment tool, a network redesign and a release upgrade together make failures impossible to attribute, and you currently can't recover reliably from the failures you already have.\""
+    },
+    {
+      "criterion": "Uses the restoration sequence or an equivalent staged approach",
+      "verdict": "partial",
+      "evidence": "The plan is staged: \"Weeks 1–2: Discover and protect\", knowledge recovery in step 5, then \"Weeks 2–4: Assess and decide\", then sequencing (\"Change one major thing at a time… Redesign networking last\"). It never lays out Stabilize, Simplify, Establish control and Evolve as phases, so the later part of the sequence is only implied."
+    },
+    {
+      "criterion": "Lists concrete first-30-day outputs",
+      "verdict": "pass",
+      "evidence": "Outputs named: a dependency map from the user journey, a map of people and knowledge with control debt, an incident timeline review, a control-level profile for each capability, and findings sorted into owned buckets (act now/plan/monitor/accept with expiry). It also promises \"a control-level table by capability, risks where low control meets high consequence, a measures list, and a 30/60/90-day roadmap.\""
+    },
+    {
+      "criterion": "Requires owners and removal conditions for guardrails",
+      "verdict": "pass",
+      "evidence": "\"Any temporary guardrail, such as disabling a flaky compute host in the scheduler or a change freeze, needs an owner and a removal condition, or it becomes permanent.\" The restart rule also requires naming who approved each restart."
+    },
+    {
+      "criterion": "Mentions the exception for unmaintained, vulnerable releases",
+      "verdict": "pass",
+      "evidence": "\"unsupported releases and unpatched CVEs are themselves a risk, and some platforms can only be stabilized by moving them forward… How far behind you are decides whether upgrading is the main priority or merely a gated one.\""
+    },
+    {
+      "criterion": "Starts from business capabilities",
+      "verdict": "pass",
+      "evidence": "Step 1 is \"Find out what the business depends on. Ask which business capabilities run on this cloud… and how critical each is.\""
+    },
+    {
+      "criterion": "Defines exit criteria for restoration",
+      "verdict": "partial",
+      "evidence": "It defines control as being able to \"understand, decide, intervene, recover and evolve without depending on individuals or undocumented assumptions.\" It gives a level scale (Unknown→…→Sustainable) and defines Recoverable as a recovery shown by someone other than the procedure's author. It never states explicit exit criteria for when restoration is finished."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses starting with the deployment tool migration and network redesign",
+      "committed": false,
+      "evidence": "\"Don't say no, and don't let them run it as the first step.\" It moves the new tool to a lab and says \"Redesign networking last.\""
+    },
+    {
+      "error": "proposes a single maturity score as the outcome",
+      "committed": false,
+      "evidence": "\"Don't compute one score. Report a profile per capability.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A strong response. It argues for restraint, starts from business capabilities, covers the release exception, requires an owner and removal condition for every guardrail, and rejects a single score. It falls short in two places: the staged approach covers only the early phases (discover, protect, knowledge recovery, assess) and does not lay out stabilize, simplify, establish control and evolve as phases, and there are no explicit exit criteria for restoration, beyond the definition of control and the capability levels. No critical errors were committed and there are no faithfulness issues."
+}

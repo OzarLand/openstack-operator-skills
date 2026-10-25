@@ -1,0 +1,81 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "partial",
+      "evidence": "Builds a differentiated strategy around the 3-week deadline (canary, waves, SR-IOV track, buffer). But it also reopens the requirement: \"Is a 3-week deadline firm for every host, or only for hosts running untrusted tenants?\""
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "partial",
+      "evidence": "It sends a tenant notice and asks owners to \"flag critical workloads or request a window\". But it does not require that input before execution: \"Treat every VM as critical by default… Silence means live migration only.\" There is no shared criticality table collected from the consuming teams."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "partial",
+      "evidence": "It sets per-AZ caps (\"Set a per-AZ cap on hosts out at once\", \"2 per AZ\"). But the per-AZ figure comes from splitting the overall 8 hosts evenly. It never asks how the spare capacity is actually distributed across AZs."
+    },
+    {
+      "criterion": "Handles SR-IOV instances by release: live migration with a brief interface interruption (owner agreement) where supported, restart or cold migration otherwise",
+      "verdict": "partial",
+      "evidence": "\"Check what your release and NICs actually support before assuming either way\" and \"What are your Nova release and NIC vendor?\" It asks for the release. It does not say that direct ports are live-migratable since Train with a brief interface interruption, and it does not separate them from flavor-based PCI passthrough."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "partial",
+      "evidence": "Leapfrogging: \"Patch the spare hosts first. Live-migrate VMs from the next hosts onto the patched spares.\" That gives a landing zone, but it never states the rule against migrating from newer to older QEMU/libvirt."
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"A running VM keeps its old QEMU process until it restarts or moves to a host with the new binary… Don't patch hosts in place with VMs running and call it done.\""
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "partial",
+      "evidence": "Stop conditions are defined: \"If more than a few migrations fail or the spare pool drops below 2, it pauses automatically.\" Completion is only checked per host (\"verify the kernel and QEMU versions\"). There is no campaign-level criterion, such as every instance migrated or restarted since its host was patched."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "The response never mentions evacuation. It uses live migration and cold migration or stop/start only."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "It uses a rolling leapfrog with capped waves and identifies VMs that cannot be live-migrated (SR-IOV, local disk, pinning), which go to separate handling."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "VMs that won't migrate go to the owner first: \"escalate to the tenant with a deadline, then force a stop/start in a stated window.\" Downtime gets \"an explicit, scheduled window.\""
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "Evacuation is not mentioned."
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "It states explicitly that running VMs keep the old QEMU until they are migrated or restarted."
+    },
+    {
+      "error": "classes all SR-IOV instances as requiring a restart without considering the release",
+      "committed": false,
+      "evidence": "\"Check what your release and NICs actually support before assuming either way\", and it asks for the Nova release."
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "\"2 per AZ\" is a cadence the plan chooses, derived from the overall 8 hosts. It is not presented as measured per-AZ spare capacity. Still, it implicitly assumes the spare is spread evenly."
+    }
+  ],
+  "faithfulness_issues": [
+    "States \"You won't classify 10k instances by hand\" as if the instance count were known; the prompt gives no instance count.",
+    "Splits the ~8 spare hosts into \"2 per AZ\" without flagging that this assumes an even distribution of spare capacity, which the prompt does not provide."
+  ],
+  "summary": "The response is a solid, practical rolling-patch plan. It gets the QEMU protection point right, avoids evacuation, sets stop conditions and asks for the Nova release before deciding how to handle SR-IOV. It commits none of the critical errors. Its weaknesses: (1) criticality is treated as an opt-in from owners, with silence as consent, rather than collected through a shared table before execution; (2) per-AZ capacity comes from splitting the overall spare evenly instead of asking for the real distribution; (3) it does not state the Train-era rule for SR-IOV direct ports or the restriction on flavor-based PCI passthrough; (4) it does not state the newer-to-older version rule; (5) it has no campaign-level completion criterion. It also asserts an invented count of 10k instances."
+}

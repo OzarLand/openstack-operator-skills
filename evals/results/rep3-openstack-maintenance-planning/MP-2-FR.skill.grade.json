@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "Heading: \"Non, ne faites pas ça : l'évacuation est réservée aux hôtes en panne\"; plus \"Ce n'est pas une migration plus rapide. C'est un redémarrage forcé, avec le risque de corruption en plus.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Double écriture sur Ceph... Si la VM d'origine tourne toujours sur l'hôte « patché », deux QEMU écrivent sur le même disque. Cela peut corrompre le système de fichiers\"; it also says the RBD exclusive lock \"ne doit pas servir de garde-fou\"."
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Arrêter nova-compute ne fait pas tomber l'hôte. Les VM continuent de tourner sur l'hyperviseur. Seul le service est déclaré down.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Covers cold migration or coordinated restart for tolerant workloads \"avec accord du propriétaire\", investigating why live migration is slow (bandwidth, auto-converge/post-copy, concurrency), and parallelizing \"dans la limite de la capacité de réserve de chaque domaine\". Also gives a per-host procedure and stop conditions."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response explicitly rejects this: \"Non, ne faites pas ça\"."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It names shared Ceph as the source of the double-write risk and says the RBD lock does not remove that risk."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes every criterion and commits neither critical error. It gives a clear no and explains why: the VMs keep running after nova-compute stops, so evacuating would put two QEMU processes writing to the same Ceph RBD disks, and nothing fences the host. It offers alternatives with conditions attached: triage by how critical each workload is, cold migration or coordinated restart with the owners' agreement, tuning live migration, and parallel draining within spare capacity. It cites nothing from the book and invents no facts about the user's environment."
+}

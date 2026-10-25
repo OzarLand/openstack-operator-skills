@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Uses the value-of-state vs uncertainty criterion",
+      "verdict": "pass",
+      "evidence": "\"The question that matters is whether the information in the current state is valuable enough to justify preserving its uncertainty.\" It applies this directly: the state is mostly leftover experiments, and the real asset (team data and config) can be extracted."
+    },
+    {
+      "criterion": "Distinguishes test from production",
+      "verdict": "pass",
+      "evidence": "\"This is a test cloud, so I haven't built the full weighted-scoring workup\" and \"In a test environment the state is mostly leftover experiments.\" Under gaps it lists \"Whether any team uses the cloud for something close to production\" as a fact that would change the answer. The distinction is mostly implicit but present."
+    },
+    {
+      "criterion": "Requires preserving needed content and evidence",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Preserve evidence first. Snapshot configs and the DB, and save the output of `server list --all-projects`, port, volume and network lists.\" Step 4 exports or snapshots stateful volumes and images. It also rejects an in-place rebuild because it \"Destroys state before the inventory is verified.\""
+    },
+    {
+      "criterion": "Requires a written baseline and validation criteria",
+      "verdict": "pass",
+      "evidence": "Step 3: \"Define the baseline. The new cloud is built entirely from version-controlled config, with validation tests (boot a VM, attach a volume, floating IP, a Heat or Terraform smoke test). Automated installation alone is not proof of equivalence.\" It adds success measures under \"How we'll know it worked\"."
+    },
+    {
+      "criterion": "Involves stakeholders and decision owner",
+      "verdict": "pass",
+      "evidence": "Step 2: \"Send each team its project's resources and ask them to claim or release them.\" The Decision rights section names the platform team, the funder/owner and the team leads, and says: \"If nobody is accountable for the cloud, name someone first.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends wiping without preserving needed content or evidence",
+      "committed": false,
+      "evidence": "It recommends a parallel build after an evidence snapshot, a per-owner inventory and migration, with an archive period. It explicitly rejects rebuilding in place before the inventory is verified."
+    },
+    {
+      "error": "applies the same reasoning to production without distinction",
+      "committed": false,
+      "evidence": "The reasoning is tied to the test-environment premise (state is mostly experiments), and near-production use is flagged as a gap that would change the answer."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A strong, conditional rebuild recommendation that matches the expected reasoning. It uses the value-of-state criterion, preserves evidence and content first, requires a version-controlled baseline with validation tests, says automated installation alone isn't enough, involves the teams, names who decides, and gives a reopen trigger for when targeted repair would be preferable. The test-versus-production distinction is made mostly implicitly but holds. It makes no book citations and invents no facts about the user's environment."
+}

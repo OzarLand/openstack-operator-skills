@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Uses the value-of-state vs uncertainty criterion",
+      "verdict": "partial",
+      "evidence": "It weighs the cost of an unknown state against the value of what is inside: \"the real state differs from what any config or documentation says\" and \"'Teams have stuff in there' is mostly an inventory problem.\" It also gives a test for when repair is enough: \"Control-plane drift is what justifies a rebuild.\" It never states the actual criterion, which is whether the information in the current state is valuable enough to justify keeping its uncertainty."
+    },
+    {
+      "criterion": "Distinguishes test from production",
+      "verdict": "fail",
+      "evidence": "The only test-specific point is \"A test cloud that can't be trusted gives you misleading test results.\" Nothing contrasts this decision with how a production environment would be handled, and nothing says the reasoning would not carry over to production."
+    },
+    {
+      "criterion": "Requires preserving needed content and evidence",
+      "verdict": "pass",
+      "evidence": "Step 1 is \"Inventory and announce... Export every project, instance, volume, network, floating IP, and image, with owner and last activity.\" Step 2 says \"Anything unclaimed by the date gets snapshotted and archived, then deleted after a grace period.\" Step 3 is \"Back up what matters,\" and the old cloud stays read-only after cutover."
+    },
+    {
+      "criterion": "Requires a written baseline and validation criteria",
+      "verdict": "partial",
+      "evidence": "Step 4, \"Build the new cloud from code... all in version control,\" partly covers a written baseline. There are no validation criteria for the new build: \"Run old and new side by side\" names no acceptance checks. The response also treats code-built reproducibility as enough on its own, without saying that automated installation does not by itself make a rebuild safe."
+    },
+    {
+      "criterion": "Involves stakeholders and decision owner",
+      "verdict": "partial",
+      "evidence": "Teams are involved: \"Send each team their list with a firm cutover date\" and \"Teams claim what they need.\" The response also addresses the \"keep repairing\" camp. It never names a decision owner or says who approves the rebuild."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends wiping without preserving needed content or evidence",
+      "committed": false,
+      "evidence": "It explicitly rejects a wipe: \"do it as a planned migration with a deadline, not a wipe.\" Inventory, snapshots, archiving, a grace period and a read-only old cloud all come before anything is deleted."
+    },
+    {
+      "error": "applies the same reasoning to production without distinction",
+      "committed": false,
+      "evidence": "Production is never mentioned. The advice is framed only for the test cloud, so the response does not extend this reasoning to production, even though it also fails to draw the distinction."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid, safety-minded rebuild plan. It recommends a migration rather than a wipe, requires inventory, team claims and archived snapshots before anything is deleted, and says when targeted repair would be enough. It does not distinguish test from production. It also never states the value-of-state vs uncertainty criterion outright, defines no validation criteria for the rebuilt environment, and names no decision owner. It commits no critical errors and makes no faithfulness errors."
+}

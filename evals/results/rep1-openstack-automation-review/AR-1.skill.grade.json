@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Marks absence of fencing as blocking",
+      "verdict": "pass",
+      "evidence": "Top risks: \"1. **No fencing (Blocking).**\" and Findings #1: \"Blocking | line 4 | Evacuates on `state == 'down'` without fencing\""
+    },
+    {
+      "criterion": "Explains why a down service is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"A missed heartbeat doesn't mean the host is dead. If the host is alive but isolated, evacuation starts a second copy of each VM while the original is still running. With shared storage such as Ceph or NFS, both copies can write to the same disk and corrupt it.\" It also explains that `down` is the nova-compute heartbeat arriving through RabbitMQ and the DB."
+    },
+    {
+      "criterion": "Identifies mass-evacuation risk from control-plane/network failure (unbounded scope)",
+      "verdict": "pass",
+      "evidence": "\"Wrong-cause mass evacuation (Blocking)... A RabbitMQ partition, a DB problem or a network fault near the controller can make many or all computes look down at once. This script would then try to evacuate the whole cloud\"; Finding #2 adds a cap and circuit breaker."
+    },
+    {
+      "criterion": "Identifies missing dry run, logging, stop conditions",
+      "verdict": "pass",
+      "evidence": "The Safeguards table lists Preview/dry run: No, Monitoring: No (\"No log and no notification\") and Stop conditions: No (\"Stop if more than N hosts or more than X% of computes look down\"). Finding #7: \"No dry run, no log, no notification\"."
+    },
+    {
+      "criterion": "Recommends semi-automation or fencing precondition with bounded scope",
+      "verdict": "pass",
+      "evidence": "\"Better design: semi-automate\" step 1 is read-only detection that proposes an action to the on-call person. Step 2 allows auto-evacuation only when \"exactly one host is down... fencing succeeded, spare capacity exists, and the daily evacuation count is under a limit.\""
+    },
+    {
+      "criterion": "Quotes or references specific lines of the script",
+      "verdict": "pass",
+      "evidence": "The Findings table cites line 4 (`state == 'down'`), lines 3–4, line 5 (`all_projects=True`) and line 7 (disable comes last). These line numbers match the script."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the script with minor tweaks without adding fencing",
+      "committed": false,
+      "evidence": "The verdict is \"not safe — redesign\". It makes fencing a blocking finding and a hard precondition, and says: \"Without fencing, a human decision at night is safer than this script.\""
+    },
+    {
+      "error": "suggests evacuating on heartbeat loss as acceptable practice",
+      "committed": false,
+      "evidence": "It says explicitly that \"A missed heartbeat doesn't mean the host is dead\". Any automation is allowed only after fencing succeeds and other conditions hold, and only under a written delegation."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all six criteria and commits neither critical error. Its verdict is \"not safe — redesign\", it marks the lack of fencing as blocking, and it explains why a lost heartbeat does not prove the host is dead (an isolated host leads to double-running VMs on shared storage). It also flags mass evacuation from a control-plane fault, the unbounded scope, and the missing dry run, logging, stop conditions and lock. The findings table has severities and line references that match the script, and the suggested design is semi-automation with fencing and bounded scope. It does not cite the book and invents no facts about the user's environment; the unknowns are stated as gaps."
+}

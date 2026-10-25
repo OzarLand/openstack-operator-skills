@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against immediate transformation and explains why",
+      "verdict": "pass",
+      "evidence": "\"This looks like a restoration situation, not a transformation one... on a platform nobody fully understands, each change adds uncertainty and makes failures harder to attribute. You'd be stacking a new tool, a new network and probably a release jump on top of unknown state.\" It also says \"sequencing is not rejection\"."
+    },
+    {
+      "criterion": "Uses the restoration sequence or an equivalent staged approach",
+      "verdict": "pass",
+      "evidence": "Staged plan: pick capabilities and trace dependencies (discover), put guardrails on restarts (protect), recover departed-team knowledge, mine incidents, rate control per capability with evidence (assess), define 'control restored', and \"Only then does the upgrade and the redesign become the main objective\" (evolve). It does not use the book's exact phase names, but the stages are equivalent."
+    },
+    {
+      "criterion": "Lists concrete first-30-day outputs",
+      "verdict": "partial",
+      "evidence": "The 'First 30 days' section gives week-by-week activities with implied outputs: capability-to-owner trace, control-debt list, restart guardrails, incident clusters, and a per-capability control profile in week 4. It never lists these as explicit deliverables, and it postpones the risk register and control roadmap until the user shares more data (\"I'll produce the full assessment... roadmap with guardrails and exit criteria\")."
+    },
+    {
+      "criterion": "Requires owners and removal conditions for guardrails",
+      "verdict": "pass",
+      "evidence": "\"Every guardrail needs an owner, a reason, a removal condition and a review date. Otherwise it becomes permanent.\""
+    },
+    {
+      "criterion": "Mentions the exception for unmaintained, vulnerable releases",
+      "verdict": "pass",
+      "evidence": "\"There is one exception. If you're so far behind that you're on unmaintained, vulnerable releases, the upgrade may be the only real stabilization.\""
+    },
+    {
+      "criterion": "Starts from business capabilities",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Don't start with a component inventory. Ask which business capabilities run on this cloud, how critical each is, and who the consumers are.\""
+    },
+    {
+      "criterion": "Defines exit criteria for restoration",
+      "verdict": "pass",
+      "evidence": "The section \"What 'control restored' could mean (define it early)\" lists: recovery demonstrated for critical capabilities, ownership gaps closed, critical dependencies visible, recurring incidents understood, a credible lifecycle plan."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses starting with the deployment tool migration and network redesign",
+      "committed": false,
+      "evidence": "It explicitly sequences both after restoration: \"we'll do this once we can recover from it\" and \"Only then does the upgrade and the redesign become the main objective.\""
+    },
+    {
+      "error": "proposes a single maturity score as the outcome",
+      "committed": false,
+      "evidence": "\"Report this as a profile per capability, not as one score.\" It also asks for measures with \"a trend (not a target score)\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong. It argues for restoration before transformation, notes the exception for unpatched releases, starts from business capabilities, requires an owner and a removal condition for every guardrail, rejects a single maturity score, and defines what \"control restored\" means. Its one weakness is the first-30-day section: it lists activities whose outputs are only implied, not explicit deliverables, and it postpones the risk register and control roadmap until the user provides more data. It commits neither critical error. It cites nothing from the book and invents no facts about the user's environment."
+}

@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Points out missing scope and decision points for different alarm types",
+      "verdict": "partial",
+      "evidence": "Finding 1: \"One alarm is treated as one situation. A node that left the cluster, a partition, and a loss of majority all raise the same alert and need different handling.\" The draft adds a read-only decision table routing to Section A or B. However, it never mentions memory or disk high-watermark alarms, which are central RabbitMQ alarm types. The draft's decision table has no branch for them, so a resource alarm would fall into Section A or B by default."
+    },
+    {
+      "criterion": "Flags simultaneous restart of all nodes/services as dangerous",
+      "verdict": "pass",
+      "evidence": "Finding 2: \"Restarting a three-node cluster all at once removes the majority and drops every RPC connection.\" Finding 4: \"Many services restarting at once reconnect to RabbitMQ at the same moment and put a load spike on it.\" Finding 1 also notes that a blanket restart \"can discard the queues services are still using.\""
+    },
+    {
+      "criterion": "Flags verification of the alarm rather than the capability",
+      "verdict": "pass",
+      "evidence": "Finding 6: \"'Check that the alarm cleared' verifies the monitor, not the capability... Verify end to end: ... create, reach and delete a test VM and a test port.\""
+    },
+    {
+      "criterion": "Flags missing stop/escalation, owner and validation",
+      "verdict": "pass",
+      "evidence": "Finding 8: \"There is no stop, escalation or must-not-do section.\" Finding 10: \"There is no owner, validation date or history... Mark it Draft, not yet validated.\" The draft also includes a 'Stop and escalate if' section and a 'Do not, without escalation' list."
+    },
+    {
+      "criterion": "Gives findings before a rewritten version",
+      "verdict": "pass",
+      "evidence": "An 11-row Findings table comes before the 'Revised draft' section, which contains decision points and TODOs."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts the runbook as adequate",
+      "committed": false,
+      "evidence": "\"Verdict: don't run it as written.\""
+    },
+    {
+      "error": "rewrites it while keeping 'restart all nodes' as an unconditional first step",
+      "committed": false,
+      "evidence": "The draft starts with read-only preconditions and a decision point. Section A restarts \"the affected node only (approval needed)\", and the must-not-do list includes \"restart all three nodes together\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It gives a findings table before a restructured draft, and the draft has read-only decision points, single-node restarts with approval, end-to-end capability checks, stop and escalation conditions, a must-not-do list, a draft/not-validated status, and TODOs for unknowns. Neither critical error was committed. The main gap is the scope analysis: it covers node-left, partition and no-majority cases but leaves out memory and disk resource alarms, and the decision table has no branch for them. That makes the first criterion partial. I found no fabricated book citations or invented environment facts; Kolla is offered only as an example, and the commands are marked illustrative."
+}

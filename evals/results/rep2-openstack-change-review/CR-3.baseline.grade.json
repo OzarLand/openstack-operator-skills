@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags incomplete online data migrations as a blocker",
+      "verdict": "pass",
+      "evidence": "Blocker 1: \"`nova-manage db online_data_migrations` was never run after the last upgrade... It can fail the DB sync or leave services refusing to start\"; it also says to run them on the current release until nothing is left, and the gate requires \"All online migrations report complete\"."
+    },
+    {
+      "criterion": "Explains the limits of the SLURP promise beyond OpenStack services",
+      "verdict": "fail",
+      "evidence": "Item 5 only says the tool's claim \"doesn't cover your config, your patches, or your DB state\" and asks to confirm a valid SLURP starting point. It never says that the OS, Python, RabbitMQ, MariaDB, the deployment tool, or network/storage backends must also support the jump."
+    },
+    {
+      "criterion": "Requires upgrade check commands",
+      "verdict": "pass",
+      "evidence": "\"Run `nova-status upgrade check` now\"; Suggested order step 1: \"Run the online migrations and the `upgrade check` tools\"; gate: \"every `upgrade check` is clean\"."
+    },
+    {
+      "criterion": "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+      "verdict": "pass",
+      "evidence": "Blocker 2: \"last tested two years ago by someone who left, so assume it doesn't work. Before the upgrade, take a fresh backup, restore it into an isolated environment, and boot the services against it.\" Gate: \"A restore has been proven within the last few weeks, with a measured RTO.\""
+    },
+    {
+      "criterion": "Includes policy/RBAC testing",
+      "verdict": "pass",
+      "evidence": "Blocker 4 covers secure RBAC defaults (scoped tokens, reader/member/manager roles), oslopolicy tooling, diffing against overrides and \"test with real user roles\"; there is also a matching gate."
+    },
+    {
+      "criterion": "Addresses local patches against the target release",
+      "verdict": "pass",
+      "evidence": "Blocker 3: decide for each patch whether it was merged upstream, can be dropped, applies cleanly or needs porting; flags the scheduler patches; asks for functional tests; \"Nothing should be rebased for the first time during the change window.\""
+    },
+    {
+      "criterion": "Gives a clear not-ready verdict with ordered conditions",
+      "verdict": "pass",
+      "evidence": "\"**Verdict: not ready for next week.**\" followed by a numbered \"Suggested order\" and \"Go/no-go gates for any new date\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "declares the upgrade ready next week",
+      "committed": false,
+      "evidence": "\"Verdict: not ready for next week. I'd move the date.\""
+    },
+    {
+      "error": "ignores the incomplete online data migrations",
+      "committed": false,
+      "evidence": "Listed as Blocker 1, with the commands to run."
+    },
+    {
+      "error": "treats SLURP support as covering the whole stack",
+      "committed": false,
+      "evidence": "The response never claims that SLURP covers the OS, RabbitMQ, MariaDB or backends. It leaves that point out rather than asserting it, and it treats the deployment tool's claim as \"not validation\"."
+    },
+    {
+      "error": "invents specific release names as the user's current/target versions",
+      "committed": false,
+      "evidence": "It names no releases and asks the user for the \"current and target release names\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A strong response. It gives a clear not-ready verdict, makes the skipped online data migrations a blocker, and requires the upgrade check commands. It treats recovery as unproven and asks for a restore exercise first, covers secure RBAC policy testing, and handles the local patches, including the two scheduler patches. Conditions are ordered and the go/no-go gates are concrete. Its main gap is that it never explains that SLURP covers only OpenStack services: the OS, Python, RabbitMQ, MariaDB and backend compatibility are not mentioned. It also has no explicit readiness table and no decision record draft. No critical errors were committed, and it invents no environment facts."
+}

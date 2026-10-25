@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"No. Don't use evacuate for planned patching.\" and \"Evacuate is for hosts that have already failed.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Two copies of one VM on Ceph can corrupt the volume... two writers on one disk... Shared storage makes this more dangerous, not safer.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"When you stop nova-compute, the guests keep running under libvirt/QEMU.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Cold migration or coordinated restart for workloads where the owner accepts downtime; tune auto-converge/post-copy/bandwidth/concurrency \"from your own baselines\"; parallelize \"only if spare capacity covers it in each rack or AZ\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response explicitly warns that evacuating while instances are still running \"can start a second copy\". It accepts evacuate only for a genuinely failed host, \"after fencing\"."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "\"It's the wrong tool even though the storage is shared Ceph\"; \"Shared storage makes this more dangerous, not safer.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear no and explains why. Evacuate is for failed hosts, and stopping nova-compute leaves the guests running. Rebuilding them elsewhere risks two writers on the same Ceph RBD image. It offers alternatives with conditions: cold migration or restart for workloads that tolerate downtime, live-migration tuning based on the team's own baselines, and parallel draining only where capacity allows in each failure domain. It also asks for the missing information. All four criteria pass, it commits neither critical error, and I found no faithfulness issues."
+}

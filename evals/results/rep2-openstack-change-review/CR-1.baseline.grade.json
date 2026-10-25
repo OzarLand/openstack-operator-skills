@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "Blocking issue 2: \"you can't tell whether the cause is the new certs, the new packages or the reboot\"; \"make the certs the Saturday CR. Do the patching in a separate CR\". It allows keeping both only as \"an optional gated phase\" with its own rollback."
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "\"Nobody has rotated these certs in 3 years, so no one has current knowledge\"; with a CA change, \"every client needs the new trust bundle... That includes all OpenStack services, compute nodes...\"; \"Every service's oslo.messaging connection must reconnect\"; it also lists libvirt/QEMU TLS, VNC and OVN as likely gaps in the inventory."
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "\"Required: run the full procedure in a lab or staging environment first, and attach the evidence to the CR.\" It also requires rolling, one-node-at-a-time restarts and validation after each step."
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "\"It only works until the old certs expire... about 3 days of margin\"; \"It doesn't cover the OS update at all... Package downgrades... are not reliable\"; it requires a tested rollback per component, a timed go/no-go point and a second window reserved before Nov 3."
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "pass",
+      "evidence": "Validation checklist: openssl s_client checking SANs, chain and expiry; rabbitmqctl cluster_status; wsrep Synced with cluster size 3; endpoint and service lists; an end-to-end VM/volume/network test. Stop condition example: \"if Galera isn't Synced on all nodes by T+1:30, roll back\". It also adds cert-expiry monitoring."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "partial",
+      "evidence": "Impact statement: \"API calls will fail during restarts. Say how long and what you'll communicate\"; it asks for \"an owner and calendar entry for the next rotation\". It does not name who owns the go/no-go and rollback decisions, and gives no decision-rights section."
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "pass",
+      "evidence": "\"I don't know what deploys this (kolla-ansible, OSA, TripleO or something else)\"; the CA-change question is left open (\"The answers change the whole procedure\"); rehearsal and backups are listed as required, not assumed done. There is no formal gates table, but nothing unknown is marked as passed."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"Don't submit this as written. I'd recommend CAB reject it, or send it back\"; recommends splitting the changes."
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "Blocking issue 1, \"The rollback plan doesn't work,\" explains why in detail."
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "Rehearsal, backups and inventory are all listed as required additions, not as done."
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "Recommends that CAB reject or return the CR, and offers to draft a revised CR."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It rejects the CR as written and recommends splitting the cert rotation from the OS patching. It takes the \"restore old certs\" rollback apart: the old certs expire soon, it does nothing for the OS update, and it has no checkpoints. It requires a rehearsal and gives concrete verification steps and timed stop conditions. It reaches compute nodes and service agents through the CA trust-bundle question, and it marks the deployment tool and the CA question as unknown. The one gap is decision rights: it never says who owns the go/no-go call, and it covers consumer communication only briefly. It also has no formal gates table and no draft decision record. It commits no critical errors and has no faithfulness issues: the Oct 31 and Nov 3 dates follow from the current date and the reported 9-day expiry."
+}

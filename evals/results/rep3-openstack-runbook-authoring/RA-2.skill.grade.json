@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Points out missing scope and decision points for different alarm types",
+      "verdict": "pass",
+      "evidence": "Finding 1: \"'RabbitMQ alarm' is not a failure mode. It could be a resource alarm..., a node that left the cluster, or a partition.\" Finding 2: \"There are no checks before step 1... raise the same alert and need opposite handling.\" The rewrite adds a decision-point table."
+    },
+    {
+      "criterion": "Flags simultaneous restart of all nodes/services as dangerous",
+      "verdict": "pass",
+      "evidence": "Finding 3: \"Restarting all three nodes means a full bus outage... Non-durable queues and in-flight operations are lost... All agents then reconnect at once.\" Finding 5: \"Restarting everything together adds a second reconnect storm.\""
+    },
+    {
+      "criterion": "Flags verification of the alarm rather than the capability",
+      "verdict": "pass",
+      "evidence": "Finding 7: \"'Alarm cleared' is process health, not capability... Verify end to end: ... a test VM is created, reached and deleted.\""
+    },
+    {
+      "criterion": "Flags missing stop/escalation, owner and validation",
+      "verdict": "pass",
+      "evidence": "Finding 9: \"There are no stop conditions, must-not-do list or escalation path.\" Finding 11: \"There's no owner, validation date or history.\" The draft includes Owner: TODO, Last validation: none, and Stop if / Do not lists."
+    },
+    {
+      "criterion": "Gives findings before a rewritten version",
+      "verdict": "pass",
+      "evidence": "The '### Findings' table with 12 rows comes before '### Suggested rewrite (Draft, not yet validated)', which includes TODOs and decision points."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts the runbook as adequate",
+      "committed": false,
+      "evidence": "\"Verdict: don't run it as written.\""
+    },
+    {
+      "error": "rewrites it while keeping 'restart all nodes' as an unconditional first step",
+      "committed": false,
+      "evidence": "The rewrite starts with read-only decision points. Section A restarts one node only, with approval, and the draft says \"Do not, without escalation: Restart all three nodes at once.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It shows that the runbook has no defined scope and no decision points, and that it lumps different alarm types together. It flags restarting every node and service at once as high blast radius, with reconnect storms and lost queues. It points out that step 3 checks the alarm, not whether the platform works. It also calls out the missing stop conditions, escalation path, owner and validation. The findings table comes before a restructured draft that has decision points and TODOs. The response commits neither critical error. It cites no book chapters and invents no facts about the user's environment."
+}

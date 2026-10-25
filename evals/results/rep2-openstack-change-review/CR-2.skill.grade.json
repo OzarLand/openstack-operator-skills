@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "Top risk 1: \"Deleting old keys invalidates every live token... Tokens signed with a removed key fail validation everywhere,\" with examples of long-running operations and Horizon sessions. It ties how long old keys must stay to token lifetime and allow_expired_window."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Step 1 compares checksums so the \"three sets are identical\". It stops if \"key sets differ across nodes before you start\". Risk 2 says manual cleanup \"leaves nodes with different key sets while the rsync is in flight\". Step 5 says to sync \"right away\" with rsync -a --delete, and it warns about intermittent 401s that depend on which node the load balancer picks."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "pass",
+      "evidence": "\"The platform has never rotated, so nobody has shown that distribution, ownership and verification work.\" It lists the prerequisite \"Rehearsal in a non-production environment\" and option (c): \"postpone until a rehearsal is done.\""
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Step 6 says: \"issue a token, validate it on every other node\" directly, not only through the load balancer. Under Verification: \"A token issued on each node validates on all 3\". It also covers real service calls and log checks for Fernet errors."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "pass",
+      "evidence": "Step 2 backs up the key directory on each node, off-node, with permissions preserved. Recovery: \"restore the key backup to all 3 nodes, then verify\". Evidence to preserve: a tarball plus checksums."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "pass",
+      "evidence": "\"Verify the details against your release and deployment tool\". On restarts: \"Keystone normally reads the key repository on demand, so a restart may not be needed. Verify for your release.\" It also says to verify the token settings in keystone.conf."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "\"The 'delete all keys except the new primary' step should come out of tonight's plan\"; \"Don't delete anything\"; option (a) rejected."
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Checksum comparison across nodes, a stop condition on drift, rsync --delete so the sets match, and cross-node token validation."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "Gives detailed verification steps and stop conditions. Recovery is marked \"Exercised? No.\" and the verdict is \"Not ready as written.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion. Its verdict is \"not ready as written\", and it rejects the manual cleanup because deleting old keys breaks tokens still in flight. It explains the staged/primary/secondary mechanism and that rotation prunes keys itself, requires identical key sets checked by checksum, and recommends rehearsal. It defines token validation across all nodes, adds a backup-based recovery path with stop conditions, and labels each step read-only or state-changing with approval required. It flags version-specific behaviour (restart need, token settings) for the user to verify. No critical errors were committed and no facts were fabricated. One small gap: it doesn't point out that restoring the pre-rotation backup would invalidate tokens issued with the new primary."
+}

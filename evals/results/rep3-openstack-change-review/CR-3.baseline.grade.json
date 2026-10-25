@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags incomplete online data migrations as a blocker",
+      "verdict": "pass",
+      "evidence": "Blocker #1: \"`nova-manage db online_data_migrations` was never run after the last upgrade... Expect `nova-status upgrade check` to fail, or the schema sync or services to break... Fix this on the current release, before touching anything else.\" It also covers Cinder, Glance and Keystone."
+    },
+    {
+      "criterion": "Explains the limits of the SLURP promise beyond OpenStack services",
+      "verdict": "partial",
+      "evidence": "The response says to \"Check OS, Python, database and RabbitMQ version requirements for the target release\" and treats the tool's claim as \"a claim to verify.\" It never says that SLURP covers only OpenStack services, and it does not mention storage or network backends or whether the deployment tool supports the whole stack across the jump."
+    },
+    {
+      "criterion": "Requires upgrade check commands",
+      "verdict": "partial",
+      "evidence": "Only `nova-status upgrade check` is named (Blocker #1 and Gate 1: \"`nova-status upgrade check` is clean\"). It does not ask for the matching checks on the other services, such as cinder-status, keystone-status or glance-status."
+    },
+    {
+      "criterion": "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+      "verdict": "pass",
+      "evidence": "Blocker #2: \"An untested restore means you have no rollback... Restore them into a scratch environment, time it, and write down the steps.\" Gate 2 requires a performed, timed and documented restore."
+    },
+    {
+      "criterion": "Includes policy/RBAC testing",
+      "verdict": "pass",
+      "evidence": "Blocker #4 names secure RBAC, asks for a diff of overrides against the generated defaults, and says to \"Test as a normal user, an admin, a reader and a service account.\" Gate 4 requires role-based tests to pass."
+    },
+    {
+      "criterion": "Addresses local patches against the target release",
+      "verdict": "pass",
+      "evidence": "Blocker #3: \"Rebase all nine onto the target release and run unit tests and a scheduling smoke test. Decide for each patch whether to drop it, upstream it, or carry it.\" It also singles out the scheduler patches as the highest risk."
+    },
+    {
+      "criterion": "Gives a clear not-ready verdict with ordered conditions",
+      "verdict": "pass",
+      "evidence": "\"**Verdict: not ready for next week.**\" It is followed by numbered \"Suggested gates for a go decision\" (1–5) and sequencing advice: \"finish 1 and 2 this week and start 3 to 5 in parallel.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "declares the upgrade ready next week",
+      "committed": false,
+      "evidence": "\"Verdict: not ready for next week.\""
+    },
+    {
+      "error": "ignores the incomplete online data migrations",
+      "committed": false,
+      "evidence": "Listed as Blocker #1 and Gate 1."
+    },
+    {
+      "error": "treats SLURP support as covering the whole stack",
+      "committed": false,
+      "evidence": "It says the tool's claim \"says nothing about your patches, config or data\" and asks for checks of OS, Python, database and RabbitMQ requirements. This is incomplete, but it does not present SLURP as covering the whole stack."
+    },
+    {
+      "error": "invents specific release names as the user's current/target versions",
+      "committed": false,
+      "evidence": "No release names appear. It refers only to \"current and target releases.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a strong one. It gives a clear not-ready verdict and treats the skipped online data migrations, the untested recovery, the local patches and the unreviewed policy changes as blockers, with numbered go gates and a realistic suggestion to slip the date. Two criteria are only partly met. The upgrade-check requirement names only nova-status, not the matching commands for the other services. The SLURP section mentions OS, Python, DB and RabbitMQ prerequisites but never says outright that SLURP covers only OpenStack services, and it leaves out backends. Two expected outputs are missing: a readiness table and a draft decision record. No critical errors were committed, and no faithfulness problems were found."
+}

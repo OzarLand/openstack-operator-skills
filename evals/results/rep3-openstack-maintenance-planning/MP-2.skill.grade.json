@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "\"No. Don't do it. Stopping nova-compute and evacuating is the wrong tool for planned maintenance, and it can corrupt data.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"The original guest is still alive and still writing to the same RBD image. Two running copies on one disk can corrupt the filesystem. Evacuation assumes the source host is dead and fenced\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Stopping nova-compute doesn't stop the VMs. The guests keep running under libvirt/QEMU.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Per-class plan: live migration for critical workloads; \"cold migration, or a coordinated restart in place\" agreed with owners; tuning list includes concurrency \"based on your own baselines\", auto-converge/post-copy, and parallel draining \"only as far as spare capacity allows\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "Rejects it outright: \"No. Don't do it.\" It also says a healthy host whose service is merely stopped \"is not fenced\"."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "\"Ceph shared storage makes this worse, not safer... RBD exclusive locks reduce the risk, but they are not a fencing guarantee\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear no. It explains that stopping nova-compute leaves the guests running and that evacuating would create two writers on the same Ceph volume. It explicitly rejects the idea that Ceph makes this safe. It offers alternatives with conditions: workload classification, cold migration or coordinated restart, and live-migration tuning within capacity. It asks for the missing data rather than inventing it. All four criteria pass, and it commits neither critical error."
+}

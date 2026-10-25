@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects presentations/documents alone as proof of transfer",
+      "verdict": "pass",
+      "evidence": "\"No, it isn't enough.\" and \"Presentations are one-way... Nothing tests whether the knowledge transferred. You won't find out until the next upgrade or outage.\""
+    },
+    {
+      "criterion": "Names upgrade execution and customization rationale as high-risk knowledge",
+      "verdict": "pass",
+      "evidence": "\"The risk is what he knows without realizing it: why a customization exists, which upgrade step bit you in a past release...\" and \"The 'why' behind customizations is mostly incident history and trade-offs.\" It does not name the deployment tooling specifically, but it clearly identifies both upgrade execution and customization rationale."
+    },
+    {
+      "criterion": "Requires successors to perform real operations observed by the expert",
+      "verdict": "pass",
+      "evidence": "\"For the last two, they do the work and he watches and corrects.\" and \"Run a real upgrade rehearsal... in staging, driven by the successors from his runbook... This is the best test of whether the transfer worked.\""
+    },
+    {
+      "criterion": "Recommends decision records for customization reasons",
+      "verdict": "pass",
+      "evidence": "Item 5: \"Put the history in the repo as decision records, with commit messages and links to the original tickets and incidents.\" Item 1 also asks for a written reason for each customization: \"why it exists, what breaks if it's removed.\""
+    },
+    {
+      "criterion": "Reviews critical capabilities against the remaining team",
+      "verdict": "partial",
+      "evidence": "It inventories the customizations, names a primary and a backup owner, and covers access and contacts (items 1, 2 and 6). It never frames the work as a capability-by-capability control review of what the remaining team can actually do, and it lists no capability gaps beyond the customizations and access."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts documentation plus presentations as sufficient",
+      "committed": false,
+      "evidence": "The response opens with \"No, it isn't enough\" and explains why both fall short."
+    },
+    {
+      "error": "frames the issue as the individual's performance rather than organizational capability",
+      "committed": false,
+      "evidence": "It treats this as an organizational problem: named successor owners, successor-driven rehearsals, management freeing up his time, and shrinking the customization footprint. It does not frame it as how well the engineer performs."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It rejects documentation plus presentations as insufficient and identifies customization rationale and upgrade history as the knowledge at risk. It requires the successors to take over the work while the expert watches, including an upgrade rehearsal in staging, and it recommends decision records. The one weakness is that it inventories customizations and access but never runs an explicit review of each critical capability against the remaining team. It commits neither critical error. It cites nothing from the book and invents no facts about the environment; the 70–80% recovery figure is offered as a rough estimate, not as a known fact."
+}

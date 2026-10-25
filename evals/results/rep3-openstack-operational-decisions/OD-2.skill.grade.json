@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"A security advisory whose fix exists upstream but not for your series is the standard legitimate case for a local backport.\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "pass",
+      "evidence": "Under 'Make it a managed deviation': OSSA/upstream change, owner, how it was tested, why chosen over upgrading, \"an exit condition... 'removed when we move to a maintained series.'\""
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "pass",
+      "evidence": "\"Six local security backports already is the warning sign: backports are turning into your lifecycle strategy.\" Also: \"the real decision is about the series, not about this patch.\""
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "pass",
+      "evidence": "\"Is there a dated plan to leave this series?\", \"Set a trigger to reopen the decision\", and the recommendation pairs the backport with \"a dated review of the upgrade path\". It also asks for the record to be applied \"for each backport, including this one\", which covers the existing backports' exit conditions."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "pass",
+      "evidence": "Check 1: \"Does your distro or vendor already ship or plan this fix for your series? If so, take theirs.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": false,
+      "evidence": "The approval is conditional (\"Backport it, if the vendor doesn't cover it and the OSSA applies to you\"). It is paired with the full backport record, which requires owner, test and exit condition."
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "A whole section, 'Why the count matters', plus 'The decision beyond this patch', addresses the lifecycle signal explicitly."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives the expected conditional yes. It treats the security backport as legitimate and requires a full record: origin change, owner, test, why not upgrade, and exit condition. It names the accumulated backports as a lifecycle warning and recommends a dated plan to leave the series, with a trigger to reopen the decision. It checks vendor/distro coverage first. It cites no book material and invents nothing about the user's environment; the gaps are stated explicitly. All criteria pass, and it commits neither critical error."
+}

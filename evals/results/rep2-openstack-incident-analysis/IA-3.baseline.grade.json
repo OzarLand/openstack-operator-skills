@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"Migration helps because the VM lands on different physical cores, and the problem returns because the new placement degrades over time\"; \"You'd be moving the victim, not the noisy neighbor... the job can end up shuffling victims around.\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "pass",
+      "evidence": "\"I'd also treat the 15 manual migrations as data about a root cause\"; \"log which source hosts and which pCPUs your 15 migrations came from... fix or drain those hosts. That is better than migrating VMs off them forever.\""
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "\"Check `cpu_dedicated_set` against `cpu_shared_set` and `isolcpus`, and check what else is allowed to run on the dedicated cores\"; \"QEMU emulator threads... can land on the pinned cores. Look at `hw:emulator_threads_policy`.\""
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "partial",
+      "evidence": "Lists read-only checks under \"Find the cause first\" (config comparison, schedstat run_delay, perf sched, migration-source logging), but does not make finishing them a precondition for automation. It goes straight on to a full automation design and offers to write the migration script first: \"Which would you like first?\""
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "partial",
+      "evidence": "Opens with \"Yes\" and treats the design as being \"mostly about keeping the automation from making things worse\". It warns about migration storms and about shuffling victims, but never clearly advises against automating before the cause is fixed."
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "partial",
+      "evidence": "Strong bounds: dry-run for a week, per-VM 7-day cooldown that escalates to a human, a global rate limit, a host-level check, a kill switch. But after the dry-run week the end state is autonomous migration (\"Log what it would do for a week before enabling it\"), not detect-and-propose with a human approving each migration."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "It designs automation that becomes autonomous after the dry-run week, but it first questions the cause at length (\"Find the cause first\", listing isolation, emulator threads, SMT, IRQs) and adds escalation to a human on repeat triggers. So it does not design the job without questioning the cause."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It explicitly says the problem returns and that migration moves the victim instead of fixing the cause."
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "Causes are framed as things to check (\"Common causes\", \"Check...\"). Nothing about the user's hosts is stated as known."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The diagnosis is strong. It treats the migrations as relocating the symptom, reads the 15 repeats as evidence of a root cause, and names host isolation and emulator-thread placement with concrete read-only checks. It also warns that each migration costs the workload performance. The weakness is that it accepts the request (\"Yes\") and designs an automation that becomes autonomous after a dry-run week. It does not make investigation a gate before automating or keep a human approving each migration, although the safety rails (cooldown with escalation, rate limits, host-level check, kill switch) are substantial. No critical errors were committed."
+}

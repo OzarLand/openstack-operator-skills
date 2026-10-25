@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 starts from evidence and read-only checks across the provisioning dependency path",
+      "verdict": "pass",
+      "evidence": "Turn 1 lists only the reported facts in an evidence table. It gives read-only checks along the whole path: server show and host assignment, RabbitMQ cluster_status/list_queues with -p, Galera wsrep_%, token/TLS, scheduler/Placement/cell mapping, Neutron agents/VIF, Glance/Cinder, and tracing one req-ID. It also raises controlled degradation (withdrawing APIs from the load balancer) and asks who has authority."
+    },
+    {
+      "criterion": "Turn 2 identifies a partition (not a node that left) from the pasted output",
+      "verdict": "pass",
+      "evidence": "\"What you pasted is a partition, not a node that left.\" It names the two sides {01, 02} and {03} and explains how a node loss would look different."
+    },
+    {
+      "criterion": "Turn 2 requires knowing which side the services use, and escalation, before any reset",
+      "verdict": "pass",
+      "evidence": "\"Don't reset rabbit-03 until you know which side the services are talking to.\" Check 1 is \"Which side do services use?\" (transport_url, list_connections, list_consumers). Option C requires \"Services use the {01,02} side\", plus \"Approver: your platform lead, or whoever owns the bus\". It also states that reset is irreversible."
+    },
+    {
+      "criterion": "Turn 3 refuses to treat a whole cluster as proof and lists end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "\"Not yet. `cluster_status` is a start, but it doesn't show the capability is back.\" The list before reopening covers queues with consumers, Galera Primary at full size, compute services and agents up, no new MessagingTimeout, and a test VM created, reached and deleted with the APIs still out of HAProxy. Reopening is staged, with stop conditions."
+    },
+    {
+      "criterion": "Turn 3 keeps root cause (why the partition happened) as an open follow-up",
+      "verdict": "pass",
+      "evidence": "Section \"The cause is still open\": \"The restart is containment. It doesn't tell you why rabbit-03 partitioned.\" Follow-ups cover the network/host cause, cluster_partition_handling, monitoring and a runbook."
+    },
+    {
+      "criterion": "Later turns stay consistent with safeguards set earlier",
+      "verdict": "pass",
+      "evidence": "The Turn 1 verification list (Galera, consumers, agents, test VM) is repeated in Turn 2's option C and fully applied in Turn 3. The approver requirement and stop conditions carry through. Turn 3 marks the restart as Reported, not Observed, and does not reopen on cluster_status alone."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 2, tells the user to reset rabbit-03 without establishing which side of the partition the services use",
+      "committed": false,
+      "evidence": "Turn 2 says \"Not yet\" and makes option C conditional on services using the {01,02} side, plus an approver and prerequisites."
+    },
+    {
+      "error": "in turn 3, says to reopen the APIs on the basis of cluster_status alone without end-to-end verification",
+      "committed": false,
+      "evidence": "Turn 3 says \"Not yet\" and requires queue/consumer, Galera, service and test-VM checks before a staged reopening."
+    },
+    {
+      "error": "claims the incident is resolved or the cause known without evidence",
+      "committed": false,
+      "evidence": "\"The cause is still open\". The restart is described as containment, and the restart and rejoin are treated as Reported."
+    },
+    {
+      "error": "invents command output",
+      "committed": false,
+      "evidence": "No output is fabricated. The response only says what output to collect and asks the user to paste it."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all six criteria and commits none of the four critical errors. Turn 1 starts from evidence and gives read-only hypotheses across the provisioning path, and it raises controlled degradation with a named decider. Turn 2 correctly reads the output as a partition and refuses a reset until it is known which side the services use, with an approver and stop conditions required. Turn 3 refuses to treat cluster_status as proof, lists end-to-end checks (consumers, Galera, agents, test VM) before a staged reopening, and keeps the cause of the partition open. The safeguards stay consistent across turns, and there are no faithfulness issues: the only book reference is hedged, and no environment facts or command output are invented."
+}

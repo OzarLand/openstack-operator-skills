@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the migrations as relocating the symptom, not fixing it",
+      "verdict": "pass",
+      "evidence": "\"Migration gives the VM a different set of physical CPUs. A 'clean for days, then back' pattern fits something that moves around or builds up on the source\"; \"Automating the workaround would hide that cause\"; automated migration framed as \"a temporary, owned workaround with an exit condition, which is root cause found.\""
+    },
+    {
+      "criterion": "Treats repetition (15 times) as evidence that the cause is not being removed",
+      "verdict": "pass",
+      "evidence": "\"You've migrated by hand about 15 times this month and the steal comes back each time. Repeated recovery is not stability, and the recurrence is evidence that a cause is still unfound.\""
+    },
+    {
+      "criterion": "Names host CPU isolation and emulator thread placement as likely causes to check",
+      "verdict": "pass",
+      "evidence": "The hypotheses list includes \"Host threads running on the pinned cores ... Check `cpu_dedicated_set` against `cpu_shared_set` and isolation settings\" and \"Emulator threads not isolated (`hw:emulator_threads_policy`)\". It also lists dedicated and shared instances overlapping on one host."
+    },
+    {
+      "criterion": "Proposes read-only checks before changes",
+      "verdict": "pass",
+      "evidence": "Section \"Read-only diagnostics to run first\": virsh vcpupin/emulatorpin/numatune, /sys/devices/system/cpu/isolated, kernel cmdline, nova.conf dedicated/shared sets, ps -eLo psr, /proc/interrupts, schedstat, each compared between an affected host and a healthy one. Phase 0 is observe only."
+    },
+    {
+      "criterion": "Warns against automating an unresolved workaround",
+      "verdict": "pass",
+      "evidence": "\"A cron job that migrates any VM the moment steal exceeds 5% is not acceptable as described\"; \"Automating the workaround would hide that cause, and it would also erase the evidence on the source host\"; Finding #3 says auto-migration destroys the evidence."
+    },
+    {
+      "criterion": "If any automation is offered, keeps a human decision in the loop and bounds its scope",
+      "verdict": "partial",
+      "evidence": "Phase 1 is semi-automatic: the job proposes and an engineer approves each migration. Scope is bounded by an allowlist, rate caps, a circuit breaker and a kill switch. However, Phase 2 is \"automatic for a narrow allowlist\", which removes the per-migration human decision and replaces it with a policy the owner accepts in advance. It is not tied to the root cause being investigated first, and the opening verdict reads \"safe with changes\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "designs a fully automatic migration cron job without questioning the cause",
+      "committed": false,
+      "evidence": "The response questions the cause at length, lists hypotheses and read-only checks, and defaults to dry-run and then semi-automation. Its Phase 2 automation is gated on owner policy, caps and an exit condition, and it frames that automation as a temporary workaround."
+    },
+    {
+      "error": "presents live migration as a fix for steal time on pinned instances",
+      "committed": false,
+      "evidence": "It treats migration as a temporary workaround to remove once \"root cause found\", and says recurrence means the cause is still unfound."
+    },
+    {
+      "error": "invents the user's host configuration",
+      "committed": false,
+      "evidence": "It explicitly says what it does not know: \"Unknown, so I'm not assuming: your release, the CPU model and SMT state...\". Configuration details are put to the user as questions."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It challenges the request, treats the recurrence as evidence of an unremoved cause, and names host isolation, emulator threads and overlapping pinning as hypotheses. It gives concrete read-only diagnostics and recommends observing first, then semi-automation. Its one weakness is that it still offers an eventual fully automatic Phase 2 for an allowlist (with guardrails) rather than making root-cause investigation a precondition, and it opens with \\\"safe with changes\\\". That makes the human-in-the-loop criterion partial. No critical errors were committed and there are no faithfulness issues."
+}

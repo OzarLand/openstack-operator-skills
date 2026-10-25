@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+      "verdict": "pass",
+      "evidence": "Phase 2: \"Read uuid, seqno and `safe_to_bootstrap` from `grastate.dat` on each node\"; \"For any node showing `-1`... `mysqld --wsrep-recover`. Read the `Recovered position: <uuid>:<seqno>` line.\""
+    },
+    {
+      "criterion": "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+      "verdict": "pass",
+      "evidence": "\"If you bootstrap a node with a lower seqno, you silently discard committed transactions... This is the main risk.\" The Do NOT list includes \"Bootstrap a node because it 'was last up' without comparing seqnos on every node.\" Stop condition: \"You can't prove which is highest | Stop and escalate.\""
+    },
+    {
+      "criterion": "Adds a decision point distinguishing full outage from partial failure",
+      "verdict": "pass",
+      "evidence": "Scope says \"One node down while the others are still Primary. Restart that node... No bootstrap.\" The decision table has the row \"Any node running and Primary | Not a full outage. Stop.\" Phase 1 is titled \"confirm the outage\"."
+    },
+    {
+      "criterion": "Includes end-to-end verification",
+      "verdict": "pass",
+      "evidence": "Verification section checks cluster size, Primary, Synced and the same state uuid on every node, plus a cross-node write/read test, a Keystone token, a server list, a test VM lifecycle and monitoring for an agreed period."
+    },
+    {
+      "criterion": "Marks unknown specifics as TODOs",
+      "verdict": "pass",
+      "evidence": "The Context section is \"(all TODO)\". Commands, paths, the approver, the escalation contact, the Phase 4 order and the test project are all marked TODO. The response says \"Commands, paths and variable names are examples to verify\"."
+    },
+    {
+      "criterion": "Proposes validation by a non-author while the expert is still available",
+      "verdict": "pass",
+      "evidence": "\"Validation plan: another engineer runs it on a non-production Galera cluster... with the expert watching but not helping... Inject one difficulty... repeat with a second person.\" This sits alongside \"Questions for him before Friday\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "omits the safe_to_bootstrap / wsrep-recover identification step",
+      "committed": false,
+      "evidence": "Phase 2 steps 1 and 3 explicitly cover safe_to_bootstrap and mysqld --wsrep-recover."
+    },
+    {
+      "error": "presents invented service names or paths as fact",
+      "committed": false,
+      "evidence": "Commands are framed as \"for example\" with \"TODO: the expert should confirm the exact command\". No hostnames or service names are invented. Author notes list command forms and paths as \"Inferred and unconfirmed\"."
+    },
+    {
+      "error": "does not propose a validation session before the expert leaves",
+      "committed": false,
+      "evidence": "The validation plan has another engineer run the runbook with the expert watching, which can only happen before the expert leaves. It also lists questions to put to the expert before Friday."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a thorough, appropriately hedged runbook draft. It covers seqno, safe_to_bootstrap and wsrep-recover identification. It states the data-loss risk of bootstrapping the wrong node and makes it a stop condition. It separates a full outage from a partial failure, includes end-to-end verification and marks environment specifics as TODO. It also proposes validation by another engineer with the expert watching. No critical errors were committed, and there are no book citations or invented environment facts."
+}

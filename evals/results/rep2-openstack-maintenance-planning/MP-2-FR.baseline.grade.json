@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "partial",
+      "evidence": "Opens with \"Non, pas tel quel. `evacuate` est fait pour un hôte mort, pas pour un hôte sain\" and ends with \"autant utiliser la migration à froid\". But the \"pas tel quel\" hedge plus the \"Ce qu'il faudrait pour que ce soit sûr\" section (BMC fencing, then --down, then evacuate) present evacuate as an acceptable maintenance path once fenced. That is softer than refusing evacuate for planned maintenance outright."
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"`evacuate` recrée alors chaque VM ailleurs sur les mêmes images Ceph, alors que l'ancienne instance tourne encore. Vous avez deux qemu sur le même disque... corruption silencieuse du système de fichiers.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Arrêter `nova-compute` ne tue pas les VMs. Les processus qemu continuent de tourner et d'écrire sur leurs volumes RBD.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Live migration tuning (post-copy/auto-converge, dedicated network, max_concurrent_live_migrations, \"plusieurs hôtes drainés en parallèle, si la capacité le permet\"). Cold migration \"pour les VMs qui tolèrent un arrêt\". A mixed live/cold approach after disabling the host. Coordinated restart is not named explicitly, but the cold-migration path covers workloads that tolerate downtime."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response explicitly warns against this. Its only evacuate path requires real fencing first: \"extinction de l'hôte par IPMI/BMC, ou au minimum arrêt de tous les guests\". So it never endorses evacuating while the instances are still running."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It states that shared Ceph is exactly what creates the danger (two qemu processes on the same RBD image), and adds that \"Les verrous exclusifs RBD sont coopératifs, donc ils ne protègent pas de façon fiable\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong answer. It explains why stopping nova-compute leaves the VMs running, and that evacuate would start a second copy of each VM on the same Ceph volumes, causing split-brain corruption. It points out that the result is effectively a cold restart, not a faster migration. Its alternatives come with conditions: live-migration tuning and running drains in parallel when capacity allows, and cold migration for workloads that tolerate downtime. It commits neither critical error. The main weakness is the hedged rejection: \\\"pas tel quel\\\" plus the fenced-evacuate recipe leaves evacuate open as a maintenance path, when the right answer is to refuse it outright, so criterion 1 gets partial. There are no book citations and no invented facts about the user's environment."
+}

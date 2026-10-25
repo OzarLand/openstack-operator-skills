@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+      "verdict": "pass",
+      "evidence": "'Finding the highest seqno': read grastate.dat for 'uuid, seqno and safe_to_bootstrap'; 'seqno: -1 means a crash'; 'For -1 nodes, run mysqld --wsrep-recover... prints Recovered position'; UUID comparison and a stop if any position is unknown."
+    },
+    {
+      "criterion": "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+      "verdict": "pass",
+      "evidence": "Context: 'Bootstrapping a lower node discards transactions the others committed'. Do NOT: 'Bootstrap the node you guess is latest' and 'Set safe_to_bootstrap: 1 on a node that isn't proven highest'. Step 7 is marked as the point of no return, and step 6 requires approval."
+    },
+    {
+      "criterion": "Adds a decision point distinguishing full outage from partial failure",
+      "verdict": "pass",
+      "evidence": "'Decision point: is it really a full outage?' table: if any node is running and Primary, 'rejoin normally, no bootstrap'; if non-Primary, escalate; if a node is unreachable, stop because of split-brain risk. The scope section also excludes the case where only one or two nodes are down."
+    },
+    {
+      "criterion": "Includes end-to-end verification",
+      "verdict": "pass",
+      "evidence": "The Verification section checks wsrep_cluster_status=Primary, cluster size, Synced, wsrep_ready and a test write. Its capability step is 'get a token, list servers, then create, reach and delete a test VM... Process health alone is not enough', followed by checks for stuck resources."
+    },
+    {
+      "criterion": "Marks unknown specifics as TODOs",
+      "verdict": "pass",
+      "evidence": "TODOs cover the owner, approver, datadir path ('often /var/lib/mysql/, TODO: confirm'), how to run commands in Kolla containers, the test table, the service restart order, the backup restore path and the escalation contact."
+    },
+    {
+      "criterion": "Proposes validation by a non-author while the expert is still available",
+      "verdict": "pass",
+      "evidence": "Validation plan: 'a colleague who did not write this runs it in a non-production Galera cluster while the expert watches but does not help... Do this before Friday', with four test cases."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "omits the safe_to_bootstrap / wsrep-recover identification step",
+      "committed": false,
+      "evidence": "Both are covered explicitly in 'Finding the highest seqno' steps 1–3."
+    },
+    {
+      "error": "presents invented service names or paths as fact",
+      "committed": false,
+      "evidence": "Paths and tools are hedged as examples: 'often /var/lib/mysql/, TODO: confirm', 'deployment tool (e.g. Kolla-Ansible)', 'Commands are examples to verify'."
+    },
+    {
+      "error": "does not propose a validation session before the expert leaves",
+      "committed": false,
+      "evidence": "'Validation plan: a colleague who did not write this runs it... while the expert watches... Do this before Friday.'"
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a thorough, well-hedged runbook draft. It covers seqno, safe_to_bootstrap and wsrep-recover for identifying the node to bootstrap, and it states the data-loss risk as both a must-not-do and an approval gate. It has a decision point for full versus partial outage, end-to-end verification that includes a capability test, TODOs for environment specifics, and a validation session run by a non-author with the expert watching before Friday. No critical errors were committed and no faithfulness issues were found."
+}

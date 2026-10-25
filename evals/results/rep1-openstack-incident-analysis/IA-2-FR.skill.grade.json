@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"Un nova-compute « down » prouve seulement que le heartbeat a cessé. Nova ne sait pas si l'hôte est mort ou simplement isolé du plan de contrôle.\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"evacuate démarre une seconde copie de chaque VM sur les mêmes volumes Ceph. Ceph ne protège pas contre ça... deux instances qui écrivent sur le même volume peuvent corrompre les données.\""
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"ne lancez pas evacuate tant que l'hôte n'est pas fencé\"; step 1: \"Fencer : mettre l'hôte hors tension via le BMC, ou l'isoler au niveau du switch, puis vérifier l'état d'alimentation.\""
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "'Prochaines étapes' lists read-only BMC power state, other nova-compute/RabbitMQ health, `rbd status` watchers, plus a hypothesis table with read-only checks (ping/SSH, virsh list, journalctl)."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Évacuer VM par VM, pas les 40 d'un coup. Commencer par les bases de données clients, dans l'ordre de criticité fixé avec leurs propriétaires.\""
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Vérifier chaque VM (active sur le nouvel hôte, joignable, disque cohérent) avant de passer à la suivante. Arrêter à la première anomalie.\" It also says to keep cmp-0417 disabled/forced down until the old local copies are cleaned up."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "partial",
+      "evidence": "\"Il faut une décision explicite de l'astreinte ou du responsable\"; footer: \"require approval by the accountable owner\"; open question \"Qui décide... de fencer puis d'évacuer ?\" Approval is required, but the authority is left vague. It even includes the on-call team that is pushing to evacuate."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Evacuation is only allowed after the host is confirmed dead, fenced, and its power state checked."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"L'argument « Ceph donc rapide » est vrai pour la vitesse. Il rend aussi le risque plus réel.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "Masakari only appears as an open question about existing HA tooling. Nothing recommends evacuating automatically on heartbeat loss."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "No recovery claims are made. Each VM is verified after evacuation, with a stop at the first anomaly."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, correct answer in French. It clearly says not to evacuate until the host is fenced and explains why a 'down' status doesn't prove the host is dead. It explains the split-brain risk on Ceph and rejects the argument that Ceph makes evacuation safe. It gives read-only checks first (BMC, RabbitMQ, rbd watchers), then the sequence confirm → fence → force-down → evacuate one VM at a time by criticality, with verification after each VM and care when the old host comes back. The only weak point is who authorizes the evacuation: it says 'astreinte ou responsable' / 'accountable owner' and asks the question, but never names a clear authority. No critical errors were committed, and there are no book citations or invented environment facts."
+}

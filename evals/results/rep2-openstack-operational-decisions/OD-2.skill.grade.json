@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"backporting this one patch is defensible\" and \"A fix in hand beats an unpatched known vulnerability\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "partial",
+      "evidence": "Check 4: \"Record the upstream change it derives from, who owns it, how it was tested, and what retires it. The usual exit is the next upgrade.\" Covers origin change, owner, test and exit condition. It does not list the upstream issue or 'why not upgrade' as record fields."
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "pass",
+      "evidence": "\"Seven local backports is a warning sign... the series is probably too old to be patched this way. At that point you're making a lifecycle decision, not a security one.\""
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "pass",
+      "evidence": "\"Treat it as a stopgap and schedule the lifecycle decision. Put a dated review on the agenda: upgrade path, vendor support timeline...\" and \"Name the trigger that ends the carrying.\" It also asks whether the other six patches are documented and owned."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "pass",
+      "evidence": "Check 1: \"Does your distribution or vendor ship the fix for this series? If it does, or will soon, use theirs\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": false,
+      "evidence": "The approval depends on the checks passing: \"Do the backport if the checks above pass\". Those checks include testing (3) and an owner plus exit condition (4)."
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "The response opens with the lifecycle signal (\"Seven local backports is a warning sign\") and recommends scheduling the lifecycle decision."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong response that matches the expected output: a conditional yes to the backport, plus a lifecycle recommendation. It treats the security backport as legitimate and checks vendor coverage first. It requires a test, an owner and an exit condition, calls seven backports a lifecycle signal, and recommends a dated upgrade review with a trigger that ends the carrying. Its one gap is that the backport record leaves out the upstream issue and 'why not upgrade' fields. It commits no critical errors and has no faithfulness issues."
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "Top risk 1: « Elle invalide immédiatement tous les tokens déjà émis, pour tous les services, utilisateurs, automatisations et sessions Horizon » plus « Il faut conserver les secondaires au moins une durée token.expiration »."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Step 1 compares sha256sum on all 3 nodes with a stop if they differ. Option A rotates in a temp repo and distributes before the new primary is used. Stop condition: « Le rsync échoue à mi-chemin (nœuds avec des jeux de clés différents : c'est l'état le plus dangereux) ». One technical slip: risk 2 says the other nodes don't yet hold the new primary, but in Fernet the new primary is the staged key 0 that identical nodes already have."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "partial",
+      "evidence": "« Un système jamais tourné n'a jamais prouvé qu'il savait le faire ». Proof gate: « Pas de test sur un environnement représentatif ». Open question: « Y a-t-il un environnement de test pour répéter la rotation ? ». It never says plainly to rehearse in staging before production."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "« Émettre un token sur chaque nœud et le valider sur chacun des deux autres (6 combinaisons) ». Also checks matching fingerprints, that a pre-rotation token still validates, an end-to-end test, and the 401 rate."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "pass",
+      "evidence": "Step 3: « Sauvegarder le dossier des clés (archive avec permissions, stockée de façon sécurisée…) C'est votre seul retour arrière ». Recovery section: restore the archive on all 3 nodes."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "pass",
+      "evidence": "« Ce que fait vraiment fernet_rotate (à vérifier pour votre release) ». On restarts: « à vérifier pour votre release et votre cache ». It also states the Kolla/deployment-tool assumption."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "Rejects it outright: « Il n'y a rien à supprimer à la main ». The decision record lists manual deletion as a rejected option."
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Checks fingerprints before and after on all 3 nodes, gives a stop condition for a partial rsync, and requires cross-node token validation."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "The verdict is « pas prêt », with a dedicated verification section (« capacité, pas succès de commande ») and stop conditions."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. Its verdict is \"not ready\". It rejects the manual deletion because it would invalidate every token in flight, and notes that max_active_keys already does the cleanup. It requires identical, fingerprint-checked key sets on all nodes and addresses the partial-rsync window. It gives a backup and restore recovery path, a 6-pair cross-node token check, and stop conditions. It flags version-specific behaviour for checking and says state-changing steps need approval. Two weaknesses:\n- Rehearsal is only implied (a missing test environment and an open question), never stated as a firm recommendation.\n- Risk 2 is technically wrong about Fernet: if the nodes are identical, the other nodes already hold the staged key 0 that becomes the new primary, so they can validate tokens keystone-1 issues right after rotation. This error isn't a book citation or an invented environment fact, so it isn't listed as a faithfulness issue.\nNo critical errors were committed."
+}

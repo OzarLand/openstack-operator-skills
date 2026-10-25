@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "\"Two changes at once. If something breaks after the reboots, you can't tell whether the cause is the certs or the patch... I'd move the OS update and reboot to its own window, unless the security update is itself urgent. If both must go in, do certs first, soak and verify, then patch.\""
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "\"First rotation in 3 years, so the unknowns are untested\" plus \"every client needs the new trust bundle (computes, agents, HAProxy, monitoring, automation)\" and the check for pinned certs or fingerprints."
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "\"Rehearse the whole procedure in a lab or staging environment.\" \"Stage the trust bundle days earlier.\" It also requires the rollback to be tested in the rehearsal and controller reboots to be rolling, one node at a time."
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "Points out that the rollback covers only the certificates, that the old certs expire in 9 days, that a CA change means reverting the trust bundle, and that Galera/RabbitMQ rollback 'is not a file copy' and a mixed-cert cluster may fail to re-join. Asks for a component-level rollback in reverse order, with exact commands."
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "pass",
+      "evidence": "Verification: per-endpoint `openssl s_client` checks, cluster status, creating and deleting a VM, volume and network, compute services reporting up, and monitoring still connecting. Stop conditions: go/no-go checkpoints, \"hard rollback cutoff, such as 'if not healthy by T+X, revert'\", and waiting for wsrep_cluster_size=3 before rebooting the next node. Expiry monitoring is listed as a follow-up."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "pass",
+      "evidence": "\"Roles and comms: change lead, the person doing the rollback, a stakeholder notice, and a post-change check\" and \"Say who decides\" for the rollback. The decision owner is requested but no named go/no-go authority is set out."
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "pass",
+      "evidence": "A 'Missing information' section lists the CA, the deployment tool, whether staging exists and how urgent the OS update is. It asks to confirm the notAfter dates. Nothing is marked as satisfied. There is no formal gates table."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"I wouldn't submit this as written.\" It recommends splitting the changes, or putting certs first with soak and verification if both must go in."
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "The Rollback section examines it in detail and rejects it as insufficient."
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "Backups and rehearsal are listed as things to add. Staging existence is listed as missing information."
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "It says a CAB reviewer will likely send the plan back, and offers to help produce a 'CAB-ready' revision."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a clear 'not ready' verdict. It covers all seven criteria and commits none of the critical errors. Strengths: it recommends splitting the certificate rotation from the OS update and reboots, examines the rollback concretely (9-day expiry, trust bundle, Galera/RabbitMQ re-join), requires a rehearsal, and sets out verification and stop conditions. Gaps against the expected output: there is no formal gates table and no draft decision record, and the decision rights are requested rather than assigned. There are no book citations and no invented environment facts presented as known."
+}

@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "Top risk 2: \"Two unrelated changes are stacked in one window. If RabbitMQ or Galera fails to re-form after the reboots, you can't tell whether the cause is TLS or the update.\" Recommends Option B: \"Split the OS update and reboot out to its own window after the certs are stable.\""
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "Blast radius table: RabbitMQ reaches \"Every nova-compute, neutron agent and other RPC client on every compute node\"; \"Compute nodes aren't mentioned... they need the new trust bundle too.\" Top risk 3 names the first-ever, unrehearsed rotation."
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "\"the rehearsal has to happen before Saturday\"; Evidence gate marked fail because there is no rehearsal; prerequisite \"Rehearsal in staging or a lab that mirrors the production topology\"; rotate \"one controller at a time... Verify each before the next.\""
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "\"'Restore old certs' returns you to a known-bad state that fails on its own around Tuesday 3 Nov. It also doesn't say how to undo the OS update or a half-formed Galera or RabbitMQ cluster.\" Proposes a dual-CA trust bundle, a config revert, a Galera safe_to_bootstrap procedure and points of no return."
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "pass",
+      "evidence": "The Verification section covers openssl s_client checks of the new expiry, wsrep_cluster_size 3 and Synced, rabbitmqctl cluster_status, agents up with no TLS errors, a VM create/delete canary and token checks. Stop conditions cover a node that fails to rejoin, persistent TLS handshake errors, compute services flapping, a time cutoff and an unreachable decision-maker."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "pass",
+      "evidence": "The Decision rights section lists assessor, capability owner, accountable and decision maker (all marked unknown), and \"Consumer communication: unknown. Tenants should be told to expect brief API errors, and the plan should say who tells them.\""
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "pass",
+      "evidence": "Every gate and prerequisite is marked \"unknown\" or \"fail\", and none is marked passed. The open questions cover the deployment tool, staging, client CA verification and the CA."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready.\" Option A (combined) is rejected."
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "Recovery gate marked fail: \"'Restore old certs' is a dead end after expiry.\""
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "Backups, rehearsal and monitoring are all marked \"unknown\" in the Prerequisites table."
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "\"Decision support only. State-changing steps above require approval by the accountable owner and should be executed under your change process.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all seven criteria and commits none of the four critical errors. It gives a \"Not ready\" verdict and explains why bundling the two changes stacks uncertainty, and it recommends splitting them. It pulls compute agents into the blast radius, requires a rehearsal before Saturday, and shows that the old-cert rollback expires on its own. It also defines verification and stop conditions, marks the decision roles and consumer communication as unknown, and includes a draft decision record. The dates (31 Oct, 3 Nov) are labelled as the response's own calculation from \"9 days\", and they match today's date. There are no book citations and no invented facts about the environment."
+}

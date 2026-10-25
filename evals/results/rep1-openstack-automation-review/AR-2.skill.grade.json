@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags rebooting without draining instances as blocking",
+      "verdict": "pass",
+      "evidence": "Finding 2, marked **Blocking**: \"No drain. VMs on the host stop.\" It recommends disabling nova-compute, live- or cold-migrating instances by class, and checking the host is empty before patching."
+    },
+    {
+      "criterion": "Flags lack of batching (serial) as a blast-radius problem",
+      "verdict": "pass",
+      "evidence": "Finding 1, marked **Blocking**: \"`hosts: compute` (no `serial`) — The whole fleet is down at once. Capacity per failure domain is ignored...\" It suggests `serial: 1` or a count based on spare capacity per failure domain."
+    },
+    {
+      "criterion": "Flags ignore_errors and missing stop conditions",
+      "verdict": "pass",
+      "evidence": "Finding 3, marked **Blocking**, says to remove ignore_errors. Finding 1 adds `max_fail_percentage: 0` or `any_errors_fatal: true`. A separate \"Stop conditions to define before the campaign\" list follows, and the response notes that \"Resuming after a stop is a new decision.\""
+    },
+    {
+      "criterion": "Flags unpinned updates as uncontrolled change",
+      "verdict": "pass",
+      "evidence": "Decisions table: \"Update `*` — Execution, but unbounded: kernel, libvirt, QEMU and whatever else is pending... Pin the scope to what the change approved.\" Finding 6 also says that patching fleet-wide at random breaks libvirt/QEMU migration compatibility."
+    },
+    {
+      "criterion": "Requires post-reboot verification",
+      "verdict": "pass",
+      "evidence": "Finding 4 (Major): \"No post-checks... assert that the compute service is up, the Neutron agent is up and libvirt is running... Re-enable `nova-compute` only after the checks pass.\" Step 7 of the suggested shape repeats this."
+    },
+    {
+      "criterion": "Refers to a maintenance plan based on criticality and capacity",
+      "verdict": "pass",
+      "evidence": "The 'Capacity and sequencing' section says each failure domain needs spare capacity for the hosts taken down at once. The 'Workloads' section says business criticality has to come from the workload owners and asks for a criticality table. Draining is done per agreed class."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the playbook on production as is",
+      "committed": false,
+      "evidence": "\"Verdict: not safe to run on prod as written.\" (\"not safe, redesign\")"
+    },
+    {
+      "error": "ignores the lack of instance draining",
+      "committed": false,
+      "evidence": "Finding 2 is marked Blocking and covers draining in detail: disable nova-compute, then migrate by class."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets every criterion and commits neither critical error. Its verdict is clearly \"not safe\" on prod. It marks three issues as Blocking: no draining, no serial batching, and ignore_errors. It also covers post-reboot checks and unpinned `*` updates, including the libvirt/QEMU migration direction and the point that running instances keep the old QEMU until they are migrated or restarted. It ties sequencing to capacity per failure domain and to workload criticality, and it proposes a serial per-host shape with stop conditions. It cites nothing from the book, and it states no environment facts as known; missing details are asked as questions."
+}

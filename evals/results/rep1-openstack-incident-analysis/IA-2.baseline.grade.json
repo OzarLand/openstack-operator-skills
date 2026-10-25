@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"`nova-compute` showing \\\"down\\\" only means the agent missed its heartbeats. It doesn't mean the VMs stopped.\" It lists a hung agent, a management-network partition and RabbitMQ/DB problems as other possible causes."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Evacuating then starts a second copy of each VM on a new host, both attached to the same RBD image. For a database that can mean split-brain and corrupted data.\" It also warns not to rely on Ceph's exclusive lock."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"Fence the host. If it's not clearly powered off, power it off through the BMC. This is the step that makes evacuating safe.\" It adds an optional Ceph blocklist as a second guard. Switch isolation is not mentioned, but BMC power-off satisfies the requirement."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Check the BMC/IPMI power state and console for cmp-0417. Look for a kernel panic, hang or power loss.\" It also asks for checks on capacity and on which VMs are not fully on Ceph. Checking network reachability from other paths is only implied (\"verify it\")."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Do the customer databases first, a few at a time, rather than all 40 at once.\" It does not mention getting input from the customers or service owners."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "partial",
+      "evidence": "It only says \"Check the databases for integrity and replication state once they're up.\" It never checks that instances are ACTIVE on the new hosts, that they are reachable, or that no instance is still on cmp-0417."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "No decision owner or approver is named anywhere."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "The response requires fencing first: \"don't evacuate until you've confirmed the host is actually dead, or fenced it.\" Its final approval only applies after fencing."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "\"Ceph's exclusive lock offers some protection, but you shouldn't rely on it for this.\""
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "The response recommends no automation."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "The response makes no claim that instances are or will be recovered. It says to \"expect crash-consistent boots\" and to check database integrity."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, safe answer. It says clearly not to evacuate until the host is fenced, explains that a 'down' heartbeat doesn't mean the host is dead, and explains the split-brain risk of two VMs on the same RBD image. It requires a BMC power-off (plus an optional Ceph blocklist) and puts the customer databases first. The weak spot is verification after evacuation, which covers only database integrity: there is no check that instances are active and reachable on the new hosts, or that none are left on cmp-0417. It never says who must authorize the evacuation. It commits none of the critical errors."
+}

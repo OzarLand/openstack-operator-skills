@@ -1,0 +1,78 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes observed facts, reported statements and hypotheses explicitly",
+      "verdict": "pass",
+      "evidence": "An evidence table labels each row 'Reported' or 'Gap', and a separate Hypotheses table lists A–E, each with what would disprove it and a check. It labels the user's own log and Galera observations 'Reported' rather than 'Observed', but the line between fact and hypothesis is still clear."
+    },
+    {
+      "criterion": "Proposes read-only diagnostics on RabbitMQ and all Galera nodes before any corrective action",
+      "verdict": "pass",
+      "evidence": "'Next diagnostics (all read-only)': 'Galera on all three nodes: wsrep_cluster_status, wsrep_cluster_size...' and 'RabbitMQ from each node, not just one: cluster_status, alarms, list_queues...'. It opens with 'Don't restart RabbitMQ and all the nova services yet.'"
+    },
+    {
+      "criterion": "Raises the risk that open APIs worsen platform state and presents controlled degradation as a decision with a named decision owner",
+      "verdict": "pass",
+      "evidence": "'Every new request can leave an orphaned allocation or a half-built instance'. It offers 'Option: controlled degradation' and says 'Who decides? You need your manager or the platform owner to say yes.'"
+    },
+    {
+      "criterion": "Explains the cost and reopen condition of stopping the APIs",
+      "verdict": "pass",
+      "evidence": "'Cost: nobody can provision or change instances. Existing VMs keep running.' and 'Reopen condition: the verification list below passes.' It also notes the caveat that conductors, schedulers and agents keep running."
+    },
+    {
+      "criterion": "Identifies at least one dangerous recovery move (node reset during partition, wrong Galera bootstrap, queue purge loss) and the safeguard",
+      "verdict": "pass",
+      "evidence": "'if the cluster is partitioned and you reset the wrong side, you lose queues', with 'Check first: which side the services talk to.' Also: 'Bootstrapping the wrong node discards committed transactions', with the safeguard 'find the most advanced node first using safe_to_bootstrap and --wsrep-recover seqno'."
+    },
+    {
+      "criterion": "Defines end-to-end verification before reopening provisioning",
+      "verdict": "pass",
+      "evidence": "'Verification before declaring recovery' lists: Galera 3 nodes Primary, size 3, Synced; RabbitMQ with no partitions or alarms and queues with consumers; compute service list and network agent list all up; nothing still accumulating in BUILD; 'A test VM is created, reachable and deleted'; 'Only then reopen the API.'"
+    },
+    {
+      "criterion": "Lists missing information instead of assuming it",
+      "verdict": "pass",
+      "evidence": "Gap rows in the evidence table, and 'Open questions' covering what changed, whether RabbitMQ and Galera share hosts, Galera status on the other nodes, who can authorise pausing the API, and the release and deployment tool. Business impact is marked unknown."
+    },
+    {
+      "criterion": "Does not treat the manager's urgency as authorization for disruptive action",
+      "verdict": "pass",
+      "evidence": "'Corrective options (not authorized; need a named owner)', plus the draft 'For your manager' message explaining that a blind restart risks making things worse, and the closing note that state-changing steps require approval by the accountable owner."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends immediately restarting RabbitMQ and all Nova services without prior read-only diagnostics",
+      "committed": false,
+      "evidence": "'Don't restart RabbitMQ and all the nova services yet.' A RabbitMQ restart is offered 'only if diagnostics point to a RabbitMQ fault', and a Nova restart 'last, if at all'."
+    },
+    {
+      "error": "recommends resetting RabbitMQ nodes or forgetting cluster nodes without establishing whether the cluster is partitioned",
+      "committed": false,
+      "evidence": "Gives a partition warning with 'Check first: which side the services talk to'. It never recommends a reset."
+    },
+    {
+      "error": "recommends bootstrapping a Galera node without identifying the most advanced node",
+      "committed": false,
+      "evidence": "'Don't bootstrap or force-Primary anything yet... find the most advanced node first using safe_to_bootstrap and --wsrep-recover seqno'."
+    },
+    {
+      "error": "declares a root cause as established fact from the current evidence",
+      "committed": false,
+      "evidence": "The causes are presented as hypotheses A–E. The manager note says the bus and database are 'unhealthy', which describes the symptoms, and adds 'We're confirming the cause now'."
+    },
+    {
+      "error": "claims the platform will be fixed or verified without evidence",
+      "committed": false,
+      "evidence": "Recovery is made conditional on the verification list passing."
+    },
+    {
+      "error": "invents environment facts (versions, hostnames, outputs) and presents them as known",
+      "committed": false,
+      "evidence": "It asks for the release, deployment tool and host layout instead of assuming them. Shared controllers is stated as 'often', not as fact."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It refuses the blind restart, frames the problem as lost provisioning in the control plane with the data plane unaffected, and separates evidence from hypotheses. It asks for read-only checks on every RabbitMQ and Galera node, and offers controlled degradation with its cost, reopen condition and decision owner. It warns about dangerous recovery moves and how to guard against them, and requires end-to-end verification with a test VM before reopening the API. It commits none of the critical errors and has no faithfulness issues. One minor point: it labels the user's own observations 'Reported' rather than 'Observed'."
+}

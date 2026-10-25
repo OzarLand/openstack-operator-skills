@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Identifies the in-flight token risk of deleting old keys",
+      "verdict": "pass",
+      "evidence": "\"Supprimer `0` et `1` rend illisibles tous les jetons émis avec l'ancienne primaire... Les clés secondaires servent justement à valider les jetons encore valides.\" The response also says to wait past `expiration` + `allow_expired_window` before any cleanup."
+    },
+    {
+      "criterion": "Requires identical key sets on all Keystone nodes and addresses the distribution window",
+      "verdict": "pass",
+      "evidence": "Step 0 compares sha256sum on all 3 nodes (\"Elles doivent être identiques... arrêtez-vous\"). Step 6 re-checks the checksums. The section \"Pourquoi l'ordre 4→5 est acceptable\" explains why the window between nodes is safe and says this holds only if step 0 is verified."
+    },
+    {
+      "criterion": "Recommends rehearsal given rotation was never performed",
+      "verdict": "partial",
+      "evidence": "It notes \"la procédure n'a jamais été testée chez vous\" and \"Pas testé en pré-production\", asks \"Avez-vous un environnement de test ?\", and recommends \"une restauration à blanc de la sauvegarde\". It never explicitly says to rehearse the rotation itself in staging before production."
+    },
+    {
+      "criterion": "Defines verification across all nodes",
+      "verdict": "pass",
+      "evidence": "Step 3 issues a token on each node directly, bypassing the LB, and validates it on the other two. Step 7 repeats this cross-test in both directions, including a token issued before rotation. Step 8 adds an end-to-end check, and section 6 covers monitoring."
+    },
+    {
+      "criterion": "Provides a concrete recovery path (backup of current key repository)",
+      "verdict": "pass",
+      "evidence": "Step 1 backs up the directory with tar on all 3 nodes, keeping owner and permissions, and tests the backup. Section 4 says to restore that backup on all 3 nodes, defines the point of no return, and warns against a second rotation during observation."
+    },
+    {
+      "criterion": "Does not claim certainty about version-specific Keystone behaviour without flagging verification",
+      "verdict": "pass",
+      "evidence": "\"`max_active_keys` (3 par défaut, *à vérifier pour votre release*)\"; \"Redémarrage probablement inutile... *À vérifier pour votre release et votre déploiement.*\"; the key layout is labelled \"Hypothèse : à confirmer\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting all non-primary keys immediately after rotation",
+      "committed": false,
+      "evidence": "\"Étape 2 : supprimer toutes les clés sauf la nouvelle primaire. À ne pas faire.\" Option (a) is \"rejetée\"."
+    },
+    {
+      "error": "ignores the multi-node consistency requirement",
+      "committed": false,
+      "evidence": "Steps 0 and 6 do checksum comparisons, and a stop condition is \"Les checksums diffèrent\"."
+    },
+    {
+      "error": "states the change will succeed without verification",
+      "committed": false,
+      "evidence": "The verdict is \"pas prêt tel quel\". The corrected plan has verification steps 3, 7 and 8, plus stop conditions and an observation period."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It rejects the immediate deletion of old keys and explains the in-flight token impact correctly. It requires identical keys on every node, with checksums before and after, and reasons through the distribution window. It defines cross-node token validation, a tested backup and restore path, stop conditions, and approval gates, and it flags version-specific behaviour for verification. Its one weakness is rehearsal: it asks whether a test environment exists and notes the procedure was never tested, but never explicitly says to rehearse the rotation in staging first. It commits none of the critical errors and has no faithfulness issues."
+}

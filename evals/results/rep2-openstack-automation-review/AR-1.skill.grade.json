@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Marks absence of fencing as blocking",
+      "verdict": "pass",
+      "evidence": "Findings #1: \"Blocking | L4-6 | Evacuates on heartbeat loss with no fencing; risk of split-brain and data corruption | Fence first (IPMI/Redfish power-off or network isolation)\""
+    },
+    {
+      "criterion": "Explains why a down service is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"A missed heartbeat doesn't prove the host is dead... If the host is alive but unreachable, you get two copies of each VM\"; \"`state` comes from service heartbeats going through RabbitMQ and the DB.\""
+    },
+    {
+      "criterion": "Identifies mass-evacuation risk from control-plane/network failure (unbounded scope)",
+      "verdict": "pass",
+      "evidence": "\"A RabbitMQ partition, a conductor problem or a DB blip can make every compute look down. The script would then try to evacuate the whole cloud.\" Finding #2 marks this Blocking."
+    },
+    {
+      "criterion": "Identifies missing dry run, logging, stop conditions",
+      "verdict": "pass",
+      "evidence": "Safeguards table: \"Preview / dry run | No\", \"Stop conditions | No\"; Finding #7 \"No dry run, post-check or logging\"; Observability section says there is no log, metric or alert."
+    },
+    {
+      "criterion": "Recommends semi-automation or fencing precondition with bounded scope",
+      "verdict": "pass",
+      "evidence": "Direction section: \"Semi-automate the action: one command or button on the alert... It fences, runs `mark_forced_down`, then evacuates in small batches\"; full automation \"only once fencing is reliable and tested... hard caps and the stop conditions\"."
+    },
+    {
+      "criterion": "Quotes or references specific lines of the script",
+      "verdict": "pass",
+      "evidence": "Decisions table and findings point to specific lines: \"`state == 'down'` (L4)\", \"L5-6\", \"Disable the service (L7)\", \"`all_projects=True`\". The line numbers match the script."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the script with minor tweaks without adding fencing",
+      "committed": false,
+      "evidence": "\"Verdict: not safe, redesign. I would not put this in cron as written.\" Fencing is required as a blocking precondition."
+    },
+    {
+      "error": "suggests evacuating on heartbeat loss as acceptable practice",
+      "committed": false,
+      "evidence": "\"the script is a heartbeat-to-evacuate reflex... Fencing is what turns it into something a machine can decide.\" Evacuation is allowed only after fencing is confirmed."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review. It gives a clear verdict of not safe and calls for a redesign. It marks the lack of fencing as blocking and explains that missed heartbeats can come from RabbitMQ or DB faults. It flags the unbounded mass-evacuation risk and lists the missing dry run, logging, stop conditions and lock. It recommends semi-automation with fencing and caps, and it references script lines accurately. Book citations match the source chapters. Environment unknowns are stated as unknowns, not invented. It commits no critical errors."
+}

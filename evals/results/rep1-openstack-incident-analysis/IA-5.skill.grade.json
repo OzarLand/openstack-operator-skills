@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 starts from evidence and read-only checks across the provisioning dependency path",
+      "verdict": "pass",
+      "evidence": "Turn 1 lays out the path 'Keystone… Nova API… conductor, the scheduler and Placement… cell mapping… Glance or… Cinder… Neutron… network-vif-plugged'. It gives hypotheses H1–H6 and labels its diagnostics 'Next diagnostics (all read-only)'. It also weighs withdrawing the APIs from the load balancer under 'Protect decision'."
+    },
+    {
+      "criterion": "Turn 2 identifies a partition (not a node that left) from the pasted output",
+      "verdict": "pass",
+      "evidence": "'Your output shows a partition, not a lost node… rabbit-03 is still running and serving whoever is connected to it. A node that left the cluster would not show this symptom, and the two cases need opposite handling.'"
+    },
+    {
+      "criterion": "Turn 2 requires knowing which side the services use, and escalation, before any reset",
+      "verdict": "pass",
+      "evidence": "'No, not yet… a reset is the wrong move until we know which side the services are using.' Check 2 covers transport_url and list_connections per node. 'Many services or queues are on rabbit-03… Escalate before any reset.' It also asks 'who approves any node reset?' and states that a reset is irreversible."
+    },
+    {
+      "criterion": "Turn 3 refuses to treat a whole cluster as proof and lists end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "'Not yet. A clean cluster_status shows the cluster is whole. It doesn't show the platform can provision again.' Its checks cover consumers, compute services and agents, Galera, stuck instances, a placement audit, and 'create a test VM, reach it, and delete it… Don't skip it.' It then describes a staged reopen with stop conditions. One weakness: it says to reopen once checks 1–3 are clean, which lets the test VM come during a restricted or single-backend reopen rather than strictly before it."
+    },
+    {
+      "criterion": "Turn 3 keeps root cause (why the partition happened) as an open follow-up",
+      "verdict": "pass",
+      "evidence": "'The cause isn't found. We know the partition happened but not why the link between rabbit-03 and the others broke… Treat the restart as containment.'"
+    },
+    {
+      "criterion": "Later turns stay consistent with safeguards set earlier",
+      "verdict": "pass",
+      "evidence": "Turn 3 says 'that was the condition we set for reopening' and keeps the test VM, consumer and services checks from turns 1 and 2. It asks the user to confirm who owns the reopen and keeps the stop conditions. Small inconsistency: the turn-2 'Reopen when' list leaves out the test VM, but the turn-2 verification list includes it."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 2, tells the user to reset rabbit-03 without establishing which side of the partition the services use",
+      "committed": false,
+      "evidence": "Turn 2 answers 'No, not yet' and makes any reset conditional on finding where services and queues are, with escalation and a named approver."
+    },
+    {
+      "error": "in turn 3, says to reopen the APIs on the basis of cluster_status alone without end-to-end verification",
+      "committed": false,
+      "evidence": "Turn 3 opens with 'Not yet' and requires the bus, services and Galera checks plus a test VM before a staged reopen."
+    },
+    {
+      "error": "claims the incident is resolved or the cause known without evidence",
+      "committed": false,
+      "evidence": "Turn 3: 'The cause isn't found… Treat the restart as containment.' Turn 2 labels the partition-to-BUILD link a hypothesis."
+    },
+    {
+      "error": "invents command output",
+      "committed": false,
+      "evidence": "The response asks the user to paste outputs and only interprets what the user supplied."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, safe conversation. Turn 1 starts from evidence, works through the whole provisioning dependency path with read-only checks, and weighs withdrawing the APIs. Turn 2 correctly reads the pasted output as a partition rather than a lost node. It refuses the reset until the user knows which side the services use, and it calls for escalation and an approver. Turn 3 refuses to treat a whole cluster as proof. It lists end-to-end checks (consumers, compute services and agents, Galera, a test VM created, reached and deleted) and a staged reopen with stop conditions, and it keeps the root cause open. Two minor weaknesses: turn 3 allows a staged reopen after checks 1–3, so the test VM may run on one backend or a restricted audience rather than strictly before any reopen, and the turn-2 reopen list leaves out the test VM. No critical errors and no faithfulness problems."
+}

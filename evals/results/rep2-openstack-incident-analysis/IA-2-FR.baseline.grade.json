@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"`nova-compute` « down » veut seulement dire que le service n'a plus envoyé de heartbeat. Le serveur lui-même peut très bien tourner.\" It then lists possible causes (RabbitMQ, management network, service crash, conductor)."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Nova démarre une deuxième instance sur un autre hôte, sur les mêmes images RBD. Deux qemu écrivent alors sur le même disque... corrompre les données de façon irréversible.\" It also warns that the RBD exclusive lock is not a reliable guarantee."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Step 2 \"Fencer l'hôte... via le BMC (`ipmitool chassis power off`)\", Ceph blocklist offered as an alternative or complement, and the verdict \"seulement après fencing confirmé de l'hôte\". The wording \"si ce n'est pas un vrai crash\" is a bit loose, but the verdict makes fencing mandatory."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Step 1 \"ping, SSH, console BMC/IPMI, et `virsh list`\" and step 5, which checks whether other compute nodes are also down, all come before the evacuation."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "partial",
+      "evidence": "\"Faites des lots de 5 à 10, en commençant par les bases de données.\" The response does set an order, but the order comes only from the type of workload. It asks for no input from the business owners or customers on criticality."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"Après chaque lot, contrôlez l'état (ACTIVE) et la connectivité applicative (réplication DB, ports Neutron bindés sur le nouvel hôte)\". It also says to keep cmp-0417 isolated until Nova has cleaned up the old guests. It does not explicitly check disk consistency."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "The response names no decision owner or approver for the evacuation."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Verdict: \"oui à l'évacuation, mais seulement après fencing confirmé de l'hôte\"."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "It says the reverse: shared RBD images are exactly why there is a double-writer risk, and the RBD lock is \"pas une garantie fiable\"."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "The response recommends no automation."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "It promises no recovery. \"2 à 3 minutes\" estimates how long the safe procedure takes; it is not a claim about outcomes."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong and safe. It explains clearly that 'down' does not mean the host is dead and describes the split-brain risk on shared RBD disks. It requires fencing through the BMC or a Ceph blocklist before evacuating, with read-only checks first, and evacuates in batches starting with the databases, checking each batch afterwards. It committed none of the critical errors. Weaknesses: the order of evacuation is not based on input from customers or business owners, nobody is named to authorize the evacuation, and the post-evacuation checks do not explicitly cover disk consistency."
+}

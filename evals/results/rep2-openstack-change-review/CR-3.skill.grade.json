@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags incomplete online data migrations as a blocker",
+      "verdict": "pass",
+      "evidence": "Top risk #2: \"Skipped `online_data_migrations`. This is a hard prerequisite... The next Nova schema sync can refuse to run\"; the prerequisites table marks it **fail**; it is step 2 in the ordered conditions."
+    },
+    {
+      "criterion": "Explains the limits of the SLURP promise beyond OpenStack services",
+      "verdict": "pass",
+      "evidence": "Prerequisites row: \"OS, Python, RabbitMQ, MariaDB, network and storage backends support the same jump | unknown. SLURP covers OpenStack services only.\" It also treats the tool's claim as \"a promise, not a test.\""
+    },
+    {
+      "criterion": "Requires upgrade check commands",
+      "verdict": "pass",
+      "evidence": "Lists the nova-status, neutron-status, cinder-status, placement-status, keystone-status and glance-status upgrade checks \"run with the **target** code\". Step 3 is \"Run the target-release status checks and fix what they flag.\""
+    },
+    {
+      "criterion": "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+      "verdict": "pass",
+      "evidence": "Recovery gate is **fail** (\"Never demonstrated by the current team\"). Step 1 is \"Do a restore exercise first... Time it and write it down.\""
+    },
+    {
+      "criterion": "Includes policy/RBAC testing",
+      "verdict": "pass",
+      "evidence": "\"Policy review (secure-default RBAC, `enforce_new_defaults`, `enforce_scope`, local policy overrides) tested against real users and automation | fail\". Step 5 repeats it."
+    },
+    {
+      "criterion": "Addresses local patches against the target release",
+      "verdict": "pass",
+      "evidence": "\"9 patches triaged: still needed, merged upstream, or broken by the target\" and \"The 2 Nova scheduler patches rebased and tested against the target scheduler/Placement behavior\". Step 4 covers both."
+    },
+    {
+      "criterion": "Gives a clear not-ready verdict with ordered conditions",
+      "verdict": "pass",
+      "evidence": "\"**Verdict: Not ready.**\", followed by a numbered list of 7 steps under \"What would make this Ready with conditions\" and \"A delay of weeks for items 1 to 3 is sequencing.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "declares the upgrade ready next week",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready... The target date of next week should not drive this decision.\""
+    },
+    {
+      "error": "ignores the incomplete online data migrations",
+      "committed": false,
+      "evidence": "Named as top risk #2, marked fail as a prerequisite, and step 2 in the order."
+    },
+    {
+      "error": "treats SLURP support as covering the whole stack",
+      "committed": false,
+      "evidence": "\"SLURP covers OpenStack services only.\""
+    },
+    {
+      "error": "invents specific release names as the user's current/target versions",
+      "committed": false,
+      "evidence": "Release names are listed as unknown: \"confirm the actual names\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "Strong response that meets every criterion. It gives a clear not-ready verdict framed as sequencing, with the restore exercise first and the online data migrations second. It covers SLURP's limits, the target-code status checks, patch triage and the RBAC policy review. It includes a gates table and a decision-record draft, and it commits no critical errors. One minor technical inaccuracy: it calls `nova-manage db online_data_migrations --max-count` a \"read-only check\" in a \"dry mode\", but the command applies migrations and has no dry-run mode. It is hedged with \"per your release docs\" and is not attributed to the book, so it is not listed as a faithfulness issue."
+}

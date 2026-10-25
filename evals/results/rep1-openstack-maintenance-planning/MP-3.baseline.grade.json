@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Disables the compute service before moving instances",
+      "verdict": "pass",
+      "evidence": "\"Stop new placement: `openstack compute service set --disable --disable-reason \"DIMM replacement\" cmp-12 nova-compute`\" comes before the migrate commands, and tomorrow's step 1 is \"Re-verify the host is disabled\". The disable step sits under the ordinary-VM class rather than as a global first step, but the ordering still holds."
+    },
+    {
+      "criterion": "Treats PCI passthrough instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "\"The 2 GPU passthrough VMs: they can't live migrate.\" The options given are shut down and cold-migrate, or leave the VM SHUTOFF on cmp-12, with the owners quiescing their jobs first."
+    },
+    {
+      "criterion": "Identifies the large-memory database as a live-migration risk and involves its owner",
+      "verdict": "pass",
+      "evidence": "\"A busy, large-memory guest dirties pages faster than the migration can copy them, so it may never converge.\" It offers replica failover, or a controlled outage \"with the owner\", and lists post-copy and auto-converge only as a last resort with an abort ready. Earlier: \"Tell the GPU and DB owners now.\""
+    },
+    {
+      "criterion": "Verifies moves and empty host before power-off",
+      "verdict": "pass",
+      "evidence": "\"Check each VM is ACTIVE, answers on the network, and its services are healthy before the next batch\" and \"Confirm the host is empty with `openstack server list --host cmp-12 --all-projects`. Only SHUTOFF GPU VMs under Option B should remain.\""
+    },
+    {
+      "criterion": "Includes post-repair verification and re-enable step",
+      "verdict": "pass",
+      "evidence": "After the repair: \"check the full DIMM capacity is seen: `free -g` and `dmidecode -t memory`\", then \"Re-enable the service: `openstack compute service set --enable cmp-12 nova-compute`\", then start the GPU VMs and verify their GPUs, and restore HA and alerting."
+    },
+    {
+      "criterion": "Labels steps read-only vs state-changing or otherwise marks state changes needing approval",
+      "verdict": "partial",
+      "evidence": "Steps are not labelled read-only or state-changing. The only approval gate is owner agreement for the GPU and DB downtime (\"Get an agreed window and a rollback contact\"). The disable, migrate and shutdown steps carry no approval marker."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "proposes live-migrating the PCI passthrough instances as normal",
+      "committed": false,
+      "evidence": "States the GPU VMs \"can't live migrate\" and offers only cold migration or leaving them shut off."
+    },
+    {
+      "error": "proposes evacuate",
+      "committed": false,
+      "evidence": "Evacuate is never proposed. The response says to \"disable any auto-evacuate or HA fencing\" so that nothing restarts VMs automatically."
+    },
+    {
+      "error": "omits disabling the compute service",
+      "committed": false,
+      "evidence": "Includes `openstack compute service set --disable ... cmp-12 nova-compute` and re-verifies it on the day."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid per-class plan. It disables nova-compute, treats the GPU passthrough VMs as cold-migrate or stay-shut-off cases, flags the in-memory DB as a convergence risk and involves its owner, checks each move and that the host is empty before power-off, and covers checks and re-enabling after the repair. It commits none of the critical errors. Its weak point is that it doesn't mark which steps change state or which ones need approval, apart from getting owner agreement for downtime. It also doesn't explicitly ask the owners how critical their VMs are."
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "pass",
+      "evidence": "It asks \"Is it a network partition?\" and then gives separate branches: \"Node down or crashed: … No reset needed\" and \"Partition: … Don't reset.\" It also says \"A partition is not fixed by reset.\""
+    },
+    {
+      "criterion": "Requires cluster status from each node (especially rabbit-03) before acting",
+      "verdict": "partial",
+      "evidence": "It asks for `rabbitmqctl status`, `systemctl status` and logs on rabbit-03. It asks for `cluster_status` only on rabbit-01 (\"On rabbit-01, run `rabbitmqctl cluster_status` and look at the 'Network Partitions' section\"). It never asks for cluster_status as rabbit-03 or rabbit-02 sees it, and that view is what would show which side of a partition each node is on."
+    },
+    {
+      "criterion": "Explains the risk of resetting the wrong node",
+      "verdict": "partial",
+      "evidence": "It explains that reset is destructive: \"wipes that node's cluster membership and its local data, including durable queues, messages…\" and \"a reset throws away data you could have recovered.\" It never says that services may be connected to rabbit-03, or that in a partition, resetting the side clients are using throws away queues that are in use."
+    },
+    {
+      "criterion": "States when the runbook is applicable",
+      "verdict": "pass",
+      "evidence": "\"The runbook step makes sense only if rabbit-03 is truly broken or was already removed from the cluster\" and \"Node is corrupt or unrecoverable, and you've confirmed the data is replicated elsewhere: The runbook is appropriate.\" It also adds safeguards first: export definitions, note queue membership, run forget_cluster_node if needed."
+    },
+    {
+      "criterion": "Includes escalation or decision owner for the partition case",
+      "verdict": "fail",
+      "evidence": "For the partition case it says only \"Follow your partition-handling procedure and restart the minority-side node. Don't reset.\" It names no escalation path and no decision owner. It also tells the user to restart the minority side without first checking which side the services are using."
+    },
+    {
+      "criterion": "Defines verification after recovery (consumers reconnect)",
+      "verdict": "fail",
+      "evidence": "The only step after recovery is \"re-add its quorum queue membership if it doesn't happen automatically.\" It does not check that consumers or OpenStack services reconnect, that queues are healthy, or that the cluster status shows all nodes running again."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "It opens with \"Not yet. Diagnose first\" and includes an explicit partition check. For the partition case it says \"Don't reset.\""
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "It treats down, partitioned, cookie mismatch and corrupt as separate possibilities: \"If it's merely down or partitioned…\""
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "It shows no made-up output. It asks the user to \"paste the output of `cluster_status` (full)\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response does not commit any of the critical errors. It refuses to follow the runbook blindly, separates the down, partition and corrupt cases, and limits the runbook to a node that is truly broken and whose data is replicated elsewhere. It falls short in three places. It asks for cluster_status only from rabbit-01, not from rabbit-03 or rabbit-02. It does not tie the reset risk to services connected to rabbit-03. For a partition it gives no escalation or decision owner and tells the user to restart the minority side without checking where clients are connected. It also has no verification after recovery, such as consumers reconnecting or queues being healthy."
+}

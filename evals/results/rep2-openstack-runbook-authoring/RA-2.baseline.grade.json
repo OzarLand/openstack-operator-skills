@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Points out missing scope and decision points for different alarm types",
+      "verdict": "partial",
+      "evidence": "Under step 1 it says: \"Find the cause first. Check what the alarm is (memory high watermark, disk free limit, or file descriptors). A restart only hides a disk alarm...\" and suggests adding a \"diagnose\" step. It never says outright that the runbook has no defined purpose or scope. It also gives no branching by alarm type (partition, node down, memory, disk). It only adds one diagnose step in front of the same restart flow."
+    },
+    {
+      "criterion": "Flags simultaneous restart of all nodes/services as dangerous",
+      "verdict": "pass",
+      "evidence": "\"Restarting all three together, or in quick succession, drops the cluster and risks a partition or lost quorum\". It recommends a rolling restart. For services: \"Restarting every nova and neutron service at once causes avoidable API and data-plane disruption... Restart only the ones that stay disconnected.\""
+    },
+    {
+      "criterion": "Flags verification of the alarm rather than the capability",
+      "verdict": "pass",
+      "evidence": "Under step 3 it adds service and agent list checks, queue draining, and \"Functional test. Add one, such as booting a test instance or creating a port.\" It does not name the alarm-versus-capability gap as such, but it does fix it."
+    },
+    {
+      "criterion": "Flags missing stop/escalation, owner and validation",
+      "verdict": "partial",
+      "evidence": "\"Rollback and escalation. Say what to do if a node won't rejoin: who to page, and when to stop.\" It also mentions \"who is authorized to run it\". It never mentions a runbook owner, a validation or last-tested date, or a must-not-do list."
+    },
+    {
+      "criterion": "Gives findings before a rewritten version",
+      "verdict": "partial",
+      "evidence": "It gives findings step by step, but not as a table, and it provides no restructured draft with decision points or TODOs. It ends with \"If you paste the runbook... I can... draft a revised version\", even though the runbook was already in the prompt."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts the runbook as adequate",
+      "committed": false,
+      "evidence": "\"the order is workable, but the runbook is risky as written\". It then lists substantial problems and missing sections."
+    },
+    {
+      "error": "rewrites it while keeping 'restart all nodes' as an unconditional first step",
+      "committed": false,
+      "evidence": "There is no rewrite. It recommends a diagnose step before step 1 and a rolling, one-node-at-a-time restart."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a solid critique and commits neither critical error. It correctly flags the danger of restarting every node and service at once, and it adds functional verification and escalation. It only partly covers the remaining expectations. It does not frame the runbook as lacking scope, with branching decision points for each alarm type. It never mentions an owner, validation history or must-not-do items. It gives no findings table and no restructured draft, and it oddly asks for the runbook even though the runbook was in the prompt."
+}

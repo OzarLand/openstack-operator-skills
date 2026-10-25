@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Applies decision gates before comparing options",
+      "verdict": "partial",
+      "evidence": "There is a gate before execution: 'Weeks 0–4, de-risk (gate)… No hop starts until it passes.' But the options are compared first ('Why not the other two'), and no gates are set up to screen the options (security, recovery, readiness) before the comparison."
+    },
+    {
+      "criterion": "Links postponement's viability to a tested backport",
+      "verdict": "partial",
+      "evidence": "Postponement is rejected because 'each later one needs the same untested work', and the backport must be tested in staging. A failed test speeds up hop one. The response never says outright that postponement holds up only if a tested backport is credible."
+    },
+    {
+      "criterion": "Identifies the recovery exercise as the first action or key uncertainty reducer",
+      "verdict": "pass",
+      "evidence": "'Recovery drill… This is the most important item… No hop starts until it passes and is written down as a runbook.'"
+    },
+    {
+      "criterion": "Recognizes team readiness as a constraint",
+      "verdict": "pass",
+      "evidence": "'Staffing: With four people, make hop one the only major project this quarter. Make sure at least two people can run the recovery drill…'"
+    },
+    {
+      "criterion": "States what would change the ranking (sensitivity)",
+      "verdict": "partial",
+      "evidence": "The 'Triggers that change the plan' section covers advisory severity, a backport that fails testing and load-bearing Nova patches. These mostly change timing within the chosen option. They do not say what evidence would reorder the three options."
+    },
+    {
+      "criterion": "Assigns owner, review trigger or exit condition to retained deviations",
+      "verdict": "partial",
+      "evidence": "The backport has an exit condition: 'Land on a maintained release… lets you retire the backport.' The Nova patches get a trigger: 'make them the first project of the stabilization period'. No owners are named."
+    },
+    {
+      "criterion": "Frames the output as decision support for a named or to-be-named owner",
+      "verdict": "fail",
+      "evidence": "The response opens 'Recommendation: a modified version of option 2' and reads as a directive. It never mentions a decision owner, accountability or who has decision rights."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends postponement while carrying an untested backport without flagging the security gate",
+      "committed": false,
+      "evidence": "Rejects postponement explicitly ('Don't postpone either') and requires the backport to be tested in staging before deployment."
+    },
+    {
+      "error": "presents a weighted score as the decision itself",
+      "committed": false,
+      "evidence": "The response uses no weighted scoring."
+    },
+    {
+      "error": "recommends the immediate double hop without addressing recovery capability",
+      "committed": false,
+      "evidence": "Rejects the double hop ('Don't do both hops in one quarter') and sets the recovery drill as a gate before any hop."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is sound and safe. It makes the recovery drill the gating first action, accounts for the four-person team, rejects both risky options and treats the backport as a bridge with an exit condition. It falls short of the expected structure in four ways: there are no explicit gates applied before comparing the options, postponement is not tied directly to a credible tested backport, the sensitivity analysis covers timing rather than ranking, and the decision is not framed as support for an accountable owner. It commits none of the critical errors and has no faithfulness issues."
+}

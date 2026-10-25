@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Recognizes security backports as a legitimate case",
+      "verdict": "pass",
+      "evidence": "\"Yes, backporting is the normal move for a series upstream has stopped maintaining.\""
+    },
+    {
+      "criterion": "Lists the backport record fields including exit condition",
+      "verdict": "partial",
+      "evidence": "\"Keep a short list of the local backports, with upstream commit IDs and the reason for each, so you can drop them when you upgrade.\" This covers the origin change, the reason, and an implied exit (drop on upgrade). It never names an owner. Tests appear in check 3 but not as a record field. It does not ask why upgrading isn't an option for this fix."
+    },
+    {
+      "criterion": "Names accumulated backports as a lifecycle problem",
+      "verdict": "pass",
+      "evidence": "\"The bigger issue is that this will be your 7th carried patch. The cost of each one grows, because each new backport has to be checked against the whole stack of earlier ones.\""
+    },
+    {
+      "criterion": "Recommends an upgrade/lifecycle decision path",
+      "verdict": "pass",
+      "evidence": "\"If you don't already have an upgrade path to a maintained series, this is a good time to schedule one.\" It does not explicitly ask for a review of the existing backports' exit conditions, but the list kept so they can be dropped at upgrade partly covers this."
+    },
+    {
+      "criterion": "Checks vendor/distribution coverage",
+      "verdict": "fail",
+      "evidence": "The response never asks whether the distribution or vendor already ships the fix."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the backport without owner, test or exit condition",
+      "committed": false,
+      "evidence": "The yes depends on checks. It requires tests (\"Run the unit and functional tests for those modules, and add a regression test\"), and it gives an implied exit condition (\"so you can drop them when you upgrade\"). It never names an owner, but tests and the exit are covered, so the approval is not unconditional."
+    },
+    {
+      "error": "ignores the lifecycle signal of accumulated backports",
+      "committed": false,
+      "evidence": "It names the 7th patch as \"the bigger issue\" and recommends scheduling an upgrade to a maintained series."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid, conditional yes. The technical checks for the backport are good: confirm the series is vulnerable, cherry-pick from the oldest fixed branch, check interaction with the six existing backports, look for follow-up patches, and plan the rollout. It correctly calls the 7th carried patch a lifecycle problem and recommends scheduling an upgrade. Two gaps keep it from full marks: the backport record is incomplete (no owner, and tests are not tied to the record), and it never asks whether the distribution or vendor already ships the fix. Neither critical error was committed."
+}

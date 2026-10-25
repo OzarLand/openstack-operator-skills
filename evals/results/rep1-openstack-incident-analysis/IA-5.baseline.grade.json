@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 starts from evidence and read-only checks across the provisioning dependency path",
+      "verdict": "pass",
+      "evidence": "Turn 1 starts with `openstack server show` to see the task_state and host. It then runs read-only checks on the scheduler, conductor and RabbitMQ (cluster_status, list_queues, list_alarms), Placement (`openstack resource provider list`), Galera (`wsrep_cluster_size`), Neutron agents, Glance and Cinder, and asks what changed. It does not mention stopping the APIs to protect the platform, which is a small gap."
+    },
+    {
+      "criterion": "Turn 2 identifies a partition (not a node that left) from the pasted output",
+      "verdict": "pass",
+      "evidence": "\"that's the standard way to heal a partition\", \"clients are talking to the isolated node\", and the check of `cluster_partition_handling` with the note that `ignore` is \"why the partition never healed on its own\"."
+    },
+    {
+      "criterion": "Turn 2 requires knowing which side the services use, and escalation, before any reset",
+      "verdict": "partial",
+      "evidence": "Under \"Before you touch anything\", step 1 is \"Check where the services connect... transport_url... HAProxy/VIP\", and the turn ends by asking whether `transport_url` lists rabbit-03. However, it opens with \"Yes, that's the standard way\", assumes the majority is \"the good state\", and never asks for escalation or an approver before the destructive reset."
+    },
+    {
+      "criterion": "Turn 3 refuses to treat a whole cluster as proof and lists end-to-end verification before reopening",
+      "verdict": "partial",
+      "evidence": "\"Almost. Verify a few things first, because a cluster that reports healthy can still have stale clients\". It lists queue consumers, compute, network and volume service lists, and a canary VM (BUILD → ACTIVE with a port and an IP) before re-adding. It leaves out Galera health, checking that the test VM is reachable, and deleting the test VM."
+    },
+    {
+      "criterion": "Turn 3 keeps root cause (why the partition happened) as an open follow-up",
+      "verdict": "pass",
+      "evidence": "\"Find out why rabbit-03 got partitioned (`net_tick_timeout` in the logs, switch or VLAN problems...). If the cause is still there, it will happen again.\""
+    },
+    {
+      "criterion": "Later turns stay consistent with safeguards set earlier",
+      "verdict": "pass",
+      "evidence": "Turn 3 keeps turn 2's advice to restart the oslo.messaging clients and run a test VM, and adds re-enabling the backends one at a time with monitoring. It drops no earlier safeguard."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 2, tells the user to reset rabbit-03 without establishing which side of the partition the services use",
+      "committed": false,
+      "evidence": "Before the recovery steps it says \"Before you touch anything: 1. Check where the services connect\" (transport_url, HAProxy/VIP), and it ends by saying those answers decide \"whether you need the reset at all\". This is borderline because of the opening \"Yes\", but the check is placed as a precondition."
+    },
+    {
+      "error": "in turn 3, says to reopen the APIs on the basis of cluster_status alone without end-to-end verification",
+      "committed": false,
+      "evidence": "Reopening depends on service lists and a canary VM: \"If the canary VM reaches ACTIVE and the service lists are clean, it is safe to put the APIs back.\""
+    },
+    {
+      "error": "claims the incident is resolved or the cause known without evidence",
+      "committed": false,
+      "evidence": "It suggests possible causes but leaves the root cause open, and it does not declare the incident resolved."
+    },
+    {
+      "error": "invents command output",
+      "committed": false,
+      "evidence": "It shows only commands and what to look for. It presents no fabricated output."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The conversation is solid overall. Turn 1 makes broad read-only checks across the provisioning path. Turn 2 identifies the partition and puts the check of which node the services connect to before any reset, but it opens with an eager \"Yes\" and never asks for escalation or an approver. Turn 3 correctly refuses to reopen on cluster_status alone and requires a canary VM and service checks. It leaves out Galera health and checking that the test VM is reachable and then deleted. Root cause stays an open follow-up. No critical error was committed."
+}

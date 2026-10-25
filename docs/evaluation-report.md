@@ -1,6 +1,7 @@
 # Evaluation report — v0.1.0
 
-Date: 2026-10-25 (section 9 added after issues #1–#6). Everything below was actually run in this repository's
+Date: 2026-10-25 (section 9 added after issues #1–#6, section 10 after the
+repeated runs). Everything below was actually run in this repository's
 development session; raw outputs and grades are under `evals/results/`.
 
 ## Contents
@@ -14,13 +15,14 @@ development session; raw outputs and grades are under `evals/results/`.
 7. Regression run after fixes
 8. Cross-model spot check (Haiku)
 9. Regression after issues #1–#6
-10. Limitations and what has not been tested
+10. Robustness: three runs of all 30 scenarios
+11. Limitations and what has not been tested
 
 ## 1. Summary
 
 | Check | Result |
 |---|---|
-| Structural validation (7 skills, 28 scenarios) | 0 errors, 0 warnings |
+| Structural validation (7 skills, 30 scenarios) | 0 errors, 0 warnings |
 | Plugin marketplace manifest (`claude plugin validate --strict .`) | passed |
 | `weighted_score.py` reproduces the book's Ch. 18 example | passed |
 | Full behavioural run, model under test claude-sonnet-5-5, 24 scenarios | with skills: mean 0.97, expected skill triggered 24/24, 0 critical errors; baseline without skills: mean 0.68, 3 critical errors |
@@ -29,9 +31,11 @@ development session; raw outputs and grades are under `evals/results/`.
 | Regression after issues #1–#6 (5 scenarios, incl. new AR-4) | mean 0.97, 5/5 triggered, 0 critical errors |
 | French prompts (3 scenarios, Sonnet) | with skills: mean 0.95, 3/3 triggered; baseline: mean 0.75; 0 critical errors |
 | Haiku on IA-2 after description fix | skill triggered 3/3 (was 0/3), mean 1.00 |
+| All 30 scenarios × 3 runs, Sonnet (incl. 2 multi-turn) | with skills: mean 0.98, 0 critical errors in 90 answers, expected skill 87/90; baseline: mean 0.73, 16 answers with a critical error |
+| Haiku on maintenance planning after description fix | triggered 4/5 (was 0/4) |
 
-These are single runs per cell, graded by a model. They show a consistent
-direction, not precise effect sizes.
+Most rows are single runs per cell; section 10 repeats the whole suite three
+times and the spread is small. All grading is by a model.
 
 ## 2. Structural checks
 
@@ -309,10 +313,96 @@ away from maintenance planning. Haiku still loaded no skill on MP-2, although
 its answer met every criterion: maintenance-planning triggering on Haiku
 remains open.
 
-## 10. Limitations and what has not been tested
+## 10. Robustness: three runs of all 30 scenarios
 
-- **One run per cell.** Differences of a few points are within noise (see IA-4
-  in the POC).
+All 30 scenarios (the 24 of section 5, AR-4, the three French prompts and two
+new multi-turn scenarios) were run three times in both modes with
+`claude-sonnet-5-5`, graded by `claude-opus-5-5` (runs `rep1-*`, `rep2-*`,
+`rep3-*`; 180 graded answers).
+
+| Mode | Answers | Mean criteria score | Mean per run | Answers with ≥1 critical error | Expected skill loaded |
+|---|---:|---:|---|---:|---:|
+| skill | 90 | 0.98 | 0.98, 0.97, 0.98 | 0 | 87/90 |
+| baseline | 90 | 0.73 | 0.72, 0.73, 0.74 | 16 | n/a |
+
+| Scenario | Baseline mean (range) | Skill mean (range) | Baseline runs with a critical error | Skill runs with a critical error | Expected skill loaded |
+|---|---|---|---:|---:|---:|
+| AR-1 | 0.97 (0.92–1.00) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| AR-2 | 0.75 (0.67–0.83) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| AR-3 | 0.63 (0.60–0.70) | 0.97 (0.90–1.00) | 1/3 | 0/3 | 3/3 |
+| AR-4 | 1.00 (1.00–1.00) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| CA-1 | 0.48 (0.43–0.50) | 0.88 (0.86–0.93) | 0/3 | 0/3 | 3/3 |
+| CA-2 | 0.93 (0.90–1.00) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| CA-3 | 0.69 (0.67–0.75) | 0.92 (0.92–0.92) | 3/3 | 0/3 | 3/3 |
+| CR-1 | 0.91 (0.79–1.00) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| CR-2 | 0.64 (0.58–0.67) | 0.97 (0.92–1.00) | 0/3 | 0/3 | 3/3 |
+| CR-2-FR | 0.64 (0.58–0.67) | 0.92 (0.92–0.92) | 0/3 | 0/3 | 3/3 |
+| CR-3 | 0.83 (0.79–0.86) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| CR-4 | 0.97 (0.92–1.00) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| IA-1 | 0.48 (0.44–0.56) | 1.00 (1.00–1.00) | 1/3 | 0/3 | 3/3 |
+| IA-2 | 0.74 (0.64–0.79) | 1.00 (1.00–1.00) | 2/3 | 0/3 | 3/3 |
+| IA-2-FR | 0.74 (0.71–0.79) | 0.93 (0.93–0.93) | 0/3 | 0/3 | 3/3 |
+| IA-3 | 0.67 (0.58–0.75) | 0.94 (0.92–1.00) | 0/3 | 0/3 | 0/3 |
+| IA-4 | 0.47 (0.42–0.50) | 0.97 (0.92–1.00) | 0/3 | 0/3 | 3/3 |
+| IA-5 | 0.78 (0.75–0.83) | 1.00 (1.00–1.00) | 2/3 | 0/3 | 3/3 |
+| MP-1 | 0.62 (0.56–0.69) | 1.00 (1.00–1.00) | 1/3 | 0/3 | 3/3 |
+| MP-2 | 0.88 (0.88–0.88) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| MP-2-FR | 0.88 (0.88–0.88) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| MP-3 | 0.89 (0.83–0.92) | 0.97 (0.92–1.00) | 0/3 | 0/3 | 3/3 |
+| MP-4 | 0.86 (0.83–0.92) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| OD-1 | 0.62 (0.57–0.71) | 0.95 (0.93–1.00) | 0/3 | 0/3 | 3/3 |
+| OD-2 | 0.63 (0.60–0.70) | 0.97 (0.90–1.00) | 2/3 | 0/3 | 3/3 |
+| OD-3 | 0.47 (0.40–0.50) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| OD-4 | 0.73 (0.70–0.80) | 1.00 (1.00–1.00) | 0/3 | 0/3 | 3/3 |
+| RA-1 | 0.40 (0.36–0.43) | 1.00 (1.00–1.00) | 3/3 | 0/3 | 3/3 |
+| RA-2 | 0.73 (0.70–0.80) | 0.97 (0.90–1.00) | 0/3 | 0/3 | 3/3 |
+| RA-3 | 0.81 (0.75–0.83) | 1.00 (1.00–1.00) | 1/3 | 0/3 | 3/3 |
+
+What the repetitions show:
+
+- **The difference is stable.** Every scenario's skill range sits at or above
+  its baseline range; the lowest skill mean is CA-1 (0.88), one of the five
+  scenarios whose baseline stays below 0.50. No answer with the skills committed a
+  critical error in 90 runs; without them, 16 of 90 did, concentrated on
+  RA-1, CA-3, IA-2, IA-5 and OD-2.
+- **Run-to-run spread is small** with the skills (per-run means within 0.01)
+  and a few points on the baseline, so the single-run figures of section 5
+  were representative.
+- **IA-3 loads `openstack-automation-review`** in all three runs instead of
+  incident analysis. The prompt asks for a cron script that migrates VMs
+  away automatically, which is the automation skill's case; the answers
+  scored 0.94. Counted as a miss above, but a defensible routing.
+- **Extra skills.** AR-2, MP-4 and RA-2 sometimes loaded a second
+  `openstack-*` skill as well (the hand-offs the skills describe). In one
+  RA-3 run a skill outside this repository, present in the evaluation
+  machine's user configuration, was also loaded; the harness isolates
+  project skills, not every user-level one.
+
+**Multi-turn scenarios.** IA-5 and MP-4 have `followups`: the harness keeps
+one Claude Code session and the grader sees the whole conversation (see
+`evals/README.md`). IA-5 starts with a VM-creation outage, then pastes a
+partitioned `cluster_status` from three nodes and asks whether to reset
+rabbit-03, then says the cluster is whole and asks to reopen the APIs. MP-4
+plans patching of 40 hosts, then gives the inventory, then reports a failed
+live migration and asks to carry on. With the skills both scored 1.00 in
+3/3 runs; the IA-5 baseline told the user to reset rabbit-03 in turn 2
+without establishing which side of the partition the services use in 2 of 3
+runs.
+
+**Haiku and maintenance planning.** Section 9 left maintenance-planning
+triggering on Haiku open. The description now names concrete triggers
+(security patching campaign, kernel or QEMU fix, hardware repair, draining
+hosts faster with evacuate). Before, Haiku loaded no skill on MP-2 (0/3) or
+MP-3 (0/1, runs `haiku-mp2-before-*`, `haiku-mp3-before`). After
+(`haiku-mp2-after-v2-*`, `haiku-mp3-after`, `haiku-mp2fr-after`): MP-2 2/3,
+MP-3 1/1, MP-2-FR 1/1, all scored 1.00 when the skill loaded and 0.88 when
+it did not. IA-2 still routes to incident analysis on Haiku and Sonnet
+(`mpdesc-*`), so the two descriptions do not collide.
+
+## 11. Limitations and what has not been tested
+
+- **Three runs at most.** The full suite was repeated three times (section
+  10); differences of a few points between scenarios are still within noise.
 - **Model grading.** The grader is a model applying a rubric; it was
   discriminating in the samples read by hand, but it is not ground truth.
 - **Same author.** Scenarios, skills and rubrics were written in the same
@@ -322,8 +412,9 @@ remains open.
   tested once end to end (section 9); in `claude -p` the plugin's reference
   files are only read when `Read` is allowed (see `docs/installation.md`).
 - **Models.** Full run on Sonnet only; Haiku on a handful of scenarios; Opus
-  only as grader. Haiku still under-triggers maintenance planning (MP-2).
-- **Multi-turn use** (pasting diagnostic output back, continuing an incident)
-  was not tested; all scenarios are single prompts.
+  only as grader. Haiku loads maintenance planning on most but not all
+  maintenance prompts (MP-2: 2/3).
+- **Multi-turn use** is covered by two scenarios only (IA-5, MP-4), with
+  scripted follow-ups rather than a person reacting to the answers.
 - **No real infrastructure.** Skills were never connected to an OpenStack
   environment; tool-enabled sessions were deliberately excluded.

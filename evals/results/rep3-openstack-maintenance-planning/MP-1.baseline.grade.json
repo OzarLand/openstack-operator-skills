@@ -1,0 +1,78 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "partial",
+      "evidence": "The whole plan treats the 3-week deadline as given and builds the execution around it (canary, rolling batches, a week of buffer). It never says outright that the requirement is fixed and only the execution can vary. It also softens the requirement: \"Ask security for risk-based ordering... in case you can't finish everything.\""
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "partial",
+      "evidence": "It explicitly declines to collect criticality: \"You can't classify criticality reliably, so don't try to guess... Live-migrate by default.\" It asks owners for input only on non-migratable VMs (\"notify the project owner and let them choose a slot\"). There is no shared table of consumer-provided criticality required before execution."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "\"roughly 2 to 3 per AZ. You'll need to confirm the real per-AZ figure, because it sets the batch size\"; \"Run 2 hosts per AZ at a time\"; \"Pull per-AZ free capacity and check that each AZ can really absorb a batch.\""
+    },
+    {
+      "criterion": "Handles SR-IOV instances by release: live migration with a brief interface interruption (owner agreement) where supported, restart or cold migration otherwise",
+      "verdict": "partial",
+      "evidence": "\"Check whether your Nova, libvirt and NIC combination supports live migration with SR-IOV ports... If it doesn't work, assume cold migration or stop/start.\" This makes the decision depend on version. It does not mention Train, the brief interface interruption that needs owner agreement, or the difference from flavor-based PCI passthrough. It also groups \"SR-IOV, GPU, pinned or otherwise non-migratable\" together in the classification."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "partial",
+      "evidence": "Landing zone is covered: \"Patch the empty buffer hosts first. Drain the next batch onto them.\" The constraint against migrating from newer to older QEMU/libvirt is never stated."
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"The QEMU fix only applies to a VM when its QEMU process restarts. Live-migrating a VM onto an already-patched host gives it the new QEMU.\""
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "partial",
+      "evidence": "Stop condition: \"stop the pipeline if a batch has more than N failed migrations or hosts that don't come back.\" There are no campaign completion criteria (for example, every instance migrated or restarted onto patched QEMU). There is only a daily burn-down to track."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "Evacuation is never suggested. Hosts are drained by live migration, or by cold migration or stop/start for VMs that can't be live-migrated."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "Uses a rolling 'leapfrog' plan with 2 hosts per AZ in flight and reserve kept back. It does not try to migrate everything at once."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "For non-migratable and SR-IOV VMs it notifies owners and lets them choose a slot or move the VMs themselves before a deadline. It falls back to \"Whatever they haven't moved by the deadline gets moved by you\" only after notice. This is borderline, but owners do get a chance to give input."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "Evacuation is not mentioned."
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "States plainly that the QEMU fix applies only once the QEMU process restarts or the VM migrates."
+    },
+    {
+      "error": "classes all SR-IOV instances as requiring a restart without considering the release",
+      "committed": false,
+      "evidence": "\"Check whether your Nova, libvirt and NIC combination supports live migration with SR-IOV ports... Support depends on version and NIC.\""
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "\"roughly 2 to 3 per AZ\" is presented as an estimate based on an even split, with \"You'll need to confirm the real per-AZ figure.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A solid, practical rolling-patch plan. It frames capacity per AZ, patches landing-zone hosts first, states correctly that running VMs are protected only after migration or restart, avoids evacuation, and ties SR-IOV handling to the release. It falls short of the expected reasoning in several places. It explicitly declines to collect consumer criticality up front instead of requiring a shared criticality table. It omits the rule against migrating from newer to older QEMU/libvirt. It does not mention the brief SR-IOV interface interruption that needs owner agreement, or the difference from PCI passthrough. It defines stop conditions but no campaign completion criteria. It commits none of the critical errors."
+}

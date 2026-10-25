@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Declines or heavily qualifies a single score and gives a profile",
+      "verdict": "fail",
+      "evidence": "Leads with \"**Score: 5/10**\" and gives score bands (\"To 6–7\", \"To 7–8\", \"To 8+\"). The closing caveat (\"this is a judgment from four facts\") is a light hedge, not a refusal. There is no per-capability profile with evidence and confidence."
+    },
+    {
+      "criterion": "Does not rate RabbitMQ as Recoverable given single-person recovery",
+      "verdict": "pass",
+      "evidence": "No maturity level is assigned. It says \"Three successes by one person is evidence that *they* can recover RabbitMQ. It isn't evidence that *the control* works.\" It also notes the runbook is \"untested by anyone else.\""
+    },
+    {
+      "criterion": "Questions per-service dashboards vs dependency visibility",
+      "verdict": "partial",
+      "evidence": "Challenges dashboards only on alerting, paging, ownership and thresholds: \"Dashboards show problems but don't act on them... Dashboards only help if someone is looking.\" It never raises dependency-path visibility, meaning that per-service views don't show how a failure spreads across business capabilities."
+    },
+    {
+      "criterion": "Questions the 400-page wiki as evidence (validation, ownership)",
+      "verdict": "pass",
+      "evidence": "\"400 pages is a warning sign as well as a strength... how many were reviewed in the last year, and whether someone on call at 3am can find the right one\". Also: \"Give the wiki owners and review dates, and prune or archive stale pages.\""
+    },
+    {
+      "criterion": "Names the single-expert dependency",
+      "verdict": "pass",
+      "evidence": "\"**Key-person dependency.** This is the main issue... If they're on leave, asleep, or gone, you don't know what happens.\""
+    },
+    {
+      "criterion": "Proposes concrete confidence tests",
+      "verdict": "pass",
+      "evidence": "\"Have a second engineer run the RabbitMQ recovery from the runbook alone, with the lead engineer observing and not helping. Fix every gap they hit.\" It then proposes quarterly rotating drills in staging and tracking recovery time across drills."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "gives a single numeric score as the answer",
+      "committed": true,
+      "evidence": "The response opens with \"**Score: 5/10**\" as its headline answer and builds its improvement plan around numeric score bands."
+    },
+    {
+      "error": "rates RabbitMQ as Recoverable or Sustainable",
+      "committed": false,
+      "evidence": "No maturity level is assigned. The response explicitly says the three successes are not evidence that the control works."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gets the substance mostly right: it names the key-person dependency, questions what the 400-page wiki actually proves, and proposes a concrete test where a second engineer runs the recovery cold. It does not overclaim RabbitMQ recoverability. However, it commits the critical error of answering with a single 5/10 score instead of a per-capability profile. Its challenge to the dashboards is about alerting and ownership, not dependency-path visibility."
+}

@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Uses the value-of-state vs uncertainty criterion",
+      "verdict": "pass",
+      "evidence": "\"The deciding question is whether the information in the current state is worth preserving along with its uncertainty. For a test cloud that has run for years, most of that state is accumulated experimentation.\""
+    },
+    {
+      "criterion": "Distinguishes test from production",
+      "verdict": "pass",
+      "evidence": "Frames the reasoning around a test cloud whose state is \"accumulated experimentation\", and makes production use a condition that changes the answer: \"Someone is using the cloud as production... treat that team's workloads as production. Migrate them first, or exempt them.\""
+    },
+    {
+      "criterion": "Requires preserving needed content and evidence",
+      "verdict": "pass",
+      "evidence": "\"Preserve evidence first (read-only). Export configs, the instance, volume, port and network inventory...\"; \"Inventory and claim\" with owners; \"take a verified backup of whatever is claimed\"; no deletion \"until the inventory is exported, owners have signed off\"."
+    },
+    {
+      "criterion": "Requires a written baseline and validation criteria",
+      "verdict": "pass",
+      "evidence": "\"Define the baseline and acceptance tests before you build. Write down what 'known good' means... a validation suite... Automated installation alone doesn't prove the new cloud is equivalent to what you need.\""
+    },
+    {
+      "criterion": "Involves stakeholders and decision owner",
+      "verdict": "pass",
+      "evidence": "\"Publish the list per project. Give owners a deadline to claim...\"; \"Set the deadline and the default with the people who'll be affected\"; the \"Decision owner\" section says someone with authority over the cloud should accept the disruption."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends wiping without preserving needed content or evidence",
+      "committed": false,
+      "evidence": "Says \"rebuild, but as a managed migration, not a wipe\". It requires a read-only evidence export, a claim process, migration or backup of claimed content, and owner sign-off before any deletion."
+    },
+    {
+      "error": "applies the same reasoning to production without distinction",
+      "committed": false,
+      "evidence": "Ties the rebuild reasoning to test state being experimentation, and treats production-like use as a reason to repair or exempt those workloads."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response gives a conditional recommendation to rebuild and meets every criterion. It uses the value-of-state vs uncertainty criterion and separates test state from workloads used as production. It requires an evidence export and a claim process, plus a written baseline with acceptance tests. It also states that automated installation alone is not enough. Stakeholders and the decision owner are part of the process. It lists the conditions under which repair would be the better choice. It commits neither critical error, and it makes no book citations or invented environment facts."
+}

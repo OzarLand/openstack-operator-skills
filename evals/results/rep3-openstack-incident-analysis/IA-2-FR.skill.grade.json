@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"'nova-compute down' ne prouve pas que l'hôte est mort\"; lists the cases where the daemon crashed or the host is isolated while \"les VM tournent toujours\"."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"deux copies de la même VM qui écrivent sur le même volume RBD ... corruption possible\"; adds that Ceph \"rend aussi ce risque plus grave\"."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "\"Ne lancez pas evacuate avant d'avoir fencé l'hôte\"; step 1: \"l'éteindre via le BMC, ou isoler ses ports au niveau du switch\"; also mentions ceph osd blocklist as an extra fence."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "\"consulter l'état d'alimentation via BMC/IPMI/iDRAC (read-only)\", \"rbd status ... watchers actifs\" (read-only), checking compute service list for other nodes and what changed at 03:12. It does not mention a host console or reachability from other network paths, but the core read-only checks come before any change."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "pass",
+      "evidence": "\"Évacuer VM par VM, dans l'ordre de criticité ... commencer par les bases de données clients, avec l'accord des propriétaires\"."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "pass",
+      "evidence": "\"ACTIVE sur le nouvel hôte, joignable, base de données saine côté application ... Aucune VM de cmp-0417 ne doit tourner en double\"; it also says to keep the old host forced down until nova-compute has cleaned up the local copies."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "partial",
+      "evidence": "It refers to \"l'accord des propriétaires\" and \"l'approbation du responsable concerné\", and asks \"Qui est le décisionnaire côté astreinte et côté clients\", but it never names one specific decision owner."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Fencing is step 1 and comes before forced-down and evacuation; \"Ne lancez pas evacuate avant d'avoir fencé l'hôte\"."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "Says Ceph speeds up evacuation \"mais cela rend aussi ce risque plus grave\"."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "Recommends no automation. Evacuation is manual, one VM at a time, after fencing."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Makes no claim of recovery. It asks for the BMC state and requires verification of each VM."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A strong answer in French. It says clearly not to evacuate until the host is fenced, explains the risk of two copies writing to the same RBD volume, and gives the sequence: confirm, fence, set forced-down, then evacuate one VM at a time by criticality. It includes read-only checks (BMC power state, rbd watchers), verification after evacuation, and safe handling of the host when it comes back. The only weak point is authorization: it asks who the decision owner is and requires approval, but never names a specific one. No critical errors were committed, and there are no faithfulness issues."
+}

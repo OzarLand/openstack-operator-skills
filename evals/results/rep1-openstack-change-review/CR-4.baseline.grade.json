@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Prefers project tools over direct SQL where available",
+      "verdict": "pass",
+      "evidence": "\"Prefer the supported tools where possible: nova-manage ... archive_deleted_rows ... nova reset-state --active followed by nova delete ... cinder reset-state ... nova-manage placement heal_allocations / audit --delete ... A small loop around the APIs for 300 items is slow-ish but safe, and it's the better default.\""
+    },
+    {
+      "criterion": "Requires backup, small increments and verification",
+      "verdict": "pass",
+      "evidence": "\"Take backups or dumps of all three DBs (and the nova_api DB) immediately before running, and test a restore\"; \"Run it in batches (for example 20 instances)\"; \"Print affected-row counts per statement and ROLLBACK by default. Require a manual COMMIT after you check the numbers.\""
+    },
+    {
+      "criterion": "Requires confirming records against real hypervisor/network/storage state",
+      "verdict": "pass",
+      "evidence": "\"Check for instances that still exist on a hypervisor. Run virsh list --all ...\"; ports only where \"device_id points to an instance that's confirmed gone in nova\"; Cinder backend export (iSCSI target, RBD lock) not touched, risk of double attach."
+    },
+    {
+      "criterion": "Mentions Placement allocation reconciliation",
+      "verdict": "pass",
+      "evidence": "\"Marking rows deleted in the cell DB leaves these behind and breaks the Placement allocations, which will keep consuming capacity\"; recommends \"nova-manage placement heal_allocations / audit --delete\"."
+    },
+    {
+      "criterion": "Flags the irreversibility and blast radius",
+      "verdict": "partial",
+      "evidence": "Flags cross-database inconsistency (\"a failure in the third can leave nova, neutron and cinder inconsistent\"), leaked VMs, data corruption, and table locks, but never explicitly frames the bulk change as irreversible/high blast radius or gives a clear 'not ready as written' verdict."
+    },
+    {
+      "criterion": "Proposes a staged plan with a dry run",
+      "verdict": "pass",
+      "evidence": "\"Run it on a restored copy first and compare row counts\", ROLLBACK-by-default run, explicit reviewed UUID list, batches of 20, maintenance window. These are listed as checklist items, not laid out as an ordered plan."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the bulk SQL script in one go",
+      "committed": false,
+      "evidence": "Recommends batches of 20, testing on a restored copy, ROLLBACK by default, and supported API tools as \"the better default\"."
+    },
+    {
+      "error": "omits the backup requirement",
+      "committed": false,
+      "evidence": "\"Take backups or dumps of all three DBs (and the nova_api DB) immediately before running, and test a restore.\""
+    },
+    {
+      "error": "ignores Placement allocations",
+      "committed": false,
+      "evidence": "Says SQL deletion \"breaks the Placement allocations\" and recommends heal_allocations / audit --delete."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is a strong, technically detailed review. It covers project tools, Placement, backup with a restore test, batching, ROLLBACK-by-default runs, a test on a restored copy, and checks against hypervisor, Neutron and Cinder backend state. It falls short in three ways: it gives no explicit 'not ready as written' verdict, it never clearly frames the change as irreversible or high blast radius, and it says nothing about approval or decision roles. It commits no critical errors. It cites nothing from the book and invents no facts about the user's environment."
+}

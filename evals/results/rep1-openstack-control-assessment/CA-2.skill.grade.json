@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects presentations/documents alone as proof of transfer",
+      "verdict": "pass",
+      "evidence": "Opens with \"No.\" and states \"Presentations transfer awareness, not ability\" and \"Nothing in the plan tests it.\""
+    },
+    {
+      "criterion": "Names upgrade execution and customization rationale as high-risk knowledge",
+      "verdict": "pass",
+      "evidence": "\"it misses the two things you described: how upgrades are actually executed, and why each customization exists\"; also \"Upgrade know-how is mostly in the doing\" and \"Customization rationale decays fast.\""
+    },
+    {
+      "criterion": "Requires successors to perform real operations observed by the expert",
+      "verdict": "pass",
+      "evidence": "Weeks 2–3: \"Have a named successor, not a spectator, perform real operations while he watches... run an upgrade rehearsal there with the successor at the keyboard.\""
+    },
+    {
+      "criterion": "Recommends decision records for customization reasons",
+      "verdict": "pass",
+      "evidence": "Week 1 \"customization register\": for each patch it records why it exists, what breaks if it is removed, upstream status, owner and review date. It doesn't use the words \"decision record\", but it records the same reasons per customization."
+    },
+    {
+      "criterion": "Reviews critical capabilities against the remaining team",
+      "verdict": "pass",
+      "evidence": "\"List the business capabilities that depend on the platform and how critical each is... Ask who can diagnose and recover each step besides him\"; Week 4 lists the remaining single-person knowledge; offers a control-scale rating for each capability."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts documentation plus presentations as sufficient",
+      "committed": false,
+      "evidence": "It rejects the plan outright: \"No. Documentation plus two presentations is the usual plan, and it misses...\""
+    },
+    {
+      "error": "frames the issue as the individual's performance rather than organizational capability",
+      "committed": false,
+      "evidence": "\"This is a capability assessment, not a judgment of him.\" The whole analysis is about team and capability gaps."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response does what the scenario expects. It rejects documentation plus presentations, names upgrade execution and customization rationale as the knowledge most at risk, and gives a 4-week plan. That plan has successors doing real operations while the expert watches, a register of the reasons behind each customization, a review of critical capabilities against the remaining team, demonstration-based checks, and a record of remaining gaps with owners. It asks for the missing information instead of inventing details about the user's environment. It commits no critical errors and has no faithfulness problems."
+}

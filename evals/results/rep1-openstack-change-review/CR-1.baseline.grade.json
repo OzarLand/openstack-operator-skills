@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "\"Two high-risk changes are bundled... you can't tell whether the certs or the patch/reboot caused it\"; \"Recommendation: Saturday is certs only. Patch and reboot the controllers in a separate window\""
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "\"Nobody has rotated these certs before, so there is no rehearsal and no known procedure\"; under 'Hidden consumers' it lists oslo.messaging ssl_ca_file, \"compute nodes, HAProxy... monitoring, backup jobs and any external automation\""
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "\"I'd require a dry run in staging or a lab before CAB approval\"; Saturday plan to \"roll one controller at a time... verify after each\""
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "\"this rollback only works until about Nov 3\"; asks where old certs/keys are backed up and verified, the restart order, the rollback decision trigger, and points out there is no rollback for the patch/reboot (GRUB kernel, downgrade, snapshots)"
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "partial",
+      "evidence": "Success checks are concrete (\"every endpoint serves the new cert, Galera wsrep_cluster_size=3 and Synced, rabbitmqctl cluster_status... VM create, volume attach\"), and it asks for \"go/no-go checkpoints and a hard 'abort and roll back by T+X' point\". But it never says what the stop conditions actually are, never checks agent-side TLS from the computes, and never mentions monitoring the new expiry dates."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "partial",
+      "evidence": "\"Comms plan and named roles (executor, verifier, decision-maker)\" appears only as a one-line missing item. It doesn't say who owns the decision or who the consumers to be told are."
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "partial",
+      "evidence": "Nothing is marked as passed, and it asks for the deployment tool, the CA, and whether the controllers run network agents. However, there is no gates table, and unknowns such as whether a staging environment exists are not explicitly marked as unknown."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"I wouldn't submit it as written\" and it recommends splitting the changes"
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "\"'Restore old certs' isn't a rollback plan\" followed by specific gaps"
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "Backups, rehearsal and inventory are all listed as missing or required"
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "It frames itself as review before CAB: \"CAB will probably bounce it\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A strong review. It rejects the CR as written, recommends doing the certs alone on Saturday and the OS update in its own window, takes apart the 'restore old certs' rollback (including the Nov 3 validity limit), requires a rehearsal, and lists hidden CA consumers including compute nodes. It is weaker on stop conditions: it asks for an abort point but never defines the conditions. It also doesn't check agent TLS or monitor the new expiry dates, mentions decision roles and comms only briefly, and has no gates table marking unknowns. It commits no critical errors and has no faithfulness issues."
+}

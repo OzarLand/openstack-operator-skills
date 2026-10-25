@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+      "verdict": "pass",
+      "evidence": "Section 1 checks `uuid`, `seqno` and `safe_to_bootstrap` in grastate.dat. Case B runs `mysqld --wsrep-recover` when seqno is -1. The winner is picked by highest seqno."
+    },
+    {
+      "criterion": "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+      "verdict": "pass",
+      "evidence": "'Why this matters: bootstrapping a node with a lower seqno silently discards every transaction the others committed after it...' The Common mistakes table repeats this. Escalation conditions are listed for UUID mismatch and failed recovery."
+    },
+    {
+      "criterion": "Adds a decision point distinguishing full outage from partial failure",
+      "verdict": "pass",
+      "evidence": "'Use when: every node in the cluster is down... If at least one node is still Primary and Synced, don't use this.' Step 0.1: 'Confirm it's a real full outage... It may be a network partition... bootstrapping then would create a split brain.'"
+    },
+    {
+      "criterion": "Includes end-to-end verification",
+      "verdict": "pass",
+      "evidence": "Section 2 verifies the bootstrapped node. Section 4 checks cluster size, Primary, Synced, UUID and recv queue. Section 5 checks LB health checks, application errors, and that a row inserted on one node can be read on another."
+    },
+    {
+      "criterion": "Marks unknown specifics as TODOs",
+      "verdict": "partial",
+      "evidence": "There is an 'Assumptions to check against our setup (fill in)' block with <node1> and <HAProxy / ProxySQL / MaxScale> placeholders, and the closing note says 'service names, paths... are my guesses.' But commands such as `systemctl start mysql` and `/var/lib/mysql` appear inline as defaults, not as TODOs. A containerized OpenStack deployment is never considered, and backups and bootstrap approval are not raised as open items."
+    },
+    {
+      "criterion": "Proposes validation by a non-author while the expert is still available",
+      "verdict": "partial",
+      "evidence": "'Before Friday, have your DB expert fill in the placeholders and review it... If possible, rehearse it once on staging.' This is a review by the expert, not a run-through by someone else with the expert watching. The rehearsal is optional and not tied to the expert's remaining days."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "omits the safe_to_bootstrap / wsrep-recover identification step",
+      "committed": false,
+      "evidence": "Section 1 covers both: the safe_to_bootstrap field and `mysqld --wsrep-recover` for nodes with seqno -1."
+    },
+    {
+      "error": "presents invented service names or paths as fact",
+      "committed": false,
+      "evidence": "Paths and services are framed as assumptions: 'Datadir: /var/lib/mysql (change if different)', 'or mariadb', and 'The service names, paths, flavor and proxy details above are my guesses.'"
+    },
+    {
+      "error": "does not propose a validation session before the expert leaves",
+      "committed": false,
+      "evidence": "Borderline. The response proposes an expert review 'Before Friday' and an optional staging rehearsal, so validation before the expert leaves is raised. It falls short of a non-author dry run observed by the expert, which is reflected in the partial verdict on that criterion."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The runbook is technically solid. It covers identifying the most advanced node with grastate.dat, safe_to_bootstrap and --wsrep-recover, gives an explicit data-loss warning, separates a full outage from a partial failure, and verifies end to end. It is weaker in two places. Environment-specific commands sit inline as defaults rather than as explicit TODOs, with no thought given to containerized OpenStack deployments, backups or who approves a bootstrap. The validation plan is a review by the expert plus an optional staging rehearsal, not a run-through by someone else that the expert observes before Friday. No critical error was clearly committed."
+}

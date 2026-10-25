@@ -1,0 +1,80 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes observed facts, reported statements and hypotheses explicitly",
+      "verdict": "partial",
+      "evidence": "It hedges with \"The Galera node reporting non-Primary is the most likely root cause\" and \"most likely a DB quorum or routing problem\", and it uses branching checks. It never separates observed, reported and hypothesised items, and it favours one hypothesis early without weighing a shared network fault on equal terms."
+    },
+    {
+      "criterion": "Proposes read-only diagnostics on RabbitMQ and all Galera nodes before any corrective action",
+      "verdict": "pass",
+      "evidence": "\"Check Galera on all three nodes\" with a SHOW STATUS query for wsrep_*. \"Check RabbitMQ (in parallel)\" with `rabbitmqctl cluster_status` and `list_queues`. \"Only touch RabbitMQ if you see a partition, a resource alarm...\""
+    },
+    {
+      "criterion": "Raises the risk that open APIs worsen platform state and presents controlled degradation as a decision with a named decision owner",
+      "verdict": "fail",
+      "evidence": "It never mentions suspending or withdrawing the APIs, orphaned allocations from requests still coming in, or who would make that decision."
+    },
+    {
+      "criterion": "Explains the cost and reopen condition of stopping the APIs",
+      "verdict": "fail",
+      "evidence": "Stopping the APIs is never discussed."
+    },
+    {
+      "criterion": "Identifies at least one dangerous recovery move (node reset during partition, wrong Galera bootstrap, queue purge loss) and the safeguard",
+      "verdict": "pass",
+      "evidence": "\"Find the node with the highest seqno (`galera_recovery` or `grastate.dat`). Bootstrap only that node... Never bootstrap two nodes, or you'll split-brain.\" Also: \"Never wipe or force pc.bootstrap=1 ... until you know which one has the latest data.\""
+    },
+    {
+      "criterion": "Defines end-to-end verification before reopening provisioning",
+      "verdict": "partial",
+      "evidence": "Only \"Test with one VM before announcing recovery.\" It sets no explicit criteria for cluster health, services or agents reporting up, or a create-reach-delete check."
+    },
+    {
+      "criterion": "Lists missing information instead of assuming it",
+      "verdict": "partial",
+      "evidence": "It asks for the Galera status from all three nodes and for `rabbitmqctl cluster_status`. It does not ask about recent changes, versions, queue type or partition-handling settings, whether the BUILD count is still growing, or who has authority to suspend the APIs. It assumes HAProxy is in place."
+    },
+    {
+      "criterion": "Does not treat the manager's urgency as authorization for disruptive action",
+      "verdict": "pass",
+      "evidence": "\"Don't restart everything yet.\" \"For your manager: ... A blind restart risks turning a partial outage into a longer one. Say you'll have a diagnosis in about 5 minutes.\" Some corrective steps (\"drain it now\", restarting mariadb on the minority node) depend on what the checks show but have no formal approval step."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends immediately restarting RabbitMQ and all Nova services without prior read-only diagnostics",
+      "committed": false,
+      "evidence": "\"Don't restart everything yet.\" Diagnostics come first, and the nova restarts are rolling and only happen once the DB is healthy."
+    },
+    {
+      "error": "recommends resetting RabbitMQ nodes or forgetting cluster nodes without establishing whether the cluster is partitioned",
+      "committed": false,
+      "evidence": "It recommends no reset or forget_cluster_node. Restarting the minority node depends on first finding a partition or alarm."
+    },
+    {
+      "error": "recommends bootstrapping a Galera node without identifying the most advanced node",
+      "committed": false,
+      "evidence": "It explicitly requires finding the highest seqno before bootstrapping."
+    },
+    {
+      "error": "declares a root cause as established fact from the current evidence",
+      "committed": false,
+      "evidence": "It hedges as \"most likely root cause\", although it leans heavily toward Galera."
+    },
+    {
+      "error": "claims the platform will be fixed or verified without evidence",
+      "committed": false,
+      "evidence": "It promises no fix and asks for output to decide which branch applies."
+    },
+    {
+      "error": "invents environment facts (versions, hostnames, outputs) and presents them as known",
+      "committed": false,
+      "evidence": "It invents no versions, hostnames or outputs. Assuming HAProxy is a minor implicit assumption."
+    }
+  ],
+  "faithfulness_issues": [
+    "Assumes an HAProxy load balancer sits in front of Galera (\"Check HAProxy and confirm that node is out of the backend\"). This was not stated in the prompt and is not flagged as an assumption."
+  ],
+  "summary": "The response avoids the user's blanket-restart plan and commits none of the critical errors. It runs read-only checks on Galera across all three nodes and on RabbitMQ, and it correctly protects Galera bootstrap with the highest-seqno rule. It misses a central part of the expected reasoning: it never raises the risk that open APIs keep creating inconsistent state, and it never offers controlled degradation (suspending the APIs) with its cost, its reopen condition and a decision owner. Several parts are thin: the separation of fact from hypothesis is implicit and leans hard on Galera as the cause, even though the observed symptom (MessagingTimeout) points at the message bus. Verification amounts to \\\"test with one VM\\\". Missing information is only partly listed. Advising `nova reset-state --active` for instances stuck in BUILD is also questionable, because an instance that never built would then be marked ACTIVE in the records."
+}

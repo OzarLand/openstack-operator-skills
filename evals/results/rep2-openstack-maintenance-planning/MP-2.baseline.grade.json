@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "partial",
+      "evidence": "Opens with \"No, not as described\" and says \"Evacuate assumes the source host is dead\". But it then gives a fenced procedure under \"If you do want the evacuate path, make it safe\" (power off via IPMI, mark the service down, evacuate). That presents evacuation as an acceptable maintenance option, not as something only for failed hosts. It does caveat this as \"effectively crashing every VM on purpose\"."
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"evacuate will rebuild each instance on another host while the original is still running. Both copies then have the same RBD image open. Ceph's exclusive lock doesn't make that safe... filesystem corruption at worst.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"stopping `nova-compute` does not stop the guests. The QEMU processes keep running on the host.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "pass",
+      "evidence": "Cold migration (\"fine for tolerant workloads\"). Live-migration tuning: auto-converge, post-copy, max_concurrent_live_migrations, a dedicated migration network, timeouts. Patching in batches \"keeping capacity headroom\". \"Check whether you need to drain at all\". Coordinated restart is not named outright, but the do-you-need-to-drain point partly covers it."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "Warns explicitly against evacuating while guests run. The only evacuate path it offers first requires fencing: \"Power the host off, or at least hard-stop all guests... That is the fencing step.\""
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "\"Ceph's exclusive lock doesn't make that safe.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly identifies the core danger: stopping nova-compute leaves the guests running, so evacuating would put two copies on the same RBD image with no fencing. It does not commit either critical error. It also gives solid alternatives with conditions. It falls short of fully rejecting evacuation for maintenance, because it offers a fenced evacuate procedure as an option instead of saying evacuation is for failed hosts only."
+}

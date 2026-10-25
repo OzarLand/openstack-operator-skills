@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags the bundling of cert rotation with OS update/reboots as stacked uncertainty and recommends separating them",
+      "verdict": "pass",
+      "evidence": "\"Two unrehearsed changes in one window. If the cluster is unhealthy after the reboots, you can't tell whether the certificates or the patches caused it.\" Recommended restructure: \"Saturday: rotation only... Patch and reboot in a separate window.\""
+    },
+    {
+      "criterion": "Identifies that a never-rehearsed rotation has unknown blast radius including compute agents",
+      "verdict": "pass",
+      "evidence": "\"Agents on every compute node connect to RabbitMQ and the APIs over TLS, so a trust or SAN mistake reaches the whole platform at once\"; \"Trust distribution: nova-compute, Neutron agents and Cinder on every node all need the right CA bundle.\""
+    },
+    {
+      "criterion": "Requires rehearsal or staged rollout",
+      "verdict": "pass",
+      "evidence": "\"Rehearse the full rotation in a staging or lab environment built like production\"; Evidence gate marked fail for no rehearsal; \"one controller at a time. One service layer at a time\"; two-phase trust bundle approach."
+    },
+    {
+      "criterion": "Examines rollback credibility concretely",
+      "verdict": "pass",
+      "evidence": "\"'Restore old certs' returns you to certificates that expire in 9 days. It is a delay, not a recovery\"; Recovery section defines points of no return, what to preserve, and \"After expiry: roll forward\"; also covers OS update rollback."
+    },
+    {
+      "criterion": "Defines verification criteria and stop conditions",
+      "verdict": "pass",
+      "evidence": "Stop conditions list (handshake errors, compute agents losing connection, Galera size/sync differs, RabbitMQ partition, time budget exceeded); Verification section (new expiry visible to monitoring, chain/SAN, Galera, RabbitMQ heartbeats from all computes, end-to-end VM create, agents up, observation period)."
+    },
+    {
+      "criterion": "Names decision roles and consumer communication",
+      "verdict": "pass",
+      "evidence": "Decision rights: \"Assessor: unknown. Capability owner: unknown. Accountable: unknown. Decision maker: unknown. Consumer communication: unknown. CAB needs real names here\"; consumer communication also listed as a prerequisite."
+    },
+    {
+      "criterion": "Marks missing information as unknown, not passed",
+      "verdict": "pass",
+      "evidence": "Prerequisites table marks inventory, rehearsal, backup, health baseline, etc. as \"unknown\"; Starting state lists unknowns. Only \"Mandatory requirements: pass (provisional)\" is a qualified pass, not a prerequisite like tests/backups/rehearsal."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves the combined change as ready without requiring separation or justification",
+      "committed": false,
+      "evidence": "\"Verdict: Not ready as written. Split the change, then resubmit.\" Option A combined: rejected."
+    },
+    {
+      "error": "accepts 'restore old certs' as a sufficient rollback without examination",
+      "committed": false,
+      "evidence": "Recovery gate marked fail; \"It is a delay, not a recovery.\""
+    },
+    {
+      "error": "marks unknown prerequisites (tests, backups, rehearsal) as passed",
+      "committed": false,
+      "evidence": "Rehearsal \"unknown / not done\", backup \"unknown\", Evidence gate \"fail\"."
+    },
+    {
+      "error": "presents its review as CAB approval",
+      "committed": false,
+      "evidence": "\"Decision support only. State-changing steps above require approval by the accountable owner\"; \"Selected option — Pending\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong review that covers every criterion. It says the change is not ready and that the two parts should be split. It explains that bundling the work means a failure can't be traced to the certificates or the patches. It shows that \"restore old certs\" is not a real rollback, because those certificates expire in 9 days. It points out that compute agents across the whole platform are exposed and requires a rehearsal plus a staged rollout. It sets out stop conditions, verification steps and decision roles, and includes a draft decision record. Missing information is marked unknown. The response commits none of the critical errors and makes no book citations. Its one assumption, that Saturday falls on 2026-10-31, is stated as an assumption and the user is asked to confirm it."
+}

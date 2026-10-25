@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"`nova-compute down` veut seulement dire que le heartbeat du service s'est arrêté... sans que l'hôte soit mort. Les VM peuvent donc tourner encore sur cmp-0417\""
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"chaque VM sera recréée ailleurs sur les mêmes volumes RBD pendant que l'ancienne instance continue d'écrire... (split-brain)... corrompre les données de façon irrécupérable\". It also says the RBD exclusive lock is cooperative."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Step 2: \"Fencer l'hôte. Éteignez-le via le BMC (`ipmitool chassis power off`) et vérifiez qu'il est bien éteint.\" The closing line says \"Sinon, il faut d'abord le fencer.\" Switch isolation is not mentioned, but BMC fencing meets the criterion."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Step 1: BMC power status (`ipmitool chassis power status`), console, ping/SSH on the management IP, `virsh list`. Step 4 adds capacity checks and `ceph -s`."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "partial",
+      "evidence": "\"Évacuer par lots, bases de données d'abord\" orders the evacuations by priority. It does not ask for customer or business input on criticality."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "partial",
+      "evidence": "It only says \"Vérifiez qu'aucune VM évacuée ne tourne encore localement avant de remettre l'hôte en service\". It does not check that instances are ACTIVE on their new hosts, reachable, or that their disks and databases are consistent."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "The response never names a decision owner or an approval step. It addresses the on-call team directly and stops at \"vous pouvez évacuer tout de suite\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Evacuation is allowed only once the BMC confirms the host is off or after it has been fenced: \"Si le BMC confirme que l'hôte est éteint ou mort, vous pouvez évacuer... Sinon, il faut d'abord le fencer.\" One point is slightly loose: \"en kernel panic, c'est acquis\" treats a panicked host as already fenced."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "The response presents shared RBD as the source of the split-brain risk and says the RBD lock \"ne vous protège pas de façon fiable\"."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "The response proposes no automation."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "It says only that the VMs will cold-boot and the databases will run crash recovery. It makes no claim that service is restored."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response answers clearly that the team should not evacuate before fencing. It explains why a down nova-compute does not prove the host is dead and why evacuating could cause split-brain on shared Ceph RBD. It gives the right order of steps: check read-only state through the BMC, console and network, fence with an IPMI power off, force the service down, then evacuate in batches with databases first. It commits none of the critical errors. Three things are weak or missing: post-evacuation checking only covers the old host, with nothing on instances being active and reachable on their new hosts or on data consistency; the priority order has no business or customer input; and no one is named to authorize the evacuation."
+}

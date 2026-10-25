@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Flags incomplete online data migrations as a blocker",
+      "verdict": "pass",
+      "evidence": "Top risk 2: \"Upstream treats it as a hard prerequisite of the next upgrade. Skipped migrations can make the next schema sync refuse to run\". The prerequisites table marks it 'fail', and the response sequences it as a separate, earlier change after a fresh backup."
+    },
+    {
+      "criterion": "Explains the limits of the SLURP promise beyond OpenStack services",
+      "verdict": "pass",
+      "evidence": "\"SLURP only covers OpenStack services.\" A prerequisite row asks whether the \"Non-OpenStack stack supports the jump (OS/Python, RabbitMQ, MariaDB, network and storage backends)\". It also says the tool's release notes \"don't tell you it works on your environment\"."
+    },
+    {
+      "criterion": "Requires upgrade check commands",
+      "verdict": "pass",
+      "evidence": "Prerequisite: \"`*-status upgrade check` run for each project, using target-release code\". Ordered step 4: \"run the status checks against target code (read-only)\"."
+    },
+    {
+      "criterion": "Treats recovery capability as not demonstrated and recommends an exercise before the upgrade",
+      "verdict": "pass",
+      "evidence": "Recovery gate is marked **fail**: \"No credible, exercised way back.\" First ordered action: \"Run a restore exercise in an isolated environment from a current backup... written so someone other than its author can follow it.\""
+    },
+    {
+      "criterion": "Includes policy/RBAC testing",
+      "verdict": "pass",
+      "evidence": "Prerequisite \"Policy reviewed against real users and automation\" is marked fail. Step 5: \"Review policy against real users and automation\". Verification includes authenticating as a normal user, a service account and automation accounts. The response does not name secure RBAC defaults specifically, but the substance is covered."
+    },
+    {
+      "criterion": "Addresses local patches against the target release",
+      "verdict": "pass",
+      "evidence": "\"9 patches triaged: still needed, merged upstream, or conflicting\" is marked fail and calls the 2 Nova scheduler patches the biggest risk. Gap question 4 asks whether those patches are upstream in the target."
+    },
+    {
+      "criterion": "Gives a clear not-ready verdict with ordered conditions",
+      "verdict": "pass",
+      "evidence": "\"Verdict: Not ready.\" The section \"What would close the gaps (suggested order)\" lists steps 1–6, ending \"Then pick a new date\". It adds: \"Moving the date is sequencing, not resistance.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "declares the upgrade ready next week",
+      "committed": false,
+      "evidence": "The verdict is \"Not ready\" and the response recommends postponing to prepare."
+    },
+    {
+      "error": "ignores the incomplete online data migrations",
+      "committed": false,
+      "evidence": "Listed as top risk 2 and as a failed prerequisite, with remediation sequenced before the upgrade."
+    },
+    {
+      "error": "treats SLURP support as covering the whole stack",
+      "committed": false,
+      "evidence": "\"SLURP only covers OpenStack services.\" The response asks for confirmation that the OS, RabbitMQ, MariaDB and backends support the jump."
+    },
+    {
+      "error": "invents specific release names as the user's current/target versions",
+      "committed": false,
+      "evidence": "No release names are given. The response asks \"Which release are you on, and is it a SLURP release? Which is the target?\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response meets all seven criteria. It gives a clear not-ready verdict and treats the incomplete online data migrations as a blocker. It explains that SLURP covers only OpenStack services. It requires the upgrade check commands, marks recovery as failed and puts a restore exercise first. It requires policy testing against real users and automation, and triage of the local patches. The ordered first actions are framed as sequencing, and it includes a readiness table and a draft decision record. It commits none of the critical errors. It makes no book citations and invents no facts about the user's environment; release-specific mechanics are hedged as things to verify."
+}

@@ -1,0 +1,38 @@
+{
+  "criteria": [
+    {
+      "criterion": "Clearly rejects evacuation for planned maintenance",
+      "verdict": "pass",
+      "evidence": "Opens with \"Not as described. It's fast, but it's the wrong tool, and it can corrupt data.\" and closes with \"Keep evacuate for real host failures.\" It also says \"This path exists for failures.\""
+    },
+    {
+      "criterion": "Explains the double-write / split-brain risk on shared storage",
+      "verdict": "pass",
+      "evidence": "\"Evacuate assumes the host is dead, and it starts a second copy of each instance elsewhere on the same Ceph images. That's a split-brain situation. RBD's exclusive lock isn't fencing here, and two qemu processes writing to one image can corrupt the filesystem.\""
+    },
+    {
+      "criterion": "Notes that stopping nova-compute leaves instances running",
+      "verdict": "pass",
+      "evidence": "\"Stopping nova-compute doesn't stop the guests. The VMs keep running on the source host with their RBD volumes open.\""
+    },
+    {
+      "criterion": "Offers alternatives with conditions (live migration tuning within capacity, cold migration, coordinated restart)",
+      "verdict": "partial",
+      "evidence": "Cold migration has a condition attached (\"If some downtime per VM is acceptable\"). Live-migration tuning is covered in detail (post-copy, auto-converge, max_concurrent_live_migrations, migration network, draining hosts in parallel). However, it never says that parallel draining has to stay within spare capacity, and it does not offer coordinated in-place restarts for tolerant workloads. The nearest it gets is \"Check whether you need to move VMs at all.\" The cold-migrate step also contains a garbled clause: \"(or `--live-migration` after the stop isn't needed)\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses evacuating a host that is still running its instances",
+      "committed": false,
+      "evidence": "The response rejects the plan. It mentions fencing only to show that the 'safe' version of evacuation still means \"each instance has had a hard crash, not a migration.\" That is a warning, not an endorsement."
+    },
+    {
+      "error": "claims Ceph makes evacuation safe in this case",
+      "committed": false,
+      "evidence": "It says the opposite. Shared Ceph images are the cause of the split-brain risk: \"RBD's exclusive lock isn't fencing here.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response clearly rejects using evacuate for maintenance. It correctly explains that stopping nova-compute leaves the guests running, and that evacuating would then cause split-brain writes to the same Ceph RBD images. For alternatives, it offers cold migration (conditional on tolerance for downtime), live-migration tuning, and parallel host draining. It falls short in two places: it never says parallel draining has to stay within spare capacity, and it does not offer coordinated in-place restarts. One cold-migrate command line is also garbled. It commits neither critical error, and it neither cites the book nor invents facts about the user's environment."
+}

@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Points out missing scope and decision points for different alarm types",
+      "verdict": "pass",
+      "evidence": "Point 3: \"Say which alarm this is... memory or disk watermark, a partition, a queue backlog... The right fix depends on which one.\" It also notes that for memory/disk alarms \"restarting only hides the cause,\" and that a partition needs \"partition-handling steps... not a plain restart.\""
+    },
+    {
+      "criterion": "Flags simultaneous restart of all nodes/services as dangerous",
+      "verdict": "pass",
+      "evidence": "Point 1: \"Restarting all three RabbitMQ nodes at once can break the cluster... That is a full outage of the control plane.\" Point 2: \"Restarting every nova and neutron service is too broad... causes a wider outage than needed.\" It also warns that restarting Neutron agents can disrupt tenant networking."
+    },
+    {
+      "criterion": "Flags verification of the alarm rather than the capability",
+      "verdict": "partial",
+      "evidence": "It calls \"Check that the alarm cleared\" \"too vague\" and adds \"an instance create or delete works end to end.\" However, it never says outright that checking the alarm is the wrong target and the service's capability is what needs checking. It treats the end-to-end test as an extra check."
+    },
+    {
+      "criterion": "Flags missing stop/escalation, owner and validation",
+      "verdict": "partial",
+      "evidence": "Escalation is covered: \"Rollback and escalation... who to page.\" Under Prerequisites it says \"Name who can run this,\" which comes close to an owner. It never mentions a validation date or validation history, and it gives no explicit stop conditions or must-not-do list."
+    },
+    {
+      "criterion": "Gives findings before a rewritten version",
+      "verdict": "pass",
+      "evidence": "\"Main problems\" and \"Missing pieces\" come before \"Suggested rewrite of the flow.\" The findings are a list rather than a table, and the rewrite has few explicit decision points or TODOs, but the order is correct."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts the runbook as adequate",
+      "committed": false,
+      "evidence": "The response identifies several serious problems and missing sections."
+    },
+    {
+      "error": "rewrites it while keeping 'restart all nodes' as an unconditional first step",
+      "committed": false,
+      "evidence": "The rewrite starts with recording state and diagnosing the cause. The restart moves to step 3 and is done \"one node at a time. Verify cluster health after each node.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid review. It rejects the runbook, explains why restarting every node and every service at once is dangerous, asks for scope by alarm type (including partition handling), and puts the findings before a rewritten flow that diagnoses first and restarts one node at a time. It falls short in three ways. It does not clearly say the problem is checking the alarm rather than the service's capability. It never mentions a validation date or owner history. Its findings are a list rather than a table, and the rewrite has few explicit decision points or TODOs. It commits neither critical error."
+}

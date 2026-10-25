@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Includes identification of the most advanced node (seqno, safe_to_bootstrap, wsrep-recover)",
+      "verdict": "pass",
+      "evidence": "Step 2: '2a. Read grastate.dat on every node', with a table covering seqno -1 and safe_to_bootstrap: 1; '2b. For nodes with seqno: -1, recover the position' using 'mariadbd --wsrep-recover'; '2c. Pick the winner', with UUID matching and highest seqno."
+    },
+    {
+      "criterion": "States the data-loss risk of bootstrapping the wrong node as must-not-do or stop condition",
+      "verdict": "pass",
+      "evidence": "'If you bootstrap a node that is behind, the transactions only the better node had are lost for good.' The Never list includes 'Bootstrap a node because it started first or is the \"primary\". Compare seqno.' Stop conditions: 'If they differ, stop and escalate.'"
+    },
+    {
+      "criterion": "Adds a decision point distinguishing full outage from partial failure",
+      "verdict": "pass",
+      "evidence": "Step 1: 'If any node is still running and wsrep_cluster_status = Primary, this is not a full outage. Don't bootstrap. Start the down nodes normally.' It also covers the case where nodes are alive but non-Primary (quorum loss)."
+    },
+    {
+      "criterion": "Includes end-to-end verification",
+      "verdict": "partial",
+      "evidence": "Step 5 checks cluster size, Primary/Synced, the cluster UUID, a write on one node read back on another, load balancer health and monitoring. There is no OpenStack service-level check that services can write again (for example creating a resource). It only says 'Release application traffic and monitor'."
+    },
+    {
+      "criterion": "Marks unknown specifics as TODOs",
+      "verdict": "pass",
+      "evidence": "A table of FILL-IN items covers version, nodes, datadir, service name, error log, SST method, load balancer and escalation contacts. Commands use <service>, <datadir> and <error-log> placeholders, and different flavours are shown as alternatives."
+    },
+    {
+      "criterion": "Proposes validation by a non-author while the expert is still available",
+      "verdict": "partial",
+      "evidence": "'Before Friday, ask the DBA to: ... Do a dry run in staging.' A dry run before the expert leaves is proposed, but the response does not say someone other than the expert should run it while the expert watches. 'The DBA' reads as the leaving expert."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "omits the safe_to_bootstrap / wsrep-recover identification step",
+      "committed": false,
+      "evidence": "Steps 2a–2c cover both grastate.dat safe_to_bootstrap and --wsrep-recover in detail."
+    },
+    {
+      "error": "presents invented service names or paths as fact",
+      "committed": false,
+      "evidence": "The service name, datadir and log path are all FILL-IN, with defaults shown as options, e.g. 'FILL-IN (mariadb, mysql or mysqld)'. Commands use placeholders."
+    },
+    {
+      "error": "does not propose a validation session before the expert leaves",
+      "committed": false,
+      "evidence": "'Before Friday, ask the DBA to ... Do a dry run in staging, which is the best test of a runbook like this.' It is weakly specified but present."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, technically sound runbook. It covers the grastate.dat and safe_to_bootstrap checks, --wsrep-recover, the data-loss warning, the full-outage vs partial-failure decision point, FILL-IN placeholders and cluster-level verification. Two things are weaker. Verification stops at the database and does not check that OpenStack services can write again. The validation plan is a staging dry run 'before Friday' with no clear statement that a non-author should run it while the expert observes. It commits no critical errors and has no faithfulness issues."
+}

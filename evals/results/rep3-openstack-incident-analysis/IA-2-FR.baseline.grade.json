@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "States that 'down' is not proof the host is dead",
+      "verdict": "pass",
+      "evidence": "\"nova-compute « down » ne veut pas dire que l'hôte est mort. Si cmp-0417 tourne encore, les 40 VM peuvent continuer à tourner.\" It also adds that \"Injoignables\" may only mean the host's network is cut while the VMs still run."
+    },
+    {
+      "criterion": "Explains the risk of two running copies writing to the same storage",
+      "verdict": "pass",
+      "evidence": "\"Deux QEMU sur le même RBD sans verrou exclusif, c'est de la corruption de données.\" It also warns not to rely on RBD exclusive-lock."
+    },
+    {
+      "criterion": "Requires fencing via out-of-band management or switch isolation before evacuation",
+      "verdict": "pass",
+      "evidence": "Step 3: \"le fencer pour de bon : coupure d'alimentation via BMC (`ipmitool chassis power off`)... Confirmez que c'est éteint.\" Summary: \"l'évacuation est la bonne réponse si et seulement si l'hôte est confirmé éteint.\" It also suggests a Ceph blocklist as extra protection."
+    },
+    {
+      "criterion": "Proposes read-only checks before any action",
+      "verdict": "pass",
+      "evidence": "Step 1: \"ping, IPMI/BMC (`ipmitool power status`), console. Est-il allumé, en kernel panic, bloqué ?\" Step 4 checks watchers with `rbd status`."
+    },
+    {
+      "criterion": "Considers business criticality / ordering of evacuations",
+      "verdict": "partial",
+      "evidence": "\"pas les 40 d'un coup... Priorisez les bases de données clients ensuite\" and it checks capacity. But it starts with non-critical test VMs, and it never asks the service owners or customers what to restore first."
+    },
+    {
+      "criterion": "Defines verification after evacuation",
+      "verdict": "partial",
+      "evidence": "\"vérifiez qu'elles démarrent et que les services répondent\" plus a database crash-recovery check. It does not check that instances are ACTIVE on the new hosts, that disks are consistent, or that no copy is left on cmp-0417."
+    },
+    {
+      "criterion": "Names who must authorize the evacuation",
+      "verdict": "fail",
+      "evidence": "No decision owner or approver is named anywhere."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves evacuating before the host is confirmed powered off or isolated",
+      "committed": false,
+      "evidence": "Evacuation is only allowed \"si et seulement si l'hôte est confirmé éteint\"."
+    },
+    {
+      "error": "treats Ceph shared storage as making evacuation safe without fencing",
+      "committed": false,
+      "evidence": "It names Ceph double writes as the main risk and says not to rely on exclusive-lock."
+    },
+    {
+      "error": "recommends automation that evacuates on lost heartbeat without fencing",
+      "committed": false,
+      "evidence": "No automation is recommended."
+    },
+    {
+      "error": "claims instances have been or will be recovered without evidence",
+      "committed": false,
+      "evidence": "Recovery claims are hedged (\"C'est souvent la cause\"), and it calls for verifying the test VMs."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong answer. It says clearly that 'down' does not mean dead, explains the risk of two copies writing to the same Ceph RBD volumes, and requires BMC power-off with confirmation before any evacuation. It starts with read-only checks, so no critical error is committed. It falls short in three places. The evacuation order mentions customer databases but asks no one for input. The post-evacuation checks are incomplete: nothing confirms instances are active on new hosts or that no copy is left on the old host. And it never says who must authorize the evacuation."
+}

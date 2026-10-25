@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Disables the compute service before moving instances",
+      "verdict": "pass",
+      "evidence": "Drain step 1: \"Stop new VMs landing there: openstack compute service set --disable --disable-reason \\\"DIMM replacement\\\" cmp-12 nova-compute\", before any migrations. (The pre-day test migration of one VM 'off and back' happens before disabling, but that is a test, not part of the drain.)"
+    },
+    {
+      "criterion": "Treats PCI passthrough instances as non-live-migratable",
+      "verdict": "pass",
+      "evidence": "\"KVM can't live-migrate PCI passthrough devices, so you have two options: Cold migrate to a host with a free matching GPU... Shut them down cleanly and start them again on cmp-12 after the repair.\""
+    },
+    {
+      "criterion": "Identifies the large-memory database as a live-migration risk and involves its owner",
+      "verdict": "pass",
+      "evidence": "\"Live migration of a big, write-heavy memory footprint often fails to converge\" and gives options (app failover, auto_converge/post-copy, planned outage); pre-work step 3: \"Find the owners of the GPU VMs and the database, and agree a window with them.\""
+    },
+    {
+      "criterion": "Verifies moves and empty host before power-off",
+      "verdict": "pass",
+      "evidence": "\"Check each one for connectivity before starting the next\" and step 5: \"Confirm cmp-12 is empty: openstack server list --host cmp-12 --all-projects should return nothing. Then stop the node.\""
+    },
+    {
+      "criterion": "Includes post-repair verification and re-enable step",
+      "verdict": "pass",
+      "evidence": "After the repair: \"Run the memory test and check that the node sees the full RAM\", then \"Re-enable the service: openstack compute service set --enable cmp-12 nova-compute\", then check GPUs with nvidia-smi."
+    },
+    {
+      "criterion": "Labels steps read-only vs state-changing or otherwise marks state changes needing approval",
+      "verdict": "fail",
+      "evidence": "No step is labeled read-only or state-changing, and nothing is marked as needing approval. Commands such as service disable, migrate and nova.conf changes appear without such markers."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "proposes live-migrating the PCI passthrough instances as normal",
+      "committed": false,
+      "evidence": "States KVM can't live-migrate PCI passthrough devices and offers cold migration or shutdown instead."
+    },
+    {
+      "error": "proposes evacuate",
+      "committed": false,
+      "evidence": "Evacuate is never mentioned; it uses live/cold migrate and shutdown only."
+    },
+    {
+      "error": "omits disabling the compute service",
+      "committed": false,
+      "evidence": "Drain step 1 disables nova-compute on cmp-12."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid procedure. It disables the compute service first and classifies the VMs correctly: PCI passthrough GPU VMs get cold migration or downtime, and the in-memory database is flagged as a convergence risk, with owner involvement and several options. It confirms the host is empty before power-off and includes post-repair memory verification and re-enabling. Its main gap is that it never separates read-only steps from state-changing ones and never marks which actions need approval. Stop conditions are thin, limited to the migration timeout and abort. It commits none of the critical errors and has no faithfulness issues."
+}

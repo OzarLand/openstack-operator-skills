@@ -1,0 +1,78 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "pass",
+      "evidence": "§1: \"Fixed (Reported): kernel + QEMU fix on all 300 hosts in 3 weeks\" ... \"Flexible: how each instance gets moved.\""
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "pass",
+      "evidence": "§3: \"Send the criticality table now, with a reply deadline of about day 3\" with owner/downtime columns; \"An empty cell is not 'low'. Silent tenants default to 'live-migrate, never restart'.\""
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "§2: \"Rule: hosts drained at once in an AZ ≤ spare in that AZ − reserve\"; \"the AZ with the least spare sets the pace\"; even split is labelled as an assumption; per-AZ spare listed as gap #1."
+    },
+    {
+      "criterion": "Handles SR-IOV instances by release: live migration with a brief interface interruption (owner agreement) where supported, restart or cold migration otherwise",
+      "verdict": "pass",
+      "evidence": "Table: `direct` port \"Live migration is supported since Train... guest briefly loses that interface. Verify for your release... Ask the owner\"; `direct-physical`/PCI alias \"Not live-migratable. Cold migration or coordinated restart with the owner's agreement\"; release asked in gap #2."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "pass",
+      "evidence": "§4.1: \"Live migration from newer to older QEMU is unsupported. Patch the spare/empty hosts first, then move instances only toward patched hosts. Never move back.\""
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "§1: \"A QEMU fix only protects instances that were migrated or restarted after it was installed\"; §5.8 records per instance \"migrated or restarted after the patch\"; §10 repeats it."
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "pass",
+      "evidence": "§6 lists stop conditions, including capacity below reserve, migration failures or slowdowns, and an unreachable decision-maker, and adds \"resuming is a new decision\"; §10 lists completion criteria."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "§5: \"Never use `evacuate` to speed up draining. It is for failed, fenced hosts only.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "The response plans rolling drains with concurrency capped by per-AZ spare minus a reserve. It says to measure cycle time in a pilot, and if the pace doesn't fit, to escalate (more hosts, agreed restarts, exceptions) rather than force it."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "\"Silent tenants default to 'live-migrate, never restart'\"; restarts happen only in \"agreed windows\" with owner approval (§7)."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "The response warns explicitly against `evacuate` on healthy hosts."
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "§1 and §10 require every instance to be migrated or restarted after the patch."
+    },
+    {
+      "error": "classes all SR-IOV instances as requiring a restart without considering the release",
+      "committed": false,
+      "evidence": "The response separates `direct` ports (live-migratable since Train, verify the release) from passthrough."
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "\"Assumption: about 100 hosts per AZ, and spare capacity of about 2.7 hosts per AZ if it's spread evenly. You haven't told me the real split\". The figures are labelled as assumptions."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response passes all 8 criteria and commits none of the 6 critical errors. It is a strong, well-structured plan that matches the expected reasoning:\n- It keeps the security requirement fixed and separate from how instances get moved.\n- It requires a criticality table from the consuming teams, and silent tenants default to no restart.\n- It frames capacity per AZ and labels the even split as an assumption, not a known figure.\n- It classifies SR-IOV by release and port type, and asks the owner to accept the brief interface interruption.\n- It puts the landing zone first and forbids migrating from newer to older QEMU.\n- It states that the QEMU fix protects only instances migrated or restarted since.\n- It forbids evacuation and defines stop conditions, decision rights and completion criteria.\n\nIt cites nothing from the book and invents no facts about the environment."
+}

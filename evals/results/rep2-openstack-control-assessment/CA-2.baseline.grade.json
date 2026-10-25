@@ -1,0 +1,43 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects presentations/documents alone as proof of transfer",
+      "verdict": "pass",
+      "evidence": "Opens with \"No.\" and explains: \"Presentations are one-way... Nobody has proven the docs work. Untested runbooks are usually missing a step\"."
+    },
+    {
+      "criterion": "Names upgrade execution and customization rationale as high-risk knowledge",
+      "verdict": "pass",
+      "evidence": "Item 1 focuses on why each customization exists and \"what happens if it's removed\". Item 3, \"Record the upgrade history\", covers order of operations, rollback points, deployment-specific gotchas and a plan for the next upgrade. It doesn't mention deployment tooling by name."
+    },
+    {
+      "criterion": "Requires successors to perform real operations observed by the expert",
+      "verdict": "pass",
+      "evidence": "Item 2: \"Have the people who will inherit this perform a real task, ideally a minor upgrade... using only the docs, with him observing and not helping unless they're stuck... the single highest-value activity.\" It doesn't say to use a test environment."
+    },
+    {
+      "criterion": "Recommends decision records for customization reasons",
+      "verdict": "pass",
+      "evidence": "Item 1 has the substance of decision records without using the term: \"For each one, record why it exists, which bug, ticket or incident drove it, what happens if it's removed, and whether it's still needed.\""
+    },
+    {
+      "criterion": "Reviews critical capabilities against the remaining team",
+      "verdict": "pass",
+      "evidence": "Item 5: \"Map which areas (compute, networking, storage, identity, upgrades, monitoring) have only one person who understands them. Assign a primary and backup\". Logistics adds a week-3 checkpoint \"where successors demonstrate competence\"."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "accepts documentation plus presentations as sufficient",
+      "committed": false,
+      "evidence": "The response opens with \"No.\" and says the default plan falls short."
+    },
+    {
+      "error": "frames the issue as the individual's performance rather than organizational capability",
+      "committed": false,
+      "evidence": "It frames the problem as single points of failure, successors' competence and the risk register. Only an aside (\"Senior engineers are usually poor, slow documenters\") is about individuals in general, and it isn't aimed at this engineer's performance."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response firmly rejects documentation plus presentations as enough. It requires successors to carry out real operations, including an upgrade, while the expert watches. It records the reasons behind each customization in the form of decision records, maps single points of knowledge across capability areas and sets a checkpoint where successors demonstrate competence. Gaps: it doesn't call for a test environment, doesn't name deployment tooling, and doesn't use the terms \"decision record\" or \"control review\". It commits no critical errors, cites no book passages and invents no facts about the user's environment; Galera, Ceph and similar are given only as examples."
+}

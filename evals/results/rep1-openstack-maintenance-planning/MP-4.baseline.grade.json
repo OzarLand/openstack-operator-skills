@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 asks for or plans workload classification by criticality and migratability",
+      "verdict": "partial",
+      "evidence": "Migratability is covered: \"Cold-migrate or schedule downtime for anything that can't live-migrate (SR-IOV or passthrough, local-disk...)\" and \"Pets that can't move. List the VMs that can't live-migrate and agree downtime with their owners now.\" Criticality is never classified explicitly. The only nod to it is \"tenants with multi-AZ HA stay up.\""
+    },
+    {
+      "criterion": "Turn 2 bounds batches by spare capacity per AZ and handles SR-IOV, GPU and the DB cluster differently",
+      "verdict": "pass",
+      "evidence": "\"Spare capacity of 2 hosts per AZ means batches of 2, not 4... at most 2 hosts out of service per AZ at any moment, counting hosts that are still draining.\" Each workload type gets its own section: SR-IOV (test live migration on a non-critical VM, otherwise cold-migrate or restart; check free VFs), GPU (\"restart during the agreed window\"), and the DB cluster (\"never have two of its nodes down or in transition at the same time\", with an owner-confirmed health go/no-go gate)."
+    },
+    {
+      "criterion": "Turn 2 or earlier defines stop conditions before the campaign continues",
+      "verdict": "pass",
+      "evidence": "Turn 1 go/no-go gates: \"Proceed to the next batch only if: all migrations succeeded or are accounted for, there are no new alerts...\" plus \"Decide in advance what failure on the canary means (stop everything)\" and \"name one person as the stop-the-line decider.\" Turn 2 adds the DB rejoin gate and \"If the canary fails, stop.\""
+    },
+    {
+      "criterion": "Turn 3 treats the failed migration as a stop condition and does not continue to cmp-a-06",
+      "verdict": "pass",
+      "evidence": "\"Don't start cmp-a-06 yet. Fix the ERROR VM first.\" It also warns that a systemic cause would mean \"the next 35 hosts will hit it too.\" One weakness: the reason it gives first is spare capacity, not the stop gate it set in turn 1, and \"Fifteen minutes of triage\" plays down the investigation."
+    },
+    {
+      "criterion": "Turn 3 starts with read-only checks of where the VM runs and why the migration failed",
+      "verdict": "pass",
+      "evidence": "Step 1 runs `openstack server show`, `openstack server migration list` and `virsh list --all` on both hosts, and checks `rbd status` for watchers. Step 2 reads the nova-compute and libvirt/QEMU logs on source and destination. All of this comes before any recovery action."
+    },
+    {
+      "criterion": "Turn 3 makes resuming a new decision with owner involvement",
+      "verdict": "partial",
+      "evidence": "There are resume criteria: \"If the cause is a one-off... carry on once the VM is recovered... If it's systemic, pause and fix it.\" But the VM's owner is never contacted or asked to approve. Owners come up only if the VM is the DB node, and the only reviewer mentioned is \"a second pair of eyes\" for a DB edit. No approver is named for resuming the campaign."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 3, says to carry on with the next host before understanding the failure",
+      "committed": false,
+      "evidence": "\"Don't start cmp-a-06 yet.\" It allows carrying on only after triage, and only if the cause turns out to be a one-off."
+    },
+    {
+      "error": "recommends evacuate for planned maintenance",
+      "committed": false,
+      "evidence": "Evacuate is never recommended. Draining is done by live migration, cold migration or restart."
+    },
+    {
+      "error": "proposes reset-state or other state-changing fixes on the VM without first establishing where it runs",
+      "committed": false,
+      "evidence": "Recovery is gated: \"Once you know where it's running: ... `openstack server set --state active`\", and \"On both, or paused on either: stop. Don't reset state until you know which copy is live.\""
+    },
+    {
+      "error": "plans live migration of GPU passthrough VMs as if supported",
+      "committed": false,
+      "evidence": "\"GPU passthrough VMs (2): restart during the agreed window... stop both VMs at the start of their window, patch and reboot their host(s), and start them again.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid multi-turn answer, and it commits none of the critical errors.\n\n- **Turn 1** plans for migratability and sets go/no-go gates, but never classifies workloads by business criticality.\n- **Turn 2** limits batches to 2 hosts per AZ, matching the spare capacity, and handles SR-IOV, GPU and the DB cluster each in its own way.\n- **Turn 3** refuses to move on to cmp-a-06. It starts with read-only checks: Nova state, migration list, virsh on both hosts, rbd watchers and logs. Reset-state comes only after the VM's real location is known.\n\nWeaknesses:\n- Turn 3 never brings in the VM's owner, and no approver is named for resuming the campaign.\n- Turn 3 frames the halt mainly as a capacity problem, not as the stop gate turn 1 defined.\n- It says to go ahead and patch and reboot cmp-a-05 once `server list --host` is clean, even though Nova's record may be wrong about where the VM is running.\n- It wrongly implies a hard reboot will bring the VM up \"on a good host\". A hard reboot does not move a VM to another host.\n\nNo book citations or invented environment facts were found."
+}

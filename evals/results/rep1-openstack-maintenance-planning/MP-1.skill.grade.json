@@ -1,0 +1,81 @@
+{
+  "criteria": [
+    {
+      "criterion": "Separates the fixed requirement from the execution strategy",
+      "verdict": "pass",
+      "evidence": "\"The plan fixes the requirement (all 300 hosts patched in 3 weeks) and designs the execution around what you have\"; §1 lists 'Fixed' separately from constraints."
+    },
+    {
+      "criterion": "Requires consumer-provided criticality before execution",
+      "verdict": "pass",
+      "evidence": "\"Step 0 is the criticality table, and it comes first. Send consuming teams a shared table...\"; \"An empty cell means a gap, not low criticality... escalated rather than restarted without agreement.\" Work that needs no decision, such as empty hosts, may start while answers come in."
+    },
+    {
+      "criterion": "Computes or frames capacity per availability zone",
+      "verdict": "pass",
+      "evidence": "§4: \"Capacity is per failure domain... spare capacity equal to one host in *each* AZ\"; per-AZ formula; \"the poorest AZ sets the pace\"; asks for the spare capacity per AZ."
+    },
+    {
+      "criterion": "Handles SR-IOV instances by release: live migration with a brief interface interruption (owner agreement) where supported, restart or cold migration otherwise",
+      "verdict": "pass",
+      "evidence": "Class table: \"SR-IOV `direct` port... Live migration if the release is Train or later... The guest loses that interface briefly... Otherwise cold migration\"; \"Owner must accept the NIC interruption\"; direct-physical/PCI passthrough \"Not live-migratable\"; asks for the release."
+    },
+    {
+      "criterion": "Explains landing zone and version direction constraint",
+      "verdict": "pass",
+      "evidence": "§5.2: \"Patch the emptiest hosts first, and use them as the first destinations... instances can move onto patched hosts but not back to unpatched ones\"; §2: \"Newer-to-older live migration is unsupported\"."
+    },
+    {
+      "criterion": "States that running instances are only protected after migration or restart",
+      "verdict": "pass",
+      "evidence": "\"the QEMU fix only protects instances that have been migrated or restarted since the patch... Track this per instance, not per host\"; repeated in completion criteria."
+    },
+    {
+      "criterion": "Defines stop conditions and completion criteria",
+      "verdict": "pass",
+      "evidence": "§7 lists stop conditions (failed or slow migrations, capacity below reserve, approver unavailable, etc.) and says \"Resuming after a stop is a new decision\"; §9 gives completion criteria, including per-instance verification."
+    },
+    {
+      "criterion": "Does not recommend evacuation for maintenance",
+      "verdict": "pass",
+      "evidence": "\"Never use evacuation for maintenance. It is for failed hosts only...\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "plans to live-migrate everything despite insufficient capacity",
+      "committed": false,
+      "evidence": "States the deadline is \"unlikely if everything must be live-migrated one host at a time\"; uses restart and cold-migration classes as the main lever."
+    },
+    {
+      "error": "restarts workloads without owner input on criticality",
+      "committed": false,
+      "evidence": "Restart class requires owner sign-off; unanswered workloads are \"escalated rather than restarted without agreement\"."
+    },
+    {
+      "error": "suggests evacuation for maintenance",
+      "committed": false,
+      "evidence": "Explicitly forbids it: \"Never use evacuation for maintenance.\""
+    },
+    {
+      "error": "treats patched hosts as protecting running instances that were not migrated or restarted",
+      "committed": false,
+      "evidence": "\"Patching a host leaves its running guests on the old binary.\""
+    },
+    {
+      "error": "classes all SR-IOV instances as requiring a restart without considering the release",
+      "committed": false,
+      "evidence": "Separates `direct` ports (live migration on Train or later) from direct-physical and PCI passthrough."
+    },
+    {
+      "error": "invents capacity numbers per AZ and presents them as known",
+      "committed": false,
+      "evidence": "\"about 2.7 per AZ on average. That is only a ceiling if the spare is evenly spread, which I haven't seen\"; per-AZ figures are explicitly marked as needing confirmation."
+    }
+  ],
+  "faithfulness_issues": [
+    "The response says \"The book lists them [SR-IOV direct ports] as not migratable\". The scenario's expected_reasoning, sourced from the book (Ch. 20), says SR-IOV direct ports can be live-migrated since Train with a brief interface interruption. The response therefore attributes to the book a position that contradicts it.",
+    "The response points to a template file, `references/criticality-table-template.md`, as if it exists. That file was not in the prompt."
+  ],
+  "summary": "This is a strong, well-structured plan, and it passes all eight criteria. It keeps the security requirement fixed and collects criticality from consuming teams first. It frames capacity per AZ without inventing numbers and handles SR-IOV by port type and release. It explains the landing zone and that migration cannot go from newer to older QEMU/libvirt. It states that only instances migrated or restarted after the patch are protected, forbids evacuation, and defines stop conditions and completion criteria. It commits none of the critical errors. There are two faithfulness issues. First, it claims the book lists SR-IOV direct ports as not migratable, which contradicts the source. Second, it refers to a template file as if it exists, though the prompt never mentioned one."
+}

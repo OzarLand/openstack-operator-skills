@@ -1,0 +1,110 @@
+[
+  {
+    "skill_under_test": "openstack-control-assessment",
+    "scenario": "CA-1",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-control-assessment"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "restoration-playbook.md",
+      "operating-principles.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.857,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-control-assessment",
+    "scenario": "CA-1",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.5,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-control-assessment",
+    "scenario": "CA-2",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-control-assessment"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "review-and-measures.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-control-assessment",
+    "scenario": "CA-2",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.9,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-control-assessment",
+    "scenario": "CA-3",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-control-assessment"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "control-spectrum.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.917,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-control-assessment",
+    "scenario": "CA-3",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.75,
+      "critical_errors_committed": [
+        "gives a single numeric score as the answer"
+      ]
+    }
+  }
+]

@@ -171,9 +171,11 @@ model against a rubric.
 
 </div>
 
-Also checked: French prompts (0.95 vs 0.75), Haiku spot checks, and an
-end-to-end plugin install from GitHub. Single runs graded by a model show a
-consistent direction, not a precise effect size.
+Repeated three times on all 30 scenarios, including French prompts and
+multi-turn conversations: 0.98 vs 0.73, and no critical error with the skills
+in 90 answers (16 without). Also checked: Haiku triggering and an end-to-end
+plugin install from GitHub. Grading is by a model, so read it as a direction
+more than an exact effect size.
 [Full evaluation report →](docs/evaluation-report.md)
 
 ## 🛡️ Safety by design

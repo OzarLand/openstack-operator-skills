@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Applies decision gates before comparing options",
+      "verdict": "partial",
+      "evidence": "Recovery is treated as a hard gate (\"This is the gate for everything after it. If it fails, fixing it comes before any upgrade\"). However, the options are dismissed first in \"Why not the other two\", and there is no explicit gates step or table (security, recovery, readiness) applied to each option before the comparison."
+    },
+    {
+      "criterion": "Links postponement's viability to a tested backport",
+      "verdict": "partial",
+      "evidence": "Rejects postponement partly because of the untested backport (\"leaves you on an unmaintained base with an ... untested security backport for longer\"), and requires testing the backport in staging as a stopgap. It never states the condition that postponement passes the security gate only if a tested backport is credible."
+    },
+    {
+      "criterion": "Identifies the recovery exercise as the first action or key uncertainty reducer",
+      "verdict": "pass",
+      "evidence": "\"Recovery: rehearse a control-plane restore from backup into a scratch environment ... This is the gate for everything after it\"; \"The biggest risk in your situation is that you can't recover, not the version gap.\""
+    },
+    {
+      "criterion": "Recognizes team readiness as a constraint",
+      "verdict": "partial",
+      "evidence": "Mentions the team size (\"changing everything at once with four people\") and asks for a runbook written \"with at least two people who each run it\". It does not name team capacity/readiness as the binding constraint or assess it on its own terms."
+    },
+    {
+      "criterion": "States what would change the ranking (sensitivity)",
+      "verdict": "pass",
+      "evidence": "\"What would change this\" section covers advisory exploitability, the intermediate series reaching end of maintenance within about six months, and backups proving unusable."
+    },
+    {
+      "criterion": "Assigns owner, review trigger or exit condition to retained deviations",
+      "verdict": "partial",
+      "evidence": "The backport is called \"a bridge, not a destination\" and retires at hop one (\"this hop also retires the backport\"). Kept patches get tests. No owner, review date or explicit exit condition is assigned to the backport or the retained local patches."
+    },
+    {
+      "criterion": "Frames the output as decision support for a named or to-be-named owner",
+      "verdict": "fail",
+      "evidence": "Opens with \"Recommendation: do a modified version of option 2\" and gives a direct verdict. No decision owner or accountable party is mentioned, and the decision is not handed back to anyone."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends postponement while carrying an untested backport without flagging the security gate",
+      "committed": false,
+      "evidence": "Rejects postponement and requires the backport to be tested in staging."
+    },
+    {
+      "error": "presents a weighted score as the decision itself",
+      "committed": false,
+      "evidence": "No weighted scoring is used."
+    },
+    {
+      "error": "recommends the immediate double hop without addressing recovery capability",
+      "committed": false,
+      "evidence": "Rules out the single-quarter double hop and makes the recovery rehearsal a gate. Compressing the hops is mentioned only as a contingency, with \"The recovery gate and the patch triage still come first.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a solid, safety-first answer. It makes the recovery rehearsal the first gate, rejects both risky options, sequences the hops with a stabilization period in between, and includes a sensitivity section. It falls short on structure and decision rights. There is no explicit gates-before-scoring step. It does not say outright that postponement depends on a credible tested backport. It treats team capacity only lightly. Neither the backport nor the retained patches get an owner or a review trigger. And it hands down a direct recommendation instead of framing the output as decision support for an accountable owner. No critical errors were committed."
+}

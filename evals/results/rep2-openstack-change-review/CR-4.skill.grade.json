@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Prefers project tools over direct SQL where available",
+      "verdict": "pass",
+      "evidence": "Step 2 'Prefer supported mechanisms, with SQL only for what's left': `openstack server set --state error` then `server delete`, `openstack port delete`, `cinder attachment-delete`/`reset-state`, `nova-manage placement audit` and `heal_allocations`. It also says 'Direct SQL belongs only where the API genuinely fails'. It does not name archive_deleted_rows, but this is a minor gap."
+    },
+    {
+      "criterion": "Requires backup, small increments and verification",
+      "verdict": "pass",
+      "evidence": "Prerequisite 'Restorable backup, or a pre-image export of every affected row'; 'one record at a time, with backup first and verification after'; 'Canary. Start with 5 to 10 instances ... then continue in batches'; a dedicated Verification section."
+    },
+    {
+      "criterion": "Requires confirming records against real hypervisor/network/storage state",
+      "verdict": "pass",
+      "evidence": "'Frozen target list, each entry verified against the API and hypervisor'; 'Check hypervisors for live guests that match'; 'Check whether any \"attached to a deleted instance\" volume is actually in use by a live instance'. It also covers Neutron/OVN and Cinder backend state checks."
+    },
+    {
+      "criterion": "Mentions Placement allocation reconciliation",
+      "verdict": "pass",
+      "evidence": "Blast radius: 'Placement allocations, which stay behind and keep consuming capacity'. Prerequisite: 'Placement audit and quota resync plan'. Recommended steps use `nova-manage placement audit` and `heal_allocations`."
+    },
+    {
+      "criterion": "Flags the irreversibility and blast radius",
+      "verdict": "pass",
+      "evidence": "The Blast radius section covers each service. The gate table marks Blast radius 'fail: All 300 plus ports and volumes go in one shot' and Recovery 'fail: Neutron deletes can't be reversed'. Point of no return is identified."
+    },
+    {
+      "criterion": "Proposes a staged plan with a dry run",
+      "verdict": "pass",
+      "evidence": "Step 1 is 'Run the read-only inventory first ... Freeze the result as a static UUID list'. Other elements: 'Rehearsal on a restored copy of each DB', a script that 'should default to ROLLBACK, with COMMIT as a manual step', then a canary followed by batches."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "approves running the bulk SQL script in one go",
+      "committed": false,
+      "evidence": "'Verdict: Not ready'. Option (a), one-shot SQL, is 'rejected pending the evidence above'."
+    },
+    {
+      "error": "omits the backup requirement",
+      "committed": false,
+      "evidence": "Prerequisite 'Restorable backup, or a pre-image export of every affected row'; 'with backup first and verification after'."
+    },
+    {
+      "error": "ignores Placement allocations",
+      "committed": false,
+      "evidence": "Placement allocations appear in the blast radius, prerequisites, inventory step and verification ('Run the Placement audit and check no new orphan allocations')."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It says the script is not ready and gives an API-first, staged alternative: a read-only inventory, a frozen UUID list, checks against the hypervisor and backends, a canary, then batches. It covers Placement reconciliation, requires a backup or pre-image export, and sets out stop conditions, verification and decision roles. It commits none of the critical errors. It makes no book citations and presents no invented environment facts as known. The default for running_deleted_instance_action is hedged and the response says to verify it. The only minor omission is that it does not name archive_deleted_rows."
+}

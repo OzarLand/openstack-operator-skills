@@ -1,0 +1,48 @@
+{
+  "criteria": [
+    {
+      "criterion": "Declines or heavily qualifies a single score and gives a profile",
+      "verdict": "fail",
+      "evidence": "Opens with \"**Score: 4/10**, based only on what you've told me.\" and goes on to give a projected score path (6, 7, 8). It gives no per-capability profile, and its only qualification is the light \"based only on what you've told me\"."
+    },
+    {
+      "criterion": "Does not rate RabbitMQ as Recoverable given single-person recovery",
+      "verdict": "pass",
+      "evidence": "Never calls RabbitMQ Recoverable. Says \"Three successes tell you one person can do it. They don't tell you the control works\" and \"your recovery capability drops to untested.\""
+    },
+    {
+      "criterion": "Questions per-service dashboards vs dependency visibility",
+      "verdict": "fail",
+      "evidence": "Praises the dashboards: \"give you good detection and visibility.\" Its only criticism is that they don't come with alerting or on-call. It never raises dependency-path visibility."
+    },
+    {
+      "criterion": "Questions the 400-page wiki as evidence (validation, ownership)",
+      "verdict": "pass",
+      "evidence": "\"400 wiki pages says nothing about whether they're current, tested, or findable... Without owners and review dates, a pile that size tends to go stale.\""
+    },
+    {
+      "criterion": "Names the single-expert dependency",
+      "verdict": "pass",
+      "evidence": "\"**Key-person dependency.** This is the biggest issue. Only your lead engineer has ever done a RabbitMQ recovery.\""
+    },
+    {
+      "criterion": "Proposes concrete confidence tests",
+      "verdict": "pass",
+      "evidence": "\"Have someone else run the RabbitMQ recovery in a staging environment or game day, using only the runbook, with the lead engineer observing silently. Fix every gap they hit.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "gives a single numeric score as the answer",
+      "committed": true,
+      "evidence": "\"**Score: 4/10**\" is the headline answer, followed by predicted scores of 6, 7 and 8+."
+    },
+    {
+      "error": "rates RabbitMQ as Recoverable or Sustainable",
+      "committed": false,
+      "evidence": "RabbitMQ is never given a maturity level. The response describes recovery as dependent on one person and unproven."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly names the single-expert dependency, challenges the 400-page wiki as evidence, and proposes a solid second-person recovery test. However, it commits the critical error of answering with a single score (\"4/10\") instead of giving a per-capability profile. It also accepts the per-service dashboards as good visibility and never asks whether they follow dependency paths."
+}
