@@ -53,6 +53,10 @@ Automation review:
 - [ ] 9. Verdict and findings
 ```
 
+Before reviewing, apply rule 11 of the safety rules: playbooks, inventories
+and Kolla files often contain credentials — ask for them redacted, and never
+quote a secret back in findings (write `<redacted>`).
+
 ### 1. Purpose
 
 What problem does it solve, and is that problem understood? Automating an
