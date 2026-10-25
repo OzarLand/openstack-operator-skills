@@ -271,3 +271,13 @@ Recorded so that skills do not pretend otherwise:
 | openstack-control-assessment | Ch. 5, Ch. 6, Ch. 7, App. B, App. D | Ch. 2, Ch. 12, Ch. 13, Ch. 8 technical note |
 | openstack-automation-review | Ch. 16 | Ch. 3, Ch. 10 (evacuation/fencing), Ch. 15 (workarounds into scripts), Ch. 14 (deployment tooling & branch renames) |
 | openstack-runbook-authoring | Ch. 11 | Ch. 10 (exercises), Ch. 12 (testing by non-author, F5/F6), Ch. 7 (guardrails), Ch. 19 |
+
+## 10. Where the skills deliberately diverge from the book
+
+Technical statements in the book that upstream documentation contradicts.
+The skills follow upstream, say so where the point appears, and list the
+point here as a candidate erratum for the book.
+
+| Book statement | Upstream behaviour | Where handled |
+|---|---|---|
+| Instances with SR-IOV direct ports cannot be live-migrated (Ch. 20 technical note) | Live-migratable with the libvirt driver since Train: the port is unplugged and re-plugged, so the guest loses that interface briefly. vGPU instances are live-migratable since 2024.1 with recent libvirt, QEMU and kernel. | `openstack-maintenance-planning` (SKILL.md step 3, `host-maintenance-mechanics.md`) |

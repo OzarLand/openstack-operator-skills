@@ -73,12 +73,19 @@ tolerate a restart [Book: Ch. 20]. Two independent inputs are needed:
   [references/criticality-table-template.md](references/criticality-table-template.md).
   If it does not exist, collecting it is the first deliverable of the plan
   [Book: Ch. 20].
-- **Technical migratability**: instances that cannot or should not be
-  live-migrated — PCI passthrough, SR-IOV direct ports, vGPU on versions without
-  mediated-device migration, memory-intensive workloads whose pages change
-  faster than they copy (unless auto-converge or post-copy is enabled), and
-  pinned/NUMA instances on older releases. For those, a restart is a technical
-  necessity, not a business choice [Book: Ch. 20, Ch. 15].
+- **Technical migratability**, which is release-dependent — check the running
+  release, not a fixed list (details in
+  [references/host-maintenance-mechanics.md](references/host-maintenance-mechanics.md)):
+  - not live-migratable: flavor-based PCI passthrough and `direct-physical`
+    ports; memory-intensive workloads whose pages change faster than they copy
+    (unless auto-converge or post-copy is enabled). For those, a restart or
+    cold migration is a technical necessity, not a business choice
+    [Book: Ch. 20];
+  - live-migratable with conditions: SR-IOV `direct` ports (since Train; the
+    port is unplugged and re-plugged, so the guest loses that interface
+    briefly — ask the owner whether that is acceptable), vGPU (since 2024.1 with
+    sufficiently recent libvirt, QEMU and kernel), pinned/NUMA instances (since
+    Train) `[Addition]`, correcting the book on SR-IOV [Book: Ch. 20, Ch. 15].
 
 ### 4. Strategy per class
 
@@ -86,6 +93,7 @@ tolerate a restart [Book: Ch. 20]. Two independent inputs are needed:
 |---|---|---|
 | Critical, migratable | Live migration within capacity | destination compatible; capacity available in the failure domain |
 | Tolerates restart (agreed by owner) | Coordinated restart or cold migration | owner-agreed window; restart in place only if host reboot downtime is acceptable |
+| SR-IOV `direct` port, owner accepts a brief interface loss | Live migration (port unplugged and re-plugged) `[Addition]` | release since Train; NIC and driver support verified |
 | Not live-migratable | Cold migration or coordinated restart | consumer informed; downtime agreed |
 | Cannot be touched before deadline | Exception | owner, compensating controls, review date [Book: Ch. 17] |
 
