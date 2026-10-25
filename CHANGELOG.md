@@ -30,4 +30,6 @@ Contents:
   marketplace manifest.
 - 28 behavioural scenarios (three with French prompts) and a `claude -p` evaluation harness; first results
   in `docs/evaluation-report.md`.
+- `docs/examples.md` (real answers with and without the skills), issue and
+  pull request templates.
 - Source: *OpenStack, the Day After Tomorrow* v1.2.

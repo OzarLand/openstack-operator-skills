@@ -1,0 +1,28 @@
+name: Improvement or correction
+description: A missing decision point, an aged technical note, backend coverage, or a docs fix.
+title: "[improvement] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What should change
+      description: Name the skill and file if you know them.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The operational situation, and sources (upstream docs, release notes, the book chapter).
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Is this from the book or an addition?
+      options:
+        - From the book (give the chapter)
+        - Addition beyond the book
+        - Correction of a technical fact
+        - Not sure
