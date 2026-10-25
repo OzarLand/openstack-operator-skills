@@ -90,7 +90,9 @@ that left the cluster vs a partitioned cluster raise the same alert; the first
 is "confirm majority, rejoin or reset the one node, watch consumers
 reconnect"; the second is "do not touch the nodes yet, establish which side the
 services use, decide whether to stop the APIs, escalate before any reset"
-[Book: Ch. 11]. See the template in
+[Book: Ch. 11]. Even in the first case a reset wipes that node's data, so the
+runbook must say what it loses and the steps that go with it `[Addition]`.
+See the template in
 [references/runbook-template.md](references/runbook-template.md).
 
 ### 6. Steps
