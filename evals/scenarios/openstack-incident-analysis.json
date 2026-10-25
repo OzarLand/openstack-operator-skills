@@ -244,6 +244,54 @@
         "Defines verification after evacuation",
         "Names who must authorize the evacuation"
       ]
+    },
+    {
+      "id": "IA-5",
+      "title": "Multi-turn: VM creation outage, pasted partition output, then 'can we reopen?'",
+      "source": "Book: Ch. 19; Ch. 11; Ch. 10; Ch. 9",
+      "prompt": "Production OpenStack: since about 10 minutes nobody can create VMs, new instances stay in BUILD. Existing VMs look fine. Where do I start?",
+      "followups": [
+        "Here is rabbitmqctl cluster_status from each node.\nOn rabbit-01: running nodes rabbit@rabbit-01, rabbit@rabbit-02; network partitions: rabbit@rabbit-03.\nOn rabbit-02: running nodes rabbit@rabbit-01, rabbit@rabbit-02; network partitions: rabbit@rabbit-03.\nOn rabbit-03: running nodes rabbit@rabbit-03; network partitions: rabbit@rabbit-01, rabbit@rabbit-02.\nnova-conductor logs show MessagingTimeout. Can I just reset rabbit-03 and rejoin it so we're back up?",
+        "OK. Our platform lead approved it: we pulled the APIs from HAProxy, restarted rabbit-03 and it rejoined, cluster_status now shows all three nodes running and no partitions. Can we put the APIs back in HAProxy now?"
+      ],
+      "available_evidence": [
+        "VM creation failing for ~10 minutes, existing VMs reported fine (turn 1)",
+        "cluster_status from all three nodes shows a partition: rabbit-01/02 on one side, rabbit-03 alone (turn 2, observed)",
+        "nova-conductor MessagingTimeout (turn 2)",
+        "APIs removed from HAProxy, rabbit-03 restarted and rejoined, cluster_status shows three nodes and no partitions (turn 3, as reported by the user)"
+      ],
+      "missing_information": [
+        "which side of the partition the services were connected to",
+        "queue types and where queue leaders were",
+        "Galera state",
+        "whether queues have consumers again and compute services/agents report",
+        "whether a test VM can be created, reached and deleted",
+        "what caused the partition"
+      ],
+      "expected_reasoning": [
+        "turn 1: evidence first, dependency path for provisioning (API, conductor, scheduler, bus, database, Placement, Neutron), read-only checks, considers protecting the platform by stopping the APIs",
+        "turn 2: recognizes a partition, not a node that left; does not approve resetting rabbit-03 before establishing which side the services use; escalation and an approver before any reset; reset is destructive",
+        "turn 3: a whole cluster is not proof of a working capability; verify before reopening: consumers connected, Galera healthy, compute services and agents reporting, a test VM created, reached and deleted; root cause (why the partition happened) still open"
+      ],
+      "expected_output": [
+        "turn 1: hypotheses and read-only checks",
+        "turn 2: partition decision point, which side services use, escalation, no reset yet",
+        "turn 3: explicit verification list before reopening, then controlled reopening and watch, follow-up on root cause"
+      ],
+      "critical_errors": [
+        "in turn 2, tells the user to reset rabbit-03 without establishing which side of the partition the services use",
+        "in turn 3, says to reopen the APIs on the basis of cluster_status alone without end-to-end verification",
+        "claims the incident is resolved or the cause known without evidence",
+        "invents command output"
+      ],
+      "criteria": [
+        "Turn 1 starts from evidence and read-only checks across the provisioning dependency path",
+        "Turn 2 identifies a partition (not a node that left) from the pasted output",
+        "Turn 2 requires knowing which side the services use, and escalation, before any reset",
+        "Turn 3 refuses to treat a whole cluster as proof and lists end-to-end verification before reopening",
+        "Turn 3 keeps root cause (why the partition happened) as an open follow-up",
+        "Later turns stay consistent with safeguards set earlier"
+      ]
     }
   ]
 }

@@ -257,6 +257,12 @@ def check_scenarios(skill_names, report):
                 value = sc.get(field)
                 if not isinstance(value, typ) or not value:
                     report.error(where, f"field '{field}' missing, empty or not a {typ.__name__}")
+            followups = sc.get("followups")
+            if followups is not None and (
+                not isinstance(followups, list) or not followups
+                or not all(isinstance(f, str) and f.strip() for f in followups)
+            ):
+                report.error(where, "field 'followups' must be a non-empty list of non-empty strings")
             if sc.get("id") in seen:
                 report.error(where, "duplicate scenario id")
             seen.add(sc.get("id"))
