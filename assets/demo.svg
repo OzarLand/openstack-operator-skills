@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="578" viewBox="0 0 960 578" role="img" aria-label="Claude Code session: the incident-analysis skill tells the operator to fence the host before evacuating">
+  <defs>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2f3a"/>
+      <stop offset="1" stop-color="#22262f"/>
+    </linearGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="577" rx="14" fill="#0d1117" stroke="#30363d"/>
+  <path d="M14.5 0.5 H945.5 A14 14 0 0 1 959.5 14.5 V42 H0.5 V14.5 A14 14 0 0 1 14.5 0.5 Z" fill="url(#bar)"/>
+  <circle cx="26" cy="21" r="7" fill="#ff5f57"/>
+  <circle cx="48" cy="21" r="7" fill="#febc2e"/>
+  <circle cx="70" cy="21" r="7" fill="#28c840"/>
+  <text x="480" y="26" text-anchor="middle" fill="#8b949e" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13">claude — on-call</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="15">
+    <text x="28" y="78" fill="#D97757" font-weight="700">&gt;</text>
+    <text fill="#e6edf3">
+      <tspan x="48" y="78">openstack compute service list shows nova-compute on cmp-0417 as</tspan>
+      <tspan x="48" y="100">'down' since 03:12. About 40 VMs on it are unreachable, including some</tspan>
+      <tspan x="48" y="122">customer databases. We use Ceph for instance disks so evacuate should</tspan>
+      <tspan x="48" y="144">be quick. The on-call wants to run 'openstack server evacuate' for all</tspan>
+      <tspan x="48" y="166">of them right now to get customers back. Any reason not to?</tspan>
+    </text>
+
+    <text x="28" y="208" fill="#3fb950">●</text>
+    <text x="48" y="208" fill="#e6edf3" font-weight="700">Skill<tspan fill="#8b949e" font-weight="400">(openstack-incident-analysis)</tspan></text>
+
+    <text x="28" y="250" fill="#e6edf3">●</text>
+    <text fill="#e6edf3">
+      <tspan x="48" y="250" font-weight="700">Short answer</tspan>
+      <tspan x="48" y="280">Yes, there is one reason not to run it yet: </tspan><tspan fill="#ff7b72" font-weight="700">fence the host first.</tspan>
+      <tspan x="48" y="302">Evacuation is safe only once cmp-0417 is confirmed dead or isolated.</tspan>
+      <tspan x="48" y="324">A "down" nova-compute service doesn't prove that.</tspan>
+      <tspan x="48" y="356" fill="#c9d1d9">If you evacuate while the originals are alive, you get two copies of</tspan>
+      <tspan x="48" y="378" fill="#c9d1d9">each VM writing to the same RBD volumes. […] Evacuation can't be</tspan>
+      <tspan x="48" y="400" fill="#c9d1d9">undone once the second copy starts writing.</tspan>
+      <tspan x="48" y="432" font-weight="700">What to do now (all read-only unless noted)</tspan>
+      <tspan x="48" y="462" fill="#79c0ff">1.</tspan><tspan> Check power state out-of-band. Use IPMI/iDRAC/iLO/BMC on</tspan>
+      <tspan x="48" y="484">   cmp-0417, for example </tspan><tspan fill="#a5d6ff">ipmitool -I lanplus -H &lt;bmc&gt; chassis</tspan>
+      <tspan x="48" y="506" fill="#a5d6ff">   power status</tspan><tspan fill="#e6edf3">. This is the main check.</tspan>
+      <tspan x="48" y="538" fill="#8b949e">   …</tspan>
+    </text>
+  </g>
+</svg>
