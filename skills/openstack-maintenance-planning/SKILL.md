@@ -138,9 +138,16 @@ platform cannot absorb [Book: Ch. 20].
 3. Move instances according to their class; verify each move (instance active
    on destination, reachable, performance acceptable).
 4. Verify the host is empty, or that only agreed-restart instances remain.
+   If some remain, record them with their power state and read
+   `resume_guests_state_on_host_boot` on the host (read-only): with the Nova
+   default (`False`), guests are **not** restarted when the host boots and come
+   back `SHUTOFF` `[Addition]`.
 5. Patch and reboot; verify the host is healthy, compute service and agents up.
-6. Optionally validate with a test instance `[Addition]`.
-7. Re-enable the compute service.
+6. For each agreed-restart instance, check its status and power state; start
+   those the owner expects running (state-changing, approval per policy) and
+   have the owner confirm the application is reachable `[Addition]`.
+7. Optionally validate with a test instance `[Addition]`.
+8. Re-enable the compute service.
 
 A patch to the hypervisor or QEMU protects only instances migrated or
 restarted since; instances still running on the old binary are **not**
@@ -170,8 +177,10 @@ exceptions, and who communicates the schedule to consumers.
 ### 10. Campaign verification and follow-up
 
 Done means: every host patched and verified, every instance either migrated or
-restarted since the patch (or listed as an exception with owner), no instance
-left on an unpatched binary unknowingly, capabilities healthy. Follow-up
+restarted since the patch (or listed as an exception with owner), every
+agreed-restart instance confirmed running again (or intentionally left off by
+its owner), no instance left on an unpatched binary unknowingly, capabilities
+healthy. Follow-up
 [Book: Ch. 20]: keep the criticality table current (as a shared document or as
 metadata on instances and projects) as an input to capacity planning; add
 maintenance scenarios to capacity planning; if every campaign consumes
