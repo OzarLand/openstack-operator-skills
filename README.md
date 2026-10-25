@@ -173,8 +173,8 @@ model against a rubric.
 
 Repeated three times on all 30 scenarios, including French prompts and
 multi-turn conversations: 0.98 vs 0.73, and no critical error with the skills
-in 90 answers (16 without). Also checked: Haiku triggering and an end-to-end
-plugin install from GitHub. Grading is by a model, so read it as a direction
+in 90 answers (16 without). Also checked: Haiku triggering, an end-to-end
+plugin install from GitHub, and the zips uploaded to claude.ai. Grading is by a model, so read it as a direction
 more than an exact effect size.
 [Full evaluation report →](docs/evaluation-report.md)
 
@@ -192,7 +192,7 @@ more than an exact effect size.
 
 | Claude Code | claude.ai | Claude API | Agent SDK |
 |:-:|:-:|:-:|:-:|
-| ✅ tested | expected, not tested yet | expected, not tested yet | expected, not tested yet |
+| ✅ tested | ✅ tested | expected, not tested yet | expected, not tested yet |
 
 Portable frontmatter only (`name`, `description`, `license`, `metadata`). The
 one script, `weighted_score.py`, needs plain Python 3 and is optional.

@@ -12,6 +12,8 @@ import re
 import sys
 from pathlib import Path
 
+from sync_shared import copy_text
+
 try:
     import yaml
 except ImportError:  # pragma: no cover
@@ -271,7 +273,7 @@ def check_scenarios(skill_names, report):
 
 def main():
     report = Report()
-    shared_texts = {p.name: p.read_text(encoding="utf-8") for p in sorted(SHARED.glob("*.md"))}
+    shared_texts = {p.name: copy_text(p) for p in sorted(SHARED.glob("*.md"))}
     skill_dirs = sorted(p for p in SKILLS.iterdir() if p.is_dir())
     if not skill_dirs:
         report.error("skills/", "no skills found")

@@ -6,15 +6,24 @@ reference text is duplicated into each skill. Edit shared/*.md, then run:
 
     python3 tools/sync_shared.py          # write copies
     python3 tools/sync_shared.py --check  # exit 1 if any copy is missing or stale
+
+The "Canonical copy: ..." paragraph is for contributors and is left out of the
+copies, so the model does not read repository notes when it loads a skill.
 """
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = ROOT / "shared"
 SKILLS = ROOT / "skills"
+CANONICAL_NOTE = re.compile(r"^Canonical copy:.*?\n\n", re.MULTILINE | re.DOTALL)
+
+
+def copy_text(src: Path) -> str:
+    return CANONICAL_NOTE.sub("", src.read_text(encoding="utf-8"), count=1)
 
 
 def main() -> int:
@@ -32,7 +41,7 @@ def main() -> int:
         refs = skill_dir / "references"
         for src in shared_files:
             dst = refs / src.name
-            expected = src.read_text(encoding="utf-8")
+            expected = copy_text(src)
             if dst.exists() and dst.read_text(encoding="utf-8") == expected:
                 continue
             stale.append(dst.relative_to(ROOT))
