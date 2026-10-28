@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Moving to OzarLand
+
+- Canonical location: `OzarLand/openstack-operator-skills` (was
+  `soufian-zaouam/openstack-operator-skills`; GitHub redirects the old URL).
+  Install commands, badges and issue links updated.
+- README: the validation policy stated as a commitment, a mapping from the
+  usual classifications (production-, lab-, partially validated, unvalidated,
+  experimental) to this repository's statuses, and a per-skill table
+  (status, environment, versions, evidence, known limitations) generated from
+  `validation/inventory.yaml` by `tools/validate_knowledge.py --write`.
+- README: how this repository fits with the other OzarLand repositories.
+- `SECURITY.md` (private reporting of unsafe advice and leaked data) and the
+  OzarLand `CODE_OF_CONDUCT.md`.
+
 ### 0.2.0 (in preparation): operational knowledge with validation status
 
 - **New skill `openstack-vm-troubleshooting`**: one instance, volume or port —

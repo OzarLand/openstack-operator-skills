@@ -8,7 +8,7 @@ place you use Claude. Source: Anthropic, *Agent Skills overview* (Oct 2026).
 ### Option A — plugin marketplace
 
 ```text
-/plugin marketplace add soufian-zaouam/openstack-operator-skills
+/plugin marketplace add OzarLand/openstack-operator-skills
 /plugin install openstack-operations@openstack-operator-skills
 ```
 
@@ -29,7 +29,7 @@ reads in advance, e.g. `claude -p --allowedTools Read "..."`. Copied skills
 ### Option B — copy the skills
 
 ```bash
-git clone https://github.com/soufian-zaouam/openstack-operator-skills
+git clone https://github.com/OzarLand/openstack-operator-skills
 # personal, all projects:
 cp -r openstack-operator-skills/skills/* ~/.claude/skills/
 # or for one repository (commit them to share with the team):

@@ -212,9 +212,58 @@ def coverage_tables(items):
     return "\n".join(lines), summary, "\n".join(skill_lines), validated == total and total > 0
 
 
+def skill_status_table(items):
+    """One row per skill directory, including skills with no inventory items."""
+    by_skill = defaultdict(list)
+    for i in items:
+        by_skill[i.get("skill")].append(i)
+    lines = ["| Skill | Validation status | Environment | Software version | Evidence | Known limitations |",
+             "|---|---|---|---|---|---|"]
+    for skill in sorted(p.name for p in SKILLS.iterdir() if (p / "SKILL.md").exists()):
+        group = by_skill.get(skill, [])
+        if not group:
+            lines.append(f"| `{skill}` | No inventory items: a reasoning method from the book | n/a | n/a "
+                         "| Behavioural evaluation only (reasoning, not execution) | Commands quoted in its "
+                         "examples are untagged, so unverified |")
+            continue
+        c = Counter(i.get("status") for i in group)
+        validated = sum(c[s] for s in VALIDATED)
+        if c["PRODUCTION-VALIDATED"]:
+            status = "Partially production-validated" if validated < len(group) else "Production-validated"
+        elif validated:
+            status = "Partially lab-validated" if validated < len(group) else "Lab-validated"
+        else:
+            status = "Unvalidated"
+        status += f": {validated} of {len(group)} items"
+        lab = [i.get("validation") or {} for i in group if i.get("status") in VALIDATED]
+        if lab:
+            tools = sorted({"Kolla-Ansible" if "kolla" in str(v.get("deployment")).lower() else "other"
+                            for v in lab})
+            env = f"{', '.join(tools)} lab" + ("s" if len(lab) > 1 else "")
+            versions = "OpenStack " + ", ".join(sorted({str(v.get("openstack_release")) for v in lab}))
+            dates = sorted(str(v.get("date")) for v in lab)
+            evidence = f"{len(lab)} lab records, {dates[0]} to {dates[-1]}"
+            limits = []
+            if not c["PRODUCTION-VALIDATED"]:
+                limits.append("no production evidence")
+            if not any(v.get("independent_human_check") for v in lab):
+                limits.append("runs by an automated lab agent, no independent human check")
+            if validated < len(group):
+                limits.append(f"{len(group) - validated} items unverified")
+            limitations = "; ".join(limits).capitalize()
+        else:
+            env = versions = "Unknown (no execution recorded)"
+            evidence = "None recorded"
+            limitations = f"All {len(group)} items unverified"
+        cells = [f"`{skill}`", status, env, versions, f"{evidence}; [details](docs/validation-coverage.md)",
+                 limitations]
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
 def render_readme_block(items):
     table, summary, _, _ = coverage_tables(items)
-    return f"{README_START}\n{summary}\n\n{table}\n{README_END}"
+    return f"{README_START}\n{summary}\n\n{table}\n\n{skill_status_table(items)}\n{README_END}"
 
 
 def render_coverage(items, data):
