@@ -33,6 +33,7 @@ python3 tools/sync_shared.py --check
 python3 tools/validate_skills.py
 python3 tools/test_weighted_score.py
 python3 tools/validate_knowledge.py
+python3 tools/test_validate_knowledge.py
 ```
 
 Behavioural runs (`tools/run_behavioral.py`) are described in `evals/README.md`.

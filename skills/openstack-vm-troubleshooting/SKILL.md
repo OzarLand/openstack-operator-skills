@@ -179,6 +179,8 @@ Rules that hold whatever the symptom:
   it holds data. Deletion is irreversible.
 - **A host that looks dead is not proof.** Evacuation needs the host fenced
   first [Book: Ch. 10]; hand over to `openstack-incident-analysis`.
+- **One host first.** When the same fix applies to several computes, apply it
+  to one, verify with a test operation there, then continue. [Addition]
 
 ### 7. Verification
 
@@ -186,7 +188,11 @@ The fix is verified when every layer agrees and the user-level capability is
 back: the instance reaches the expected state and is reachable or usable;
 the volume is attached once to the right instance, or detached everywhere;
 Placement allocations match the instance's host; nothing new appears in the
-logs at `ERROR`. Each reference section lists its own checks.
+logs at `ERROR`. When the symptom hit new resources (no IP, no metadata,
+failed builds or attaches), verify with a **new** one created after the fix,
+not only with the one that failed; when a resource moved or was detached,
+check that nothing of it remains on the old host (domain, iSCSI session,
+port binding). Each reference section lists its own checks. [Addition]
 
 ## Output format
 

@@ -26,6 +26,14 @@
 - Existing technical notes in maintenance planning, change review and
   automation review now carry status tags and the lab findings that qualify
   them (for example live-migration interruption measured on a lab).
+- `tools/test_validate_knowledge.py` (CI) injects seven bookkeeping faults and
+  checks each is caught; it found and fixed a missed misspelt status.
+- Independent audit of 116 lab-validated items against their sources: no wrong
+  fact, 20 over-claims fixed (8 items downgraded). 163 of 352 items
+  lab-validated, none production-validated.
+- Behavioural runs (`docs/evaluation-report.md`, section 13): new skills 0.96
+  with skills vs 0.66 without on 8 scenarios, no critical error with the
+  skills; incident analysis still loads on all 6 of its scenarios.
 - Contribution workflow: validation evidence issue form, procedure and
   validation-record templates, PR checklist, `docs/source-mapping.md` with the
   assessment and the defects found in the source repositories.

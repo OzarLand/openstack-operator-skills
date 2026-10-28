@@ -393,6 +393,18 @@ it in the process list and history), `openstack token issue`,
 `openstack server list --all-projects --limit 5`; a later `deploy` passes the
 task.
 
+**After a power loss, check the other containers too.** On a lab, after every
+controller lost power and `mariadb-recovery` ran, `nova_api`,
+`nova_metadata`, `placement_api` and `neutron_server` stayed `unhealthy`
+(uWSGI `no python application found`, HAProxy 503) and `nova_conductor` and
+`nova_scheduler` crash-looped on `The placement service for <vip>:RegionOne
+exists but does not have any supported versions.` Check
+`sudo docker ps --filter health=unhealthy` on every controller and restart
+those units (*state-changing*, requests in flight on that controller fail):
+`sudo systemctl restart kolla-<container>-container.service` (conductor and
+scheduler need Placement answering to start). [LAB-VALIDATED: IA-CP-11] Lab: 2026.1, Kolla-Ansible 22.2.0, three
+controllers with ProxySQL; one power-loss run.
+
 **Blind spots.** [DOCUMENTED-UNVERIFIED: KA-OPS-19] After a crash `grastate.dat`
 reads `seqno: -1` and the role recovers the position from data files
 (`Recovered position: <uuid>:<seqno>`). A node whose recovery wrote no such

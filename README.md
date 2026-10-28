@@ -192,7 +192,10 @@ Repeated three times on all 30 scenarios, including French prompts and
 multi-turn conversations: 0.98 vs 0.73, and no critical error with the skills
 in 90 answers (16 without). Also checked: Haiku triggering, an end-to-end
 plugin install from GitHub, and the zips uploaded to claude.ai. Grading is by a model, so read it as a direction
-more than an exact effect size.
+more than an exact effect size. The two 0.2.0 skills, on 8 new scenarios: 0.96
+with skills, 0.66 without, 8/8 loaded, no critical error with the skills (2
+without); incident analysis still loads on all 6 of its scenarios. These runs
+measure reasoning, not whether a procedure works on OpenStack.
 [Full evaluation report →](docs/evaluation-report.md)
 
 ## 🔬 Validation status

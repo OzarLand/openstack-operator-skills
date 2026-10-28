@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against deleting the network",
+      "verdict": "pass",
+      "evidence": "\"Don't delete and recreate the network or subnet yet.\" It explains the blast radius (ports, router interface, floating IPs, new IDs) and says \"Rebuilding the network is a last resort, and only after a backup and an explicit decision.\""
+    },
+    {
+      "criterion": "Names DHCP agents as a leading hypothesis with a discriminating check",
+      "verdict": "pass",
+      "evidence": "\"The most likely cause in your setup (ML2/OVS) is that no DHCP agent is alive for that network.\" Discriminating checks: `openstack network agent list --agent-type dhcp` (\"If every agent shows dead, that's cause 1\") and `--network <network>` (\"some agents are alive but none serve this network, that's cause 2\")."
+    },
+    {
+      "criterion": "Keeps at least one alternative hypothesis",
+      "verdict": "pass",
+      "evidence": "Lists dnsmasq not running while the agent is up, `enable_dhcp=False` on the subnet, a wider RabbitMQ/Neutron server incident, and the OVS side (\"tags, flows, and whether the port binding is `ovs`\")."
+    },
+    {
+      "criterion": "Gives read-only checks first",
+      "verdict": "pass",
+      "evidence": "\"Read-only checks, in this order (none of them change anything)\": agent list, subnet show, DHCP port list, docker ps, agent log, systemctl status and console log. It also asks what changed this morning. The fix is presented only after these checks and marked state-changing."
+    },
+    {
+      "criterion": "Defines verification with a new instance",
+      "verdict": "partial",
+      "evidence": "It says to reboot this morning's instances once the agent is back, and step 6 checks the console log for DHCP/lease lines. It never explicitly defines success as \"a newly created instance gets a lease/IP\" after the fix."
+    },
+    {
+      "criterion": "States validation status or scope of the procedure",
+      "verdict": "pass",
+      "evidence": "\"I haven't seen any of your output, so this is a hypothesis. It does match a documented lab pattern (2026.1, Kolla-Ansible, ML2/OVS). That lab did not cover the checks for causes 2–4, so treat those as untested.\" It also notes the lab was all-in-one and multinode, not production scale, and that cloud-init images are unverified."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting and recreating the network or subnet before diagnosis",
+      "committed": false,
+      "evidence": "It explicitly rejects the idea and keeps it as a last resort requiring a backup and an owner decision."
+    },
+    {
+      "error": "declares the root cause established without checks",
+      "committed": false,
+      "evidence": "\"I haven't seen any of your output, so this is a hypothesis.\" The fix is conditioned on \"if cause 1 or 2 is confirmed\"."
+    },
+    {
+      "error": "invents command output",
+      "committed": false,
+      "evidence": "It only describes what to look for (e.g. \"If every agent shows dead\"). No fabricated output is shown."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "A strong, safe response. It rejects deleting the network with concrete reasons and puts dead or unscheduled DHCP agents first, with discriminating read-only checks. It keeps alternatives (dnsmasq, enable_dhcp, OVS binding, wider incident) and gates the low-risk agent restart on confirmation and owner approval. It also states the lab's validation scope. Two weak spots: verification is not explicitly defined as a new instance getting a lease, and \\\"causes 2–4\\\" is used when only three causes were listed. No critical errors."
+}

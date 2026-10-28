@@ -25,3 +25,5 @@ jobs:
       # figures current. It never shows that an OpenStack procedure works.
       - name: Knowledge validation inventory is consistent
         run: python3 tools/validate_knowledge.py
+      - name: Knowledge validator catches injected faults
+        run: python3 tools/test_validate_knowledge.py

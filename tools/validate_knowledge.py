@@ -161,7 +161,7 @@ def scan_tags(errors):
         text = CODE_SPAN_RE.sub(lambda m: " " * len(m.group(0)), path.read_text(encoding="utf-8"))
         strict = {(m.start(), m.end()) for m in TAG_RE.finditer(text)}
         for m in LOOSE_TAG_RE.finditer(text):
-            if (m.start(), m.end()) not in strict and m.group(1).endswith(("VALIDATED", "UNVERIFIED", "REVALIDATION")):
+            if (m.start(), m.end()) not in strict and re.search(r"VALID|VERIF", m.group(1)):
                 errors.append(f"{rel(path)}: malformed validation tag '{m.group(0)}'")
         for m in TAG_RE.finditer(text):
             found[m.group(2)].append((rel(path), m.group(1)))

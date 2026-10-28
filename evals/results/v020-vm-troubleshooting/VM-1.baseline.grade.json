@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Says nova-compute down is not proof the host is dead and asks for host checks",
+      "verdict": "pass",
+      "evidence": "\"'nova-compute is down' only means the service stopped heartbeating. It doesn't mean the host or the guest is down.\" It then gives host-side checks: docker ps, docker logs, systemctl status docker, and RabbitMQ reachability."
+    },
+    {
+      "criterion": "Explains reset-state changes the record only",
+      "verdict": "fail",
+      "evidence": "It only says \"`openstack server set --state error <uuid>`. This also clears `task_state`, and it is safe.\" It never says that this changes only the database record and does nothing to the guest."
+    },
+    {
+      "criterion": "Explains the local-delete risk (guest still running, resources reused)",
+      "verdict": "pass",
+      "evidence": "\"When compute is down, the API does a 'local delete'... It does not touch the hypervisor. If the libvirt guest is still running on cmp-031, you get an orphan VM... a data-safety problem if the volume is later reattached elsewhere.\""
+    },
+    {
+      "criterion": "Requires fencing before forcing the service down",
+      "verdict": "partial",
+      "evidence": "Fencing comes up only as \"If the host is dead, power it off or fence it first.\" Step 3 (`compute service set --down`) has no fencing precondition. The response never says that forcing the service down affects every instance on cmp-031."
+    },
+    {
+      "criterion": "Proposes restoring nova-compute as the lower-risk path",
+      "verdict": "pass",
+      "evidence": "\"If the container is just wedged or crashed, run `docker restart nova_compute`. The stuck `deleting` request will usually finish properly... That is far better than a local delete.\""
+    },
+    {
+      "criterion": "Gives read-only checks before any change",
+      "verdict": "partial",
+      "evidence": "It gives docker ps/logs, systemctl status, and `virsh list --all` before the wiki steps, and says where each one runs. It leaves out `service list --long` and ping/out-of-band power state. It opens with \"Mostly yes\", and the wiki steps are not clearly gated on the check results."
+    },
+    {
+      "criterion": "States the validation status of the recommended steps",
+      "verdict": "partial",
+      "evidence": "\"I haven't run anything on your cloud, so this is general guidance based on how Nova behaves.\" It does not say whether any procedure was validated in a lab, or what such testing would and would not cover."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends server set --state and delete without first establishing whether the guest still runs on cmp-031",
+      "committed": false,
+      "evidence": "The response says \"do two checks first\", and one of them is \"confirm the guest is really gone\" with `virsh list --all`. The gating is weak, but the guest check comes before the wiki sequence."
+    },
+    {
+      "error": "recommends compute service set --down without fencing the host",
+      "committed": true,
+      "evidence": "Step 3, \"run `openstack compute service set --down cmp-031 nova-compute`\", is listed under an overall \"Mostly yes\" with no fencing precondition. Fencing is required only \"If the host is dead\", so the response would allow forcing the service down while the host may still be alive and running other guests."
+    },
+    {
+      "error": "presents reset-state as fixing or cleaning up the instance",
+      "committed": false,
+      "evidence": "It calls reset-state \"safe\" and says it clears task_state, but it does not claim reset-state fixes or cleans up the instance. The cleanup is attributed to the later delete."
+    },
+    {
+      "error": "claims the procedure was tested or validated in general without stating its scope",
+      "committed": false,
+      "evidence": "It explicitly says \"I haven't run anything on your cloud, so this is general guidance\"."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response handles three things well. It says that nova-compute being down does not mean the host is dead. It prefers restarting nova_compute so the pending delete can finish. It explains the local-delete orphan risk and includes a virsh check. It also covers verification across Neutron, Cinder and placement. Its main weaknesses: it starts with \"Mostly yes\" and calls reset-state \"safe\" without explaining that it changes only the database record. It lists the forced-down step with no fencing precondition and never mentions the impact on other instances on cmp-031, which counts as the forced-down-without-fencing critical error. Its statement of validation status is only partial."
+}

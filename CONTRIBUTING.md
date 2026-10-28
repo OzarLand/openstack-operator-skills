@@ -92,6 +92,7 @@ python3 tools/sync_shared.py
 python3 tools/validate_skills.py         # must report 0 errors
 python3 tools/test_weighted_score.py
 python3 tools/validate_knowledge.py      # inventory, tags and coverage consistent
+python3 tools/test_validate_knowledge.py
 ruff check .                             # configuration in ruff.toml
 ```
 
