@@ -21,6 +21,11 @@ Two kinds of checks, kept separate on purpose.
 
 These checks say nothing about whether a skill gives good advice.
 
+`python3 tools/validate_knowledge.py` (also in CI) checks the knowledge
+validation inventory against the status tags in the skills and the published
+coverage. It says nothing about whether a procedure works on OpenStack; only a
+recorded execution does (`docs/knowledge-validation-policy.md`).
+
 ## 2. Behavioural evaluations (require running Claude)
 
 `tools/run_behavioral.py` runs each scenario through the Claude Code CLI:
@@ -43,7 +48,7 @@ errors are reported separately and matter more than the average.
 | Field | Meaning |
 |---|---|
 | `id`, `title` | identifier and short name |
-| `source` | book chapters the scenario comes from; "scenario constructed" when it is not a documented book situation |
+| `source` | book chapters the scenario comes from; "scenario constructed" when it is not a documented book situation (the 0.2.0 scenarios name the OzarLand page they are built from) |
 | `prompt` | what the user says |
 | `followups` | optional: later user turns, for a multi-turn scenario; the harness keeps one session (`--session-id`, then `--resume`) and the grader sees the whole conversation |
 | `available_evidence` | what the prompt actually establishes |

@@ -24,6 +24,11 @@ need `docker exec`/`podman exec` or equivalent) and networking backend
 | Control plane | API services, schedulers, conductors, message bus, databases | No create/modify/migrate/delete; new state (ports, security-group rules, floating IPs) does not reach the data plane; an instance booting during the outage may miss metadata. |
 | Data plane | Hypervisors, instance disks, network paths, and the agents running on those nodes | Running instances keep running, keep storage and keep forwarding traffic. With ML2/OVS, existing DHCP leases are still served by the DHCP agent's dnsmasq; with OVN, DHCP is answered locally on each compute. L3 HA (keepalived) and OVN gateway chassis failover are data-plane mechanisms. |
 
+[LAB-VALIDATED: IA-DEP-01] Lab (2026.1, Kolla-Ansible all-in-one, ML2/OVS,
+legacy router): control plane stopped 8 min, 0 pings lost, DHCP lease renewed,
+metadata lost, a rebooted guest came up without its SSH service until the
+control plane returned. Not run: OVN, L3 HA, gateway failover.
+
 Cautions: Neutron agents and OVN controllers run **on** data-plane nodes, so
 restarting some of them can briefly interrupt traffic. "Stopping the control
 plane" means APIs, bus and databases — not the agents.
@@ -50,6 +55,14 @@ plane" means APIs, bus and databases — not the agents.
    compute symptom.
 9. The hypervisor driver starts the instance.
 
+[LAB-VALIDATED: IA-DEP-02] Traversal and request-id tracing, lab (2026.1,
+Kolla-Ansible all-in-one, ML2/OVS): two failed boots (no valid host; port
+binding to a dead OVS agent) traced across Nova, Placement and Neutron logs.
+Not reached: the Cinder, Glance download, libvirt and cell-mapping steps. The
+unmapped-host failure of step 5 was reproduced separately (IA-FP-05 in
+failure-patterns.md) and the vif-plugged wait of step 8 too (VM-LC-01 in
+`openstack-vm-troubleshooting`).
+
 Transport: inside Nova (API, conductor, scheduler, compute) over oslo.messaging,
 normally **RabbitMQ**; to Keystone, Placement, Glance, Neutron, Cinder over
 REST via the service catalogue. Agent-based Neutron talks to agents over the
@@ -63,12 +76,12 @@ or in network/storage beneath them.
 
 | Component | Key signals | Failure notes |
 |---|---|---|
-| MariaDB Galera | `wsrep_cluster_size`; `wsrep_cluster_status` (non-Primary ⇒ node refuses queries, reads included, unless `wsrep_dirty_reads` is on); `wsrep_flow_control_paused` | Writable only with quorum. Full-outage recovery bootstraps from the most advanced node (`grastate.dat` seqno and `safe_to_bootstrap`; after unclean stop find it with `--wsrep-recover`). Wrong node ⇒ lost transactions. Usually written through one node behind the LB. |
-| RabbitMQ | messages ready / unacknowledged per queue; consumers per queue; memory/disk alarms; partitions | Queue accumulating while consumers vanish = a service that stopped processing, whatever its process list says. Quorum queues need a majority of members. Partition behaviour: `cluster_partition_handling` (RabbitMQ default `ignore`; the book calls `pause_minority` the usual choice for OpenStack, and several deployment tools set it — check `rabbitmq.conf`) applies to the Mnesia metadata store, not to Khepri — check which store the cluster uses. OpenStack services may use one or several non-default vhosts (check `transport_url`) `[Addition]`. |
-| memcached | availability, latency | Loss makes every API call slow or failing (token validation). |
+| MariaDB Galera [LAB-VALIDATED: IA-CP-08] | `wsrep_cluster_size`; `wsrep_cluster_status` (non-Primary ⇒ node refuses queries, reads included, unless `wsrep_dirty_reads` is on); `wsrep_flow_control_paused` | Writable only with quorum. Full-outage recovery bootstraps from the most advanced node (`grastate.dat` seqno and `safe_to_bootstrap`; after unclean stop find it with `--wsrep-recover`). Wrong node ⇒ lost transactions. Usually written through one node behind the LB. |
+| RabbitMQ | messages ready / unacknowledged per queue; consumers per queue; memory/disk alarms; partitions | Queue accumulating while consumers vanish = a service that stopped processing, whatever its process list says. Quorum queues need a majority of members. Partition behaviour: `cluster_partition_handling` (RabbitMQ default `ignore`; the book calls `pause_minority` the usual choice for OpenStack, and several deployment tools set it — check `rabbitmq.conf`) applies to the Mnesia metadata store, not to Khepri — check which store the cluster uses. OpenStack services may use one or several non-default vhosts (check `transport_url`) `[Addition]`. [DOCUMENTED-UNVERIFIED: IA-DEP-03] Khepri behaviour during a partition and an alarm on a lab: [LAB-VALIDATED: IA-CP-02]. |
+| memcached | availability, latency | Loss makes every API call slow or failing (token validation). [DOCUMENTED-UNVERIFIED: IA-DEP-04] |
 | Load balancer / VIP | backend health, API latency and error rates | The VIP is what makes "stop the APIs" a controlled action. |
-| TLS certificates | expiry dates on every endpoint, bus and DB | A common cause of complete control-plane outage on long-lived platforms. |
-| Keystone Fernet keys | key repository identical on all Keystone nodes; last rotation | Bad rotation or divergent keys break authentication platform-wide at once. |
+| TLS certificates | expiry dates on every endpoint, bus and DB | A common cause of complete control-plane outage on long-lived platforms. [DOCUMENTED-UNVERIFIED: IA-DEP-05] |
+| Keystone Fernet keys | each node's primary key present in every node's set; last rotation | Bad rotation or divergent keys break authentication platform-wide; on a lab, tokens older than the cache lifetime failed first [LAB-VALIDATED: IA-CP-18]. |
 
 ## OpenStack-level signals
 
@@ -83,6 +96,9 @@ or in network/storage beneath them.
 ## Read-only diagnostics by layer
 
 Commands are examples; adapt to the deployment. All are read-only as written.
+Status: the RabbitMQ and Galera rows were run on a lab (IA-CP-01, IA-CP-08 in
+control-plane-recovery.md), the Fernet comparison too (IA-CP-18); the
+certificate and upgrade-check rows were not.
 
 | Layer | Check | Source |
 |---|---|---|
@@ -98,15 +114,17 @@ Commands are examples; adapt to the deployment. All are read-only as written.
 | RabbitMQ | `rabbitmqctl cluster_status` (members, partitions, alarms) | Addition |
 | RabbitMQ | `rabbitmqctl list_vhosts`, then for each OpenStack vhost `rabbitmqctl list_queues -p <vhost> --timeout 60 name messages_ready messages_unacknowledged consumers`. Without `-p`, only the default vhost `/` is listed: on platforms that use per-service vhosts this shows few or no queues, which is **not** evidence that queues or consumers are gone. Can be slow on a degraded cluster. | Addition (signals: Book: Ch. 8) |
 | RabbitMQ | `rabbitmqctl list_queues -p <vhost> name type leader members` (which queues and quorum replicas live on which node) | Addition |
-| Certificates (HTTPS, AMQPS) | `openssl s_client -connect <host>:<port> -servername <name> </dev/null 2>/dev/null \| openssl x509 -noout -enddate` — `-servername` returns the right certificate behind an SNI load balancer | Addition |
+| Certificates (HTTPS, AMQPS) [DOCUMENTED-UNVERIFIED: IA-DEP-06] | `openssl s_client -connect <host>:<port> -servername <name> </dev/null 2>/dev/null \| openssl x509 -noout -enddate` — `-servername` returns the right certificate behind an SNI load balancer | Addition |
 | Certificates (MariaDB) | same with `-starttls mysql` (OpenSSL ≥ 1.1.1): MariaDB negotiates TLS inside its own protocol, so plain `s_client` does not work | Addition |
 | Fernet | compare checksums of the key repository across Keystone nodes | Addition |
-| Upgrade state | `nova-status upgrade check` (read-only; for an upgrade it must run with the *target* release's code before services restart — with installed code it only checks the current release) | Book: Ch. 14 |
+| Upgrade state [DOCUMENTED-UNVERIFIED: IA-DEP-07] | `nova-status upgrade check` (read-only; for an upgrade it must run with the *target* release's code before services restart — with installed code it only checks the current release) | Book: Ch. 14 |
 
 ## Commands that are NOT read-only
 
 Never present these as diagnostics. Each needs the full change discipline and
-a decision owner.
+a decision owner. [DOCUMENTED-UNVERIFIED: IA-DEP-08] (a classification from
+documentation; several of these commands were run on a lab as part of
+procedures, listed in control-plane-recovery.md.)
 
 - `nova-manage placement audit --delete`, `nova-manage placement heal_allocations`,
   `nova-manage db archive_deleted_rows`, `nova-manage cell_v2 discover_hosts`

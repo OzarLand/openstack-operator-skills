@@ -5,6 +5,14 @@ policy and mechanics change; always check releases.openstack.org, the project
 upgrade guides and, for a distribution, the vendor's supported path before
 relying on any of this.
 
+Validation: every technical item in this file is
+[DOCUMENTED-UNVERIFIED: CR-UPG-01] (upstream release policy and upgrade
+guides, read but not executed for this repository), except where another tag
+says otherwise. One Kolla-Ansible all-in-one upgrade from 2025.1 to 2026.1
+was run on a lab; what happened is in `openstack-kolla-ansible-operations`
+(architecture-implications.md, *From 2025.1 to 2026.1*). A single all-in-one
+run does not validate a multinode rolling upgrade.
+
 ## Contents
 
 - Organizational readiness review

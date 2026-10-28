@@ -1,0 +1,41 @@
+# Copy into validation/inventory.yaml under `items:` and fill in.
+# Rules: docs/knowledge-validation-policy.md, section 5. Never invent a value:
+# write "unknown" or "not provided".
+
+- id: VM-NET-99                       # <AREA>-<TOPIC>-<NN>, unique, never reused
+  claim: >-
+    One or two sentences: the procedure or behaviour, as the skill states it.
+  kind: procedure                     # procedure | diagnostic | behaviour | config-fact
+  risk: state-changing                # read-only | state-changing | destructive (highest step covered)
+  skill: openstack-vm-troubleshooting
+  location: references/instance-networking.md   # file where the tag appears
+  status: PROPOSED-UNVERIFIED         # PRODUCTION-VALIDATED | LAB-VALIDATED | DOCUMENTED-UNVERIFIED
+                                      # | PROPOSED-UNVERIFIED | NEEDS-REVALIDATION
+  scope: "2026.1, Kolla-Ansible, ML2/OVS, any storage"
+  sources:
+    - { repo: vm-runbooks, path: networking/example.md }   # repo key from source_repos
+    # - { doc: "https://docs.openstack.org/..." }
+    # - { book: "Ch. 10" }
+    # - { note: "proposed in this repository" }
+
+  # For unverified statuses only:
+  missing_evidence: >-
+    The test that would validate it: environment, steps, expected result.
+
+  # For LAB-VALIDATED, PRODUCTION-VALIDATED and NEEDS-REVALIDATION only
+  # (remove missing_evidence then):
+  # validation:
+  #   environment: "lab: 3 controllers, 2 computes, nested in an OpenStack cloud"
+  #   openstack_release: "2026.1"
+  #   deployment: "kolla-ansible 22.2.0, Docker, Ubuntu 24.04"
+  #   network_backend: "ml2/ovs"
+  #   storage_backend: "local instance disks"
+  #   executed_by: "@handle or agent:name"
+  #   date: 2026-10-27
+  #   observed: "What was executed and what was seen."
+  #   not_observed: "Steps of the claim that were not run, or 'none'."
+  #   evidence: ["https://github.com/.../pull/NN"]
+  #   independent_human_check: false
+  # revalidate_when: "Release change, procedure change, ..."
+  # limitations: "Optional."
+  # production_reports: ["Optional: production observations too thin to validate."]

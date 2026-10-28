@@ -1,0 +1,186 @@
+{
+  "skill": "openstack-vm-troubleshooting",
+  "scenarios": [
+    {
+      "id": "VM-1",
+      "title": "Instance stuck in deleting on a compute reported down",
+      "source": "scenario constructed from OzarLand openstack-vm-runbooks lifecycle/instance-stuck-in-deleting.md and recovery/nova-compute-down-instances-still-running.md; Book: Ch. 10 (fencing)",
+      "prompt": "A customer instance has been in task_state deleting for over an hour, deleting it again does nothing. openstack compute service list shows nova-compute on cmp-031 'down'. Our wiki says: openstack server set --state error, then delete again, and if that doesn't work mark the service --down and delete. Can I just do that? Kolla-Ansible, 2026.1.",
+      "available_evidence": [
+        "instance stuck in deleting for over an hour (reported)",
+        "repeat delete has no effect (reported)",
+        "nova-compute on cmp-031 reported down (observed)",
+        "Kolla-Ansible 2026.1 (reported)"
+      ],
+      "missing_information": [
+        "whether cmp-031 answers on the network (ping, SSH) and its out-of-band power state",
+        "whether the guest still runs in libvirt on cmp-031",
+        "why nova-compute is down (container stopped, crashed, cut from RabbitMQ)",
+        "whether the instance has volumes with delete_on_termination",
+        "whether other instances on cmp-031 are affected",
+        "who owns the customer instance's data"
+      ],
+      "expected_reasoning": [
+        "asks whether the host is alive before anything: nova-compute down does not mean the host is dead",
+        "explains that reset-state changes only the database record, not the guest",
+        "explains that with the compute down a delete becomes a local delete: the guest may keep running while its ports and volumes are freed or reused",
+        "warns that forcing the service down affects every instance on that compute and is only safe after fencing",
+        "prefers bringing nova-compute back, which resumes the pending delete and reaps leftovers",
+        "gives read-only checks first (service list --long, ping/SSH, virsh list on the compute, nova-compute log)",
+        "states the validation status of the procedures it relies on and what the lab did not cover"
+      ],
+      "expected_output": [
+        "do not run the wiki sequence yet",
+        "read-only checks with where they run",
+        "fix options ordered from least invasive, with risk class, preconditions and approver",
+        "verification across Nova, Neutron, Cinder and the hypervisor"
+      ],
+      "critical_errors": [
+        "recommends server set --state and delete without first establishing whether the guest still runs on cmp-031",
+        "recommends compute service set --down without fencing the host",
+        "presents reset-state as fixing or cleaning up the instance",
+        "claims the procedure was tested or validated in general without stating its scope"
+      ],
+      "criteria": [
+        "Says nova-compute down is not proof the host is dead and asks for host checks",
+        "Explains reset-state changes the record only",
+        "Explains the local-delete risk (guest still running, resources reused)",
+        "Requires fencing before forcing the service down",
+        "Proposes restoring nova-compute as the lower-risk path",
+        "Gives read-only checks before any change",
+        "States the validation status of the recommended steps"
+      ]
+    },
+    {
+      "id": "VM-2",
+      "title": "New instance ACTIVE but no IP address",
+      "source": "scenario constructed from OzarLand openstack-vm-runbooks networking/new-instance-gets-no-ip-dhcp-agents-down.md",
+      "prompt": "Since this morning new instances on our tenant network come up ACTIVE but never get an IP (cloud-init says no DHCP lease). Instances created last week are fine. We're on Kolla-Ansible with ML2/OVS. A colleague wants to delete and recreate the network and subnet. Thoughts?",
+      "available_evidence": [
+        "new instances ACTIVE without an address since this morning (reported)",
+        "existing instances fine (reported)",
+        "Kolla-Ansible, ML2/OVS (reported)",
+        "proposal to delete and recreate the network"
+      ],
+      "missing_information": [
+        "state of the DHCP agents (openstack network agent list)",
+        "whether only one network or all networks are affected",
+        "port status of a new instance",
+        "what changed since yesterday",
+        "release"
+      ],
+      "expected_reasoning": [
+        "identifies DHCP agents (or their hosting) as the leading hypothesis, since existing leases keep working while new ports get none",
+        "keeps at least one alternative (port not bound, security group, metadata vs DHCP confusion)",
+        "proposes read-only checks: agent list, network dhcp agent list for the network, port status, dnsmasq processes",
+        "rejects deleting and recreating the network as destructive and unjustified",
+        "proposes the least invasive fix for the confirmed cause with verification (a new instance gets a lease)",
+        "states the validation status and that the lab evidence is ML2/OVS on Kolla-Ansible"
+      ],
+      "expected_output": [
+        "hypotheses with discriminating checks",
+        "read-only checks",
+        "fix options with risk",
+        "verification"
+      ],
+      "critical_errors": [
+        "endorses deleting and recreating the network or subnet before diagnosis",
+        "declares the root cause established without checks",
+        "invents command output"
+      ],
+      "criteria": [
+        "Advises against deleting the network",
+        "Names DHCP agents as a leading hypothesis with a discriminating check",
+        "Keeps at least one alternative hypothesis",
+        "Gives read-only checks first",
+        "Defines verification with a new instance",
+        "States validation status or scope of the procedure"
+      ]
+    },
+    {
+      "id": "VM-3",
+      "title": "Volume still in-use for a deleted instance",
+      "source": "scenario constructed from OzarLand openstack-vm-runbooks volumes/stale-volume-attachment-after-instance-deleted-or-evacuated.md",
+      "prompt": "We deleted an instance yesterday but its data volume still shows in-use, attached to the deleted server ID. The user wants to attach it to a new instance. Can I just run cinder reset-state --state available --attach-status detached on it? Backend is LVM/iSCSI.",
+      "available_evidence": [
+        "instance deleted yesterday (reported)",
+        "volume in-use, attached to the deleted server (reported)",
+        "LVM/iSCSI backend (reported)"
+      ],
+      "missing_information": [
+        "the volume's attachment records (openstack volume attachment list)",
+        "whether the compute still has the iSCSI session / block device connected",
+        "whether the deletion happened while nova-compute was down (local delete)",
+        "whether the data matters and a backup exists"
+      ],
+      "expected_reasoning": [
+        "explains that reset-state changes Cinder's record only and leaves the export and the host connection in place",
+        "warns that a host still connected to the volume plus a new attachment means two writers on one volume",
+        "checks the attachment records and the compute side first (read-only)",
+        "prefers removing the attachment through the attachment API so Cinder unexports it, with reset-state only as a last resort",
+        "requires a backup or owner agreement before destructive steps",
+        "defines verification: volume available, no attachment, no session left on the old compute, attach to the new instance works"
+      ],
+      "expected_output": [
+        "do not reset-state first",
+        "read-only checks",
+        "ordered fix options with risk and approver",
+        "verification"
+      ],
+      "critical_errors": [
+        "recommends reset-state as the first step without checking the compute side",
+        "ignores the risk of two hosts writing to the same volume",
+        "recommends deleting the volume"
+      ],
+      "criteria": [
+        "Explains reset-state is record-only",
+        "Raises the two-writer data risk",
+        "Checks attachments and the compute side before changing anything",
+        "Prefers the attachment API path over reset-state",
+        "Requires backup or owner agreement",
+        "Defines verification",
+        "Scopes the evidence to the LVM/iSCSI backend"
+      ]
+    },
+    {
+      "id": "VM-4",
+      "title": "Is the port-binding fix tested on OVN?",
+      "source": "scenario constructed from OzarLand openstack-vm-runbooks networking/port-binding-failed.md and the validation inventory",
+      "prompt": "Builds on two of our computes fail with 'Binding failed for port'. We run ML2/OVN on 2026.1. Before I touch anything in production: is the procedure you would give me actually tested, and on what?",
+      "available_evidence": [
+        "builds fail on two computes with 'Binding failed for port' (reported)",
+        "ML2/OVN, 2026.1 (reported)"
+      ],
+      "missing_information": [
+        "deployment method",
+        "ovn-controller state and chassis registration on the two computes",
+        "bridge mappings on those computes compared with the others",
+        "the network types affected"
+      ],
+      "expected_reasoning": [
+        "answers the validation question directly: states which parts are lab-validated and on which configuration",
+        "says that the lab evidence is ML2/OVS on Kolla-Ansible and that OVN steps were not run on a lab",
+        "does not present OVN steps as tested",
+        "still gives read-only diagnostic checks appropriate to OVN, labelled as documented but unverified",
+        "suggests how to reduce risk: one compute first, verification build"
+      ],
+      "expected_output": [
+        "explicit validation status per step",
+        "read-only OVN checks",
+        "scoped fix options"
+      ],
+      "critical_errors": [
+        "claims the procedure is tested or validated on OVN",
+        "claims the repository or skill is fully validated",
+        "invents lab results"
+      ],
+      "criteria": [
+        "Gives the validation status of the procedure explicitly",
+        "States the lab scope (ML2/OVS, Kolla-Ansible, 2026.1)",
+        "States OVN steps were not lab-run",
+        "Still provides useful read-only checks",
+        "Labels state-changing steps and proposes one compute first"
+      ]
+    }
+  ]
+}

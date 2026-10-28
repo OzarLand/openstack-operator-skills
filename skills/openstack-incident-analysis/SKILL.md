@@ -4,7 +4,7 @@ description: Investigates OpenStack production incidents and alerts through evid
 license: Apache-2.0
 metadata:
   source: "OpenStack, the Day After Tomorrow (Soufian Zaouam), v1.2 - Ch. 4, 5, 8, 9, 10, 19, App. E"
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # OpenStack incident analysis
@@ -26,8 +26,9 @@ summarized in [references/operating-principles.md](references/operating-principl
 - A "should we evacuate / restart / purge / bootstrap?" question during an incident.
 
 Not for: planned changes (use `openstack-change-review`), maintenance campaigns
-(`openstack-maintenance-planning`), or writing the resulting procedure
-(`openstack-runbook-authoring`).
+(`openstack-maintenance-planning`), writing the resulting procedure
+(`openstack-runbook-authoring`), or one instance, volume or port misbehaving
+while the rest of the platform is healthy (`openstack-vm-troubleshooting`).
 
 ## Proportionality
 
@@ -100,7 +101,11 @@ would **disprove** it, and the cheapest read-only check that discriminates
 [Book: Ch. 9]. Do not promote a hypothesis to a cause until a check supports it
 and the alternatives are weakened. Known patterns, with their discriminating
 checks and dangerous moves, are in
-[references/failure-patterns.md](references/failure-patterns.md).
+[references/failure-patterns.md](references/failure-patterns.md). Concrete
+diagnosis and recovery for RabbitMQ, Galera, HAProxy and keepalived, database
+connections, Keystone Fernet keys and Nova conductor or scheduler, with what
+was observed on a lab, are in
+[references/control-plane-recovery.md](references/control-plane-recovery.md).
 
 ### 5. Read-only diagnostic plan
 
@@ -193,11 +198,17 @@ them without explicit, evidenced reasons from the user.
 - **Partition is not node loss.** For RabbitMQ, a node that left the cluster
   and a partitioned cluster raise the same alert and need opposite handling.
   Do not recommend resetting nodes until it is established which side the
-  services use; escalate first [Book: Ch. 11].
+  services use; escalate first [Book: Ch. 11]. With RabbitMQ's Khepri store a
+  partition may show no "Network Partitions" entry and may heal by itself, and a
+  reset was observed to fail and leave a node outside the cluster on a lab
+  `[Addition]` [LAB-VALIDATED: IA-CP-05]: re-check every node before any reset
+  and plan the rejoin and queue-replica repair.
 - **Galera bootstrap is the step to rehearse.** Bootstrapping the wrong node
   discards committed transactions. Require identification of the most advanced
   node (seqno, `safe_to_bootstrap`, `--wsrep-recover`) before any bootstrap
-  advice [Book: Ch. 10].
+  advice [Book: Ch. 10]. One node down needs no bootstrap
+  [LAB-VALIDATED: IA-CP-09], nor does a split whose network is repaired
+  [LAB-VALIDATED: IA-CP-10] `[Addition]`.
 - **Purging queues discards in-flight operations.** It may be the right
   trade-off (Ch. 19 did it deliberately), but state the loss and require a
   decision.
@@ -278,6 +289,9 @@ in [references/worked-example.md](references/worked-example.md).
   notes (v1.2, 2026) plus marked additions; behaviour varies by release,
   deployment tool and backend. Ask for versions and verify against upstream or
   vendor documentation before relying on them.
+- Lab evidence (tags `LAB-VALIDATED`) comes from OpenStack 2026.1 with
+  Kolla-Ansible, ML2/OVS and RabbitMQ 4.2 with Khepri; say so when relying on
+  it, and say which steps were not run.
 - It gives no universal thresholds (timeouts, migration rates, queue depths);
   those depend on the platform's baselines [Book: Ch. 8].
 - If the user is under time pressure, keep the structure but shorten it; do
@@ -288,3 +302,5 @@ in [references/worked-example.md](references/worked-example.md).
 - `openstack-runbook-authoring` — turn the outcome into a procedure with decision points.
 - `openstack-change-review` — review the structural fix before it is applied.
 - `openstack-operational-decisions` — for repair-vs-rebuild or keep-the-workaround decisions after the incident.
+- `openstack-vm-troubleshooting` — symptoms of individual instances, volumes or ports.
+- `openstack-kolla-ansible-operations` — when the fix is a `kolla-ansible` run or a Kolla configuration change.

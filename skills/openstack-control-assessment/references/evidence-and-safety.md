@@ -67,6 +67,28 @@ statement. "We think so" means the point is not established [Book: App. B].
     runbook, record or table: write `<redacted>`, and tell the user it was
     exposed and may need rotating. Never ask for a credential to perform an
     analysis. [Addition]
+12. **Say how well a procedure is validated.** Procedures and technical claims
+    in the reference files carry a validation tag, such as
+    `[LAB-VALIDATED: VM-NET-03]`. When you recommend a procedure or rely on such
+    a claim, state its status and, for `LAB-VALIDATED`, the scope the tag's
+    text gives (release, deployment method, backends) and the steps it says
+    were not run. Present `DOCUMENTED-UNVERIFIED` and `PROPOSED-UNVERIFIED`
+    material as not tested, and `NEEDS-REVALIDATION` as possibly outdated.
+    Untagged technical statements are unverified. Never upgrade a status,
+    never extend a lab result to another release, deployment method or backend,
+    and never describe a skill or this repository as validated as a whole.
+    A status describes past evidence; it is not a guarantee for the user's
+    platform, so the read-only checks still come first. [Addition]
+
+### Validation statuses
+
+| Status | Meaning |
+|---|---|
+| `PRODUCTION-VALIDATED` | Executed and verified in a real production environment, documented. |
+| `LAB-VALIDATED` | Executed and verified in a lab of the stated configuration, for the steps stated. |
+| `DOCUMENTED-UNVERIFIED` | From documentation, source code, the book or a runbook; no execution evidence. |
+| `PROPOSED-UNVERIFIED` | Written for this repository; not executed anywhere yet. |
+| `NEEDS-REVALIDATION` | Was validated, but the procedure or its context changed since. |
 
 ## Standard disclaimer line
 

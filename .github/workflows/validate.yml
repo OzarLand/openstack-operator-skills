@@ -21,3 +21,7 @@ jobs:
         run: python3 tools/validate_skills.py
       - name: Weighted model script reproduces the book's example and rejects bad input
         run: python3 tools/test_weighted_score.py
+      # Bookkeeping only: tags match the inventory, evidence fields present, coverage
+      # figures current. It never shows that an OpenStack procedure works.
+      - name: Knowledge validation inventory is consistent
+        run: python3 tools/validate_knowledge.py

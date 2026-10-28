@@ -4,13 +4,13 @@
     "name": "Soufian Zaouam"
   },
   "metadata": {
-    "description": "Agent Skills for operating production OpenStack, derived from the book 'OpenStack, the Day After Tomorrow'",
-    "version": "0.1.0"
+    "description": "Agent Skills for operating production OpenStack, derived from the book 'OpenStack, the Day After Tomorrow' and the OzarLand operator runbooks, with per-procedure validation status",
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "openstack-operations",
-      "description": "Incident analysis, change review, maintenance planning, operational decisions, control assessment, automation review and runbook authoring for production OpenStack platforms",
+      "description": "Incident analysis, VM troubleshooting, Kolla-Ansible operations, change review, maintenance planning, operational decisions, control assessment, automation review and runbook authoring for production OpenStack platforms",
       "source": "./",
       "strict": false,
       "skills": [
@@ -20,7 +20,9 @@
         "./skills/openstack-operational-decisions",
         "./skills/openstack-control-assessment",
         "./skills/openstack-automation-review",
-        "./skills/openstack-runbook-authoring"
+        "./skills/openstack-runbook-authoring",
+        "./skills/openstack-vm-troubleshooting",
+        "./skills/openstack-kolla-ansible-operations"
       ]
     }
   ]

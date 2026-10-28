@@ -1,7 +1,9 @@
 # Notes by change type
 
 What to look for in common OpenStack change types. Items marked `[Addition]`
-are this repository's suggestions, not the book's.
+are this repository's suggestions, not the book's. Validation tags (rule 12 of
+the safety rules) say whether a technical claim was executed on a lab;
+untagged items here are review questions, not procedures.
 
 ## Contents
 
@@ -26,6 +28,8 @@ are this repository's suggestions, not the book's.
   `[Addition]` that follows from that.
 - Verification `[Addition]`: services reconnect over TLS, no handshake errors,
   API and RPC traffic healthy, new expiry dates visible to monitoring.
+- [DOCUMENTED-UNVERIFIED: CR-CERT-01] No certificate rotation or expiry was
+  executed on a lab for this repository.
 
 ## Keystone Fernet key rotation
 
@@ -37,6 +41,12 @@ are this repository's suggestions, not the book's.
 - Check `[Addition]`: distribution mechanism to all nodes, order of
   operations, rollback (keeping prior keys until tokens issued with them
   expire), verification of token issue and validation from every node.
+- What a lab showed `[Addition]` (Kolla-Ansible 2026.1, three Keystone nodes):
+  one missed key push is harmless, a second rotation without a push breaks
+  tokens older than the 600 s token cache; with the default schedule only two
+  of three nodes get a rotation slot; re-synchronising by pushing one node's
+  keys invalidates the tokens the other nodes issued
+  [LAB-VALIDATED: IA-CP-18] [LAB-VALIDATED: IA-CP-19].
 
 ## Network changes
 
@@ -46,7 +56,11 @@ are this repository's suggestions, not the book's.
   boundaries — name the coordinating owner.
 - Neutron agents and OVN controllers run on data-plane nodes; restarting some
   of them can briefly interrupt tenant traffic, depending on version and
-  configuration [Book: Ch. 1].
+  configuration [Book: Ch. 1]. [DOCUMENTED-UNVERIFIED: CR-NET-01] On a lab
+  (2026.1, Kolla-Ansible, ML2/OVS, `drop_flows_on_start` at its default),
+  restarting the Open vSwitch agent lost no traffic
+  [LAB-VALIDATED: VM-NET-29]; that result does not cover OVN, the L3 or DHCP
+  agents, or other settings.
 - Verification must include tenant connectivity end to end, not just link
   state `[Addition]`, consistent with capability-level verification
   [Book: Ch. 10].
@@ -55,13 +69,16 @@ are this repository's suggestions, not the book's.
 
 [Book: Ch. 10]
 - Direct database surgery: backup first, one record at a time, verification
-  after.
+  after. [DOCUMENTED-UNVERIFIED: IA-FP-09]
 - Prefer project tools where they exist: `nova-manage placement audit`
   (read-only unless `--delete`), `nova-manage placement heal_allocations`,
-  `nova-manage db archive_deleted_rows`, reset state via the API.
+  `nova-manage db archive_deleted_rows`, reset state via the API
+  [LAB-VALIDATED: IA-FP-08] (lab: all-in-one, no Cinder).
 - Database restores: all service databases at one point in time, followed by
   reconciliation against hypervisors; mixed points in time leave Nova,
-  Placement, Neutron and Cinder disagreeing.
+  Placement, Neutron and Cinder disagreeing. [DOCUMENTED-UNVERIFIED: IA-FP-10]
+  A Kolla-Ansible Mariabackup full restore of a Galera cluster was run on a
+  lab: see `openstack-kolla-ansible-operations` [LAB-VALIDATED: KA-OPS-14].
 - Galera: confirm the write path (usually a single node behind the load
   balancer) and cluster health before and after.
 
@@ -84,8 +101,13 @@ are this repository's suggestions, not the book's.
 - Quorum queues need a majority of members: size the cluster for the failures
   it must survive.
 - RabbitMQ 4.0 removed classic queue mirroring.
+  [DOCUMENTED-UNVERIFIED: CR-MQ-01] (queue type fixed at declaration, quorum
+  majority, mirroring removed: from RabbitMQ documentation.)
 - Partition handling (`cluster_partition_handling`) applies to the Mnesia
-  metadata store, not Khepri; check which store is in use.
+  metadata store, not Khepri; check which store is in use
+  [DOCUMENTED-UNVERIFIED: IA-DEP-03]. Any change that resets or rejoins nodes:
+  with Khepri, `force_reset` is refused and a Kolla-Ansible reset failed on a
+  lab [LAB-VALIDATED: IA-CP-05]; plan the queue-replica repair.
 
 ## Changes carrying a local patch or backport
 

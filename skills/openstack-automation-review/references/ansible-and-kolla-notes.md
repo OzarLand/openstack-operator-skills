@@ -17,7 +17,7 @@ versions in use.
 
 | Safeguard (book) | Ansible mechanism to look for |
 |---|---|
-| Preview / dry run | `--check` and `--diff`; note that `command`/`shell` tasks are skipped in check mode unless written to support it, so a clean check run can hide most of a shell-heavy playbook |
+| Preview / dry run | `--check` and `--diff`; note that `command`/`shell` tasks are skipped in check mode unless written to support it, so a clean check run can hide most of a shell-heavy playbook [DOCUMENTED-UNVERIFIED: AR-ANS-01] |
 | Explicit scope | `hosts:` patterns, `--limit`, inventory groups; beware `hosts: all` and empty-group behaviour |
 | Bounded blast radius | `serial:` (batches), `throttle:`, `forks` |
 | Stop conditions | `max_fail_percentage`, `any_errors_fatal`, explicit `assert`/`fail` tasks on health checks between batches |
@@ -46,13 +46,22 @@ versions in use.
 - `deploy`, `reconfigure` and `upgrade` regenerate configuration and may
   restart containers for the targeted services; scope with `--limit` and
   `--tags` and know which containers will restart before running in production.
+  On a lab, only containers whose configuration or image differed were
+  restarted [LAB-VALIDATED: KA-CMD-04], and `--limit` still gathered facts from
+  every host, so an unreachable host failed the run [LAB-VALIDATED: KA-CMD-07];
+  `reconfigure` overrides a `kolla_serial` passed with `-e`, so it cannot be
+  made rolling that way [LAB-VALIDATED: KA-CMD-09]. Details and limits:
+  `openstack-kolla-ansible-operations`.
 - Configuration overrides under `/etc/kolla/config/` are merged into generated
   service configuration; local overrides are carried divergence that must be
   reviewed at each upgrade [Book: Ch. 14].
 - Image tags: pin explicit tags/versions so a re-run does not silently pull
   different images.
 - `destroy` is destructive by design and protected by an explicit confirmation
-  flag; it should never appear in routine automation.
+  flag; it should never appear in routine automation. `kolla-ansible stop` is
+  protected the same way on 2026.1 (it exits without
+  `--yes-i-really-really-mean-it`) [LAB-VALIDATED: KA-OPS-23]; the `destroy`
+  flag itself was not exercised [DOCUMENTED-UNVERIFIED: AR-KA-01].
 - Command syntax and available subcommands differ between releases; check the
   installed version's help.
 
@@ -67,6 +76,9 @@ versions in use.
 - Evacuation logic must fence the host first [Book: Ch. 10], then mark the
   compute service forced down before evacuating, and must not return the host
   to service before `nova-compute` has cleaned up the evacuated instances.
+  The force-down, evacuate and clean-up steps were run on a lab
+  [LAB-VALIDATED: IA-FP-03]; automated fencing was not
+  [DOCUMENTED-UNVERIFIED: IA-FP-04].
 - Migration automation should account for capacity and the libvirt/QEMU
   direction constraint after partial patching [Book: Ch. 20].
 - Cleanup automation for stale records: prefer project tools

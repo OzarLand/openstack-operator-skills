@@ -15,7 +15,7 @@ place you use Claude. Source: Anthropic, *Agent Skills overview* (Oct 2026).
 Plugin skills are namespaced, e.g. `/openstack-operations:openstack-incident-analysis`.
 The manifest (`.claude-plugin/marketplace.json`) passes
 `claude plugin validate --strict`, and the install above was tested end to end
-from GitHub (all seven skills installed; the incident skill triggered on a
+from GitHub in 0.1.0 (all seven skills of that version installed; the incident skill triggered on a
 test prompt).
 
 Plugin skills live outside your project (in the plugin cache under
@@ -36,7 +36,7 @@ cp -r openstack-operator-skills/skills/* ~/.claude/skills/
 mkdir -p .claude/skills && cp -r openstack-operator-skills/skills/* .claude/skills/
 ```
 
-Install all seven if you can: they hand off to each other. Each one also works
+Install all nine if you can: they hand off to each other. Each one also works
 alone.
 
 ## claude.ai
