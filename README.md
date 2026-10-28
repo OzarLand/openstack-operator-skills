@@ -352,7 +352,7 @@ Grading is by a model, so read it as a direction more than an exact effect
 size. These runs measure reasoning, not whether a procedure works on
 OpenStack. [Full evaluation report →](docs/evaluation-report.md)
 
-## 🏝️ Part of OzarLand
+## Part of OzarLand
 
 [OzarLand](https://github.com/OzarLand/ozarland) is an early-stage,
 independent space where OpenStack operators share what they learn running it.
