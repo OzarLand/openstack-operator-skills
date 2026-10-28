@@ -185,45 +185,75 @@ confidently wrong exactly where production OpenStack punishes you.
 
 ## 🔬 Validation status
 
-How much can you trust a procedure? Here is the rule:
+> [!IMPORTANT]
+> **All procedures presented as validated in this knowledge base have been
+> successfully tested either in production or, at minimum, in a laboratory
+> environment. Procedures without sufficient execution evidence are explicitly
+> identified as unvalidated or experimental.**
+>
+> A lab result is never presented as a production result, and reading or
+> reviewing a procedure is not validation.
 
-**All procedures presented as validated in this knowledge base have been
-successfully tested either in production or, at minimum, in a laboratory
-environment. Procedures without sufficient execution evidence are explicitly
-identified as unvalidated or experimental.** A lab result is never presented
-as a production result, and reading or reviewing a procedure is not
-validation.
-
-Every procedure or technical claim an operator could act on carries a tag in
-the skill text, such as `[LAB-VALIDATED: VM-NET-03]`, and an entry in
-[`validation/inventory.yaml`](validation/inventory.yaml). Claude states that
-status, and what the test did not cover, when it recommends the procedure.
+**How a procedure earns its status.** Each one carries a tag such as
+`[LAB-VALIDATED: VM-NET-03]`, and Claude tells you that status, and what the
+test did not cover, when it recommends the procedure.
 
 ```mermaid
 flowchart LR
-    P["PROPOSED-UNVERIFIED<br/>written here,<br/>not executed"] --> L
-    D["DOCUMENTED-UNVERIFIED<br/>from docs, the book<br/>or a runbook"] --> L
-    L["LAB-VALIDATED<br/>executed on a lab,<br/>for the steps<br/>and setup recorded"] --> PR["PRODUCTION-VALIDATED<br/>executed and verified<br/>in production"]
-    L -. "procedure or<br/>context changes" .-> N["NEEDS-REVALIDATION"]
+    P["🧪 PROPOSED-UNVERIFIED<br/><i>experimental</i>"] --> L
+    D["📄 DOCUMENTED-UNVERIFIED<br/><i>unvalidated</i>"] --> L
+    L["🟩 LAB-VALIDATED<br/><i>ran on a lab</i>"] --> PR["🟦 PRODUCTION-VALIDATED<br/><i>ran in production</i>"]
+    L -. "procedure or<br/>context changes" .-> N["🔁 NEEDS-REVALIDATION<br/><i>possibly outdated</i>"]
     PR -.-> N
+    classDef grey fill:#f3f4f6,stroke:#9ca3af,color:#111827
+    classDef green fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef blue fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef amber fill:#fef3c7,stroke:#d97706,color:#78350f
+    class P,D grey
+    class L green
+    class PR blue
+    class N amber
 ```
 
-| Usual term | Status here |
-|---|---|
-| Production-validated | `PRODUCTION-VALIDATED` |
-| Lab-validated | `LAB-VALIDATED`, for the steps and configuration recorded |
-| Partially validated | each `LAB-VALIDATED` entry lists the steps *not* observed; per skill, see the table below |
-| Unvalidated | `DOCUMENTED-UNVERIFIED` |
-| Experimental | `PROPOSED-UNVERIFIED` |
-| Possibly outdated | `NEEDS-REVALIDATION` |
-
-**The knowledge base is undergoing validation.** It is not fully validated,
-and no repository-wide validation claim will be made until every item in the
-declared scope is production- or lab-validated. Where things stand,
-generated from the inventory:
+**Where things stand.** The knowledge base is undergoing validation: it is
+not fully validated, and no repository-wide claim will be made until every
+item in scope is. Generated from
+[`validation/inventory.yaml`](validation/inventory.yaml):
 
 <!-- validation-coverage:start -->
+<p align="center">
+  <img src="https://img.shields.io/badge/production--validated-0%20of%20352-2563eb.svg" alt="production-validated: 0 of 352">
+  <img src="https://img.shields.io/badge/lab--validated-163%20of%20352-16a34a.svg" alt="lab-validated: 163 of 352">
+  <img src="https://img.shields.io/badge/not%20validated%20yet-189%20of%20352-9ca3af.svg" alt="not validated yet: 189 of 352">
+</p>
+
 163 of 352 items in scope (46 %) are validated: 0 in production, 163 in a lab. 189 are not validated yet.
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"pie1": "#d1d5db", "pie2": "#16a34a", "pie3": "#6b7280"}}}%%
+pie showData
+    title Items in scope by status
+    "DOCUMENTED-UNVERIFIED" : 188
+    "LAB-VALIDATED" : 163
+    "PROPOSED-UNVERIFIED" : 1
+```
+
+| Skill | Progress | Validated |
+|---|---|---:|
+| `openstack-automation-review` | ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ | 0 / 2 |
+| `openstack-change-review` | ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ | 0 / 4 |
+| `openstack-control-assessment` | 🧠 reasoning method, no tagged procedures | n/a |
+| `openstack-incident-analysis` | 🟩🟩🟩🟩🟩⬜⬜⬜⬜⬜ | 18 / 39 |
+| `openstack-kolla-ansible-operations` | 🟩🟩🟩⬜⬜⬜⬜⬜⬜⬜ | 42 / 126 |
+| `openstack-maintenance-planning` | 🟩🟩🟩⬜⬜⬜⬜⬜⬜⬜ | 2 / 7 |
+| `openstack-operational-decisions` | 🧠 reasoning method, no tagged procedures | n/a |
+| `openstack-runbook-authoring` | 🧠 reasoning method, no tagged procedures | n/a |
+| `openstack-vm-troubleshooting` | 🟩🟩🟩🟩🟩🟩⬜⬜⬜⬜ | 101 / 174 |
+
+<sub>🟦 production-validated · 🟩 lab-validated · ⬜ not validated yet · one square is about 10 % of the skill's items</sub>
+
+<details>
+<summary><b>Per-skill details and status counts</b></summary>
 
 | Status | Items | Share |
 |---|---:|---:|
@@ -245,26 +275,42 @@ generated from the inventory:
 | `openstack-operational-decisions` | No inventory items: a reasoning method from the book | n/a | n/a | Behavioural evaluation only (reasoning, not execution) | Commands quoted in its examples are untagged, so unverified |
 | `openstack-runbook-authoring` | No inventory items: a reasoning method from the book | n/a | n/a | Behavioural evaluation only (reasoning, not execution) | Commands quoted in its examples are untagged, so unverified |
 | `openstack-vm-troubleshooting` | Partially lab-validated: 101 of 174 items | Kolla-Ansible labs | OpenStack 2026.1 | 101 lab records, 2026-10-13 to 2026-10-27; [details](docs/validation-coverage.md) | No production evidence; runs by an automated lab agent, no independent human check; 73 items unverified |
+
+</details>
 <!-- validation-coverage:end -->
 
 **What the lab evidence covers**
 
-- ✅ OpenStack 2026.1 with Kolla-Ansible (mostly 22.x), Docker, Ubuntu 24.04,
-  ML2/OVS, RabbitMQ 4.2 with Khepri, Galera behind ProxySQL.
-- ✅ Small nested labs: all-in-one, or up to 3 controllers and 2 computes.
-- ⚠️ The runs were executed by an automated lab agent and recorded in the
-  OzarLand repositories. No human operator has independently reproduced them
-  yet, and this repository has not re-executed them.
-- ⚠️ Nothing is production-validated: the few production observations
-  recorded are too thin to qualify.
-- ❌ OVN, Ceph, other releases and other deployment tools are mostly untested.
+| | |
+|:-:|---|
+| ✅ | OpenStack 2026.1, Kolla-Ansible (mostly 22.x), Ubuntu 24.04, ML2/OVS, RabbitMQ 4.2, Galera with ProxySQL |
+| ✅ | Small nested labs: all-in-one, up to 3 controllers and 2 computes |
+| ⚠️ | Runs by an automated lab agent; not yet reproduced by a human operator |
+| ⚠️ | Nothing production-validated yet |
+| ❌ | OVN, Ceph, other releases and other deployment tools: mostly untested |
 
-Per-item evidence and missing evidence:
-[docs/validation-coverage.md](docs/validation-coverage.md). The policy:
-[docs/knowledge-validation-policy.md](docs/knowledge-validation-policy.md).
-Passing CI and the behavioural evaluations show that the bookkeeping is
-consistent and that Claude reasons well; neither shows that an OpenStack
-procedure works.
+<details>
+<summary><b>Status names, partial validation and what CI proves</b></summary>
+
+| Usual term | Status here |
+|---|---|
+| Production-validated | `PRODUCTION-VALIDATED` |
+| Lab-validated | `LAB-VALIDATED`, for the steps and configuration recorded |
+| Partially validated | each `LAB-VALIDATED` entry lists the steps *not* observed; per skill, see the bars above |
+| Unvalidated | `DOCUMENTED-UNVERIFIED` |
+| Experimental | `PROPOSED-UNVERIFIED` |
+| Possibly outdated | `NEEDS-REVALIDATION` |
+
+The lab runs were recorded in the OzarLand repositories; this repository has
+not re-executed them. The few production observations recorded are too thin
+to qualify as production validation. Passing CI and the behavioural
+evaluations show that the bookkeeping is consistent and that Claude reasons
+well; neither shows that an OpenStack procedure works.
+
+</details>
+
+📖 Per-item evidence: [docs/validation-coverage.md](docs/validation-coverage.md) ·
+policy: [docs/knowledge-validation-policy.md](docs/knowledge-validation-policy.md)
 
 ## 🛡️ Safety by design
 

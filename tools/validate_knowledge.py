@@ -261,9 +261,59 @@ def skill_status_table(items):
     return "\n".join(lines)
 
 
+def status_badges(items):
+    total = len(items)
+    counts = Counter(i.get("status") for i in items)
+    unverified = total - sum(counts[s] for s in VALIDATED)
+    badges = [("production--validated", counts["PRODUCTION-VALIDATED"], "2563eb"),
+              ("lab--validated", counts["LAB-VALIDATED"], "16a34a"),
+              ("not%20validated%20yet", unverified, "9ca3af")]
+    return "<p align=\"center\">\n" + "\n".join(
+        f'  <img src="https://img.shields.io/badge/{label}-{n}%20of%20{total}-{color}.svg" '
+        f'alt="{label.replace("--", "-").replace("%20", " ")}: {n} of {total}">'
+        for label, n, color in badges) + "\n</p>"
+
+
+def status_pie(items):
+    counts = Counter(i.get("status") for i in items)
+    colors = {"PRODUCTION-VALIDATED": "#2563eb", "LAB-VALIDATED": "#16a34a", "DOCUMENTED-UNVERIFIED": "#d1d5db",
+              "PROPOSED-UNVERIFIED": "#6b7280", "NEEDS-REVALIDATION": "#d97706"}
+    # Mermaid colours slices pie1, pie2, ... in descending order of value.
+    shown = sorted((s for s in STATUSES if counts[s]), key=lambda s: -counts[s])
+    theme = ", ".join(f'"pie{n}": "{colors[s]}"' for n, s in enumerate(shown, 1))
+    slices = "\n".join(f'    "{s}" : {counts[s]}' for s in shown)
+    return (f'```mermaid\n%%{{init: {{"theme": "base", "themeVariables": {{{theme}}}}}}}%%\n'
+            f"pie showData\n    title Items in scope by status\n{slices}\n```")
+
+
+def skill_bars(items):
+    """Ten-square bar per skill: blue production, green lab, white not validated."""
+    by_skill = defaultdict(Counter)
+    for i in items:
+        by_skill[i.get("skill")][i.get("status")] += 1
+    lines = ["| Skill | Progress | Validated |", "|---|---|---:|"]
+    for skill in sorted(p.name for p in SKILLS.iterdir() if (p / "SKILL.md").exists()):
+        c = by_skill.get(skill)
+        if not c:
+            lines.append(f"| `{skill}` | 🧠 reasoning method, no tagged procedures | n/a |")
+            continue
+        total = sum(c.values())
+        prod = round(10 * c["PRODUCTION-VALIDATED"] / total)
+        lab = round(10 * (c["PRODUCTION-VALIDATED"] + c["LAB-VALIDATED"]) / total) - prod
+        validated = c["PRODUCTION-VALIDATED"] + c["LAB-VALIDATED"]
+        bar = "🟦" * prod + "🟩" * lab + "⬜" * (10 - prod - lab)
+        lines.append(f"| `{skill}` | {bar} | {validated} / {total} |")
+    lines.append("")
+    lines.append("<sub>🟦 production-validated · 🟩 lab-validated · ⬜ not validated yet · "
+                 "one square is about 10 % of the skill's items</sub>")
+    return "\n".join(lines)
+
+
 def render_readme_block(items):
     table, summary, _, _ = coverage_tables(items)
-    return f"{README_START}\n{summary}\n\n{table}\n\n{skill_status_table(items)}\n{README_END}"
+    return (f"{README_START}\n{status_badges(items)}\n\n{summary}\n\n{status_pie(items)}\n\n"
+            f"{skill_bars(items)}\n\n<details>\n<summary><b>Per-skill details and status counts</b>"
+            f"</summary>\n\n{table}\n\n{skill_status_table(items)}\n\n</details>\n{README_END}")
 
 
 def render_coverage(items, data):
