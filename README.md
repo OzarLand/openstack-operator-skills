@@ -29,6 +29,10 @@
 **Nine [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)
 that make Claude reason like a senior OpenStack operator** during incidents,
 changes, maintenance and troubleshooting.
+They use the open Agent Skills format, and every `references/` file is plain
+Markdown that people and other assistants can read as it is.
+The skills themselves, not only the lab runs, were written with AI agents from
+Soufian Zaouam's book and the OzarLand pages, and reviewed by him.
 
 - **For** people who run OpenStack in production: operators, SREs, platform
   engineers and their leads.
@@ -359,16 +363,9 @@ Grading is by a model, so read it as a direction more than an exact effect
 size. These runs measure reasoning, not whether a procedure works on
 OpenStack. [Full evaluation report →](docs/evaluation-report.md)
 
-## 🌍 Part of OzarLand
+## 🧬 Where the knowledge comes from
 
-**[OzarLand](https://github.com/OzarLand/ozarland): a shared land for better
-OpenStack operations.** It started as a personal initiative by Soufian Zaouam
-to share practical OpenStack operational knowledge, and it is meant to grow
-into a space where operators exchange experience, document solutions and help
-each other run more reliable platforms. It is open to everyone: your
-knowledge, questions and corrections are welcome.
-
-The skills draw on its knowledge and keep its validation status attached:
+The skills draw on OzarLand's knowledge and keep its validation status attached:
 
 ```mermaid
 flowchart LR
@@ -378,14 +375,6 @@ flowchart LR
     QL["openstack-quick-lab<br/>disposable lab"] -.->|practise the runbooks| RB
     SK["openstack-operator-skills<br/>(here)"] --> C["Claude"]
 ```
-
-| Repository | Role |
-|---|---|
-| [ozarland](https://github.com/OzarLand/ozarland) | Community home: principles, conventions, how pages are reviewed and validated |
-| [openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) | Symptom-driven runbooks for instance problems; source of most lab evidence here |
-| [kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns) | Kolla-Ansible deployment choices and their trade-offs, compared rather than prescribed |
-| [openstack-quick-lab](https://github.com/OzarLand/openstack-quick-lab) | A disposable lab to try OpenStack and practise the runbooks |
-| openstack-operator-skills (here) | Claude skills that apply this knowledge and an operating method, and say how well each procedure was tested |
 
 A correction to a procedure belongs first in the runbook or pattern it comes
 from; the skill then picks it up ([docs/source-mapping.md](docs/source-mapping.md)).
@@ -436,6 +425,21 @@ assets/                         images used in this README
 ```
 
 </details>
+
+## 🌍 Part of OzarLand
+
+**OzarLand: a shared land for better OpenStack operations.** It started as a personal initiative by Soufian Zaouam
+to share practical OpenStack operational knowledge, and it is meant to grow into a space where operators exchange
+experience, document solutions and help each other run more reliable platforms. It is open to everyone: your
+knowledge, questions and corrections are welcome.
+
+| | Repository | What it holds |
+|:-:|---|---|
+| | [ozarland](https://github.com/OzarLand/ozarland) | Start here: newcomer path, community rules, [Discussions](https://github.com/OzarLand/ozarland/discussions) |
+| 🔧 | [openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) | Symptom-driven runbooks for instance problems |
+| 🏗️ | [kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns) | Ways to deploy with Kolla-Ansible, compared |
+| 🧪 | [openstack-quick-lab](https://github.com/OzarLand/openstack-quick-lab) | A disposable OpenStack lab to practise on |
+| 🤖 | `openstack-operator-skills` **(you are here)** | Claude skills that apply this knowledge |
 
 ## 📚 The book, licence and citation
 

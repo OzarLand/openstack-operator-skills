@@ -1,8 +1,11 @@
-# Evaluation report — v0.1.0
+# Evaluation report — v0.1.0 and v0.2.0
 
-Date: 2026-10-25 (section 9 added after issues #1–#6, section 10 after the
-repeated runs). Everything below was actually run in this repository's
-development session; raw outputs and grades are under `evals/results/`.
+Sections 1 to 12 cover v0.1.0 (seven skills, 30 scenarios), run on 2026-10-25
+(section 9 added after issues #1–#6, section 10 after the repeated runs).
+Section 13 covers v0.2.0 (nine skills, 38 scenarios), run on 2026-10-28; read
+it for the current release. Everything below was actually run in this
+repository's development sessions; raw outputs and grades are under
+`evals/results/`.
 
 ## Contents
 
