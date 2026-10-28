@@ -31,14 +31,26 @@ Everyone taking part follows the OzarLand [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Where new knowledge belongs
 
-| You have | It goes in |
-|---|---|
-| A symptom of one instance, volume or port, with checks and a fix | `skills/openstack-vm-troubleshooting/references/<domain>.md` |
-| A control-plane failure (RabbitMQ, Galera, HAProxy, Keystone) and its recovery | `skills/openstack-incident-analysis/references/control-plane-recovery.md` |
-| A Kolla-Ansible command, configuration file, failed run or host operation | `skills/openstack-kolla-ansible-operations/references/` |
-| Host maintenance mechanics | `skills/openstack-maintenance-planning/references/host-maintenance-mechanics.md` |
-| A decision point or reasoning step | the relevant `SKILL.md` |
-| A full runbook | upstream first, in [OzarLand openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) or [kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns); the skill then carries the distilled checks and decisions and links the source in the inventory |
+Operational knowledge (a symptom, its checks and fix, a recovery, a command's
+behaviour, and any correction to them) goes first to the OzarLand page it
+comes from, in
+[openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) or
+[kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns),
+where it is reviewed and lab-checked. The skill reference follows: it carries
+the distilled checks and decisions, links the source page in
+`validation/inventory.yaml`, and keeps that page's validation status. Open the
+upstream pull request or issue first and link it from yours. Only knowledge
+with no OzarLand page to live in (reasoning steps, decision points, the book's
+method) goes straight into the skills.
+
+| You have | Upstream first | Then in the skill |
+|---|---|---|
+| A symptom of one instance, volume or port, with checks and a fix | openstack-vm-runbooks | `skills/openstack-vm-troubleshooting/references/<domain>.md` |
+| A control-plane failure (RabbitMQ, Galera, HAProxy, Keystone) and its recovery | openstack-vm-runbooks or kolla-ansible-deployment-patterns | `skills/openstack-incident-analysis/references/control-plane-recovery.md` |
+| A Kolla-Ansible command, configuration file, failed run or host operation | kolla-ansible-deployment-patterns | `skills/openstack-kolla-ansible-operations/references/` |
+| Host maintenance mechanics | openstack-vm-runbooks | `skills/openstack-maintenance-planning/references/host-maintenance-mechanics.md` |
+| A full runbook | openstack-vm-runbooks or kolla-ansible-deployment-patterns | the distilled checks and decisions, with the source linked in the inventory |
+| A decision point or reasoning step | none | the relevant `SKILL.md` |
 
 Version-specific behaviour is written with its scope ("since 2024.1", "with
 Kolla-Ansible", "ML2/OVS only"), never as a universal fact. Use the
@@ -98,6 +110,16 @@ python3 tools/test_weighted_score.py
 python3 tools/validate_knowledge.py      # inventory, tags and coverage consistent
 python3 tools/test_validate_knowledge.py
 ruff check .                             # configuration in ruff.toml
+```
+
+If you change a procedure taken from an OzarLand page, or before a release,
+check the cited pages against local checkouts of the source repositories
+(missing pages, undisclosed draft status; see the
+[policy](docs/knowledge-validation-policy.md#7-revalidation)):
+
+```bash
+python3 tools/check_sources.py --repo openstack-vm-runbooks=../openstack-vm-runbooks \
+    --repo kolla-ansible-deployment-patterns=../kolla-ansible-deployment-patterns --ref origin/main
 ```
 
 If you change a skill's behaviour, run its scenarios when you can:

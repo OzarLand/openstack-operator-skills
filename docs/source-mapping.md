@@ -139,7 +139,8 @@ the new.
 ## 7. Defects found in the sources
 
 Reported here and to the source repositories' owner so they can be fixed
-upstream; each affects the narrower claim this repository uses. Rows marked
+upstream (`tools/check_sources.py` reports missing pages and undisclosed
+draft status mechanically); each affects the narrower claim this repository uses. Rows marked
 *Fixed upstream* stay for the record. "confirmed_by vs body" means the page's
 frontmatter lab record and its own text disagree on what was run. Last
 checked against both repositories' `main` on 2026-10-28.

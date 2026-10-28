@@ -207,6 +207,11 @@ Conventions:
 - Provenance tags stay as they are: `[Book: Ch. N]` for the book,
   `[Addition]` for everything else. Provenance says where a statement comes
   from; the validation tag says whether it was executed.
+- Risk is written as plain-text labels, `read-only`, `state-changing` and
+  `Destructive` (*State-changing* and *Destructive* in italics next to a
+  step), where the OzarLand pages use the markers ⚠️ (state-changing) and 🛑
+  (destructive). The skill text is read by a model and quoted back to an
+  operator, so a word survives where an emoji can be dropped or misread.
 
 ## 7. Revalidation
 
@@ -223,6 +228,18 @@ Set `NEEDS-REVALIDATION` (keeping the old evidence) when:
 
 Each validated item lists its own `revalidate_when`. Anyone can request a
 revalidation with the issue template; a maintainer sets the status.
+
+Source drift is checked with `tools/check_sources.py`, given local checkouts
+of the source repositories (not run in CI, since it needs them). It reads the
+front matter `status:` of every page the inventory cites and reports pages
+that are missing (moved or deleted) and `LAB-VALIDATED` items whose source
+page is `draft` without that being disclosed next to the tag (section 4). It
+only reports; a maintainer decides what changes:
+
+```
+python3 tools/check_sources.py --repo openstack-vm-runbooks=<path> \
+    --repo kolla-ansible-deployment-patterns=<path> --ref origin/main
+```
 
 ## 8. Contributing knowledge and evidence
 
