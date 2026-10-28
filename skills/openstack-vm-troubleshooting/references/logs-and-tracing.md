@@ -59,7 +59,7 @@ sudo docker exec nova_libvirt tail -50 /var/log/libvirt/qemu/<instance-name>.log
 sudo docker logs --tail 50 nova_compute
 ```
 
-[LAB-VALIDATED: VM-LOG-01] Paths, file names and the commands above. Lab: 2026.1, Kolla-Ansible
+[LAB-VALIDATED: VM-LOG-01] (source page still `draft`) Paths, file names and the commands above. Lab: 2026.1, Kolla-Ansible
 all-in-one, ML2/OVS, no HAProxy, host in UTC; not run: package-install commands, journald fields,
 HAProxy and OVN log files.
 
@@ -117,7 +117,7 @@ oslo.log default (Kolla-Ansible 2026.1 does not override it):
 | MariaDB | host local time, 1 s resolution, no offset |
 | journal | `journalctl -o short-iso-precise` prints the offset; `--utc` for UTC |
 
-[LAB-VALIDATED: VM-LOG-04] Line format, request-id brackets and time stamps, from real oslo.log,
+[LAB-VALIDATED: VM-LOG-04] (source page still `draft`) Line format, request-id brackets and time stamps, from real oslo.log,
 uWSGI, OVS, RabbitMQ, libvirtd and MariaDB lines. Lab: 2026.1, Kolla-Ansible all-in-one, host in
 UTC; not run: a host in a non-UTC zone, journald fields.
 
@@ -127,7 +127,7 @@ UTC; not run: a host in a non-UTC zone, journald fields.
 logged nothing, `Packet count` stayed 0 and "synchronized: yes" stayed. A clock jump shows as
 `Time jumped backwards, rotating.` (journald),
 `System clock time unset or jumped backwards, restored from recorded timestamp: <date>` and
-`Initial clock synchronization to <date>.`: log times jump there. [LAB-VALIDATED: VM-LOG-05] Lab:
+`Initial clock synchronization to <date>.`: log times jump there. [LAB-VALIDATED: VM-LOG-05] (source page still `draft`) Lab:
 2026.1, Kolla-Ansible 22.2.0 all-in-one, systemd-timesyncd (systemd 255); not run: chrony, agents on
 another host than neutron-server, a controller clock ahead.
 
@@ -179,7 +179,7 @@ port chain captured: ovs-vswitchd `bridge br-int: added interface qvo<11-chars> 
 nova-api `Creating event network-vif-plugged:<port-id> for instance <server-id> on <host>`, OVS
 agent `Port <port-id> updated. Details: {...}` and
 `Configuration for devices up ['<port-id>'] and devices down [] completed.`, nova-compute
-`Took <n> seconds to spawn the instance on the hypervisor.` [LAB-VALIDATED: VM-LOG-07] Lab: 2026.1,
+`Took <n> seconds to spawn the instance on the hypervisor.` [LAB-VALIDATED: VM-LOG-07] (source page still `draft`) Lab: 2026.1,
 Kolla-Ansible 22.2.0 all-in-one, ML2/OVS hybrid iptables firewall, host in UTC; not run: several
 hosts and their clock offsets, journal searches, DEBUG lines, OVN, a volume.
 
@@ -255,12 +255,12 @@ older `.gz`); journal (`journalctl REQUEST_ID=<request-id> -o short-iso-precise`
 `sudo grep -n "Got no allocation candidates\|Filtering removed all hosts" /var/log/kolla/nova/nova-scheduler.log | tail`;
 `sudo grep "<nova-request-id>" /var/log/kolla/placement/placement-api.log`.
 
-[LAB-VALIDATED: VM-LOG-10] Rows *lab 10*. Lab: 2026.1 (Nova 33.0.3), Kolla-Ansible 22.2.0
+[LAB-VALIDATED: VM-LOG-10] (source page still `draft`) Rows *lab 10*. Lab: 2026.1 (Nova 33.0.3), Kolla-Ansible 22.2.0
 all-in-one, captures 2026-10-23 to 27; not seen: network allocation, block device or libvirt
 connection failures, max retries on that run. [LAB-VALIDATED: VM-LOG-11] Rows *lab 11*. Lab: 2026.1,
 Kolla-Ansible 22.2.0 all-in-one, one compute, ML2/OVS, INFO logs; recorded by the lab agent in the page body of a draft page (no `confirmed_by`); not seen:
 `Exceeded max scheduling attempts`, a reschedule to another compute, DEBUG lines.
-[LAB-VALIDATED: VM-LOG-12] Rows *lab 12*. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, 409s made
+[LAB-VALIDATED: VM-LOG-12] (source page still `draft`) Rows *lab 12*. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, 409s made
 with a test consumer; not seen: retry limit, generation conflict, 500, report-client lines.
 [DOCUMENTED-UNVERIFIED: VM-LOG-13] Rows *src*.
 
@@ -288,7 +288,7 @@ with a test consumer; not seen: retry limit, generation conflict, 500, report-cl
 | `<target>: continuing to reconnect in the background but suppressing further logging` | OVN daemons | silence after it is not "reconnected": look for `connected` | src |
 
 Neutron timers: `report_interval` 30 s, `agent_down_time` 75 s. With separate server processes, a
-line may be in another of the three server logs. [LAB-VALIDATED: VM-LOG-14] Rows *lab 14*. Lab:
+line may be in another of the three server logs. [LAB-VALIDATED: VM-LOG-14] (source page still `draft`) Rows *lab 14*. Lab:
 2026.1, Kolla-Ansible 22.2.0 all-in-one, ML2/OVS (VXLAN, hybrid iptables firewall), Open vSwitch
 3.7.1; not run: ML2/OVN, DPDK, inactivity probe. [DOCUMENTED-UNVERIFIED: VM-LOG-15] Rows *src*: no
 line of the Neutron ML2/OVS agent and OVN pages was captured.
@@ -321,9 +321,9 @@ after a reboot); `journalctl -u kolla-iscsid-container.service --since "-1h"`;
 `docker exec iscsid iscsiadm -m session -P 1` (lab, during a cut: `TRANSPORT WAIT`, `FAILED`).
 Kolla-Ansible runs `iscsid -d 8`: lower-case `login failed ...` and `re-opening session` are debug
 noise. On the lab, nova-compute and cinder-volume logged nothing while the iSCSI path was broken.
-[LAB-VALIDATED: VM-LOG-16] Rows *lab 16*. Lab: 2026.1 (Cinder 28.0.1), Kolla-Ansible 22.2.0
+[LAB-VALIDATED: VM-LOG-16] (source page still `draft`) Rows *lab 16*. Lab: 2026.1 (Cinder 28.0.1), Kolla-Ansible 22.2.0
 all-in-one, LVM thin over iSCSI (tgtd), no multipath; not seen: driver init failure, heartbeat stop,
-create failure, os-brick failure lines. [LAB-VALIDATED: VM-LOG-17] Rows *lab 17* and the iSCSI
+create failure, os-brick failure lines. [LAB-VALIDATED: VM-LOG-17] (source page still `draft`) Rows *lab 17* and the iSCSI
 commands. Lab: 2026.1, Kolla-Ansible all-in-one, kernel 6.8, open-iscsi 2.1.9, port 3260 dropped 60
 s and 180 s; not run: multipath, NFS, Ceph RBD client logs. [DOCUMENTED-UNVERIFIED: VM-LOG-18] Rows
 *src*. With Ceph RBD, librbd inside QEMU logs nowhere useful by default.
@@ -343,7 +343,7 @@ s and 180 s; not run: multipath, NFS, Ceph RBD client logs. [DOCUMENTED-UNVERIFI
 `sudo grep "<nova-request-id>" /var/log/kolla/glance/glance-api.log`;
 `sudo grep "<image-id>" /var/log/kolla/glance/glance-api-uwsgi.log | tail`;
 `sudo grep -n "<server-id>" /var/log/kolla/nova/nova-compute.log | grep -E "snapshot|Snapshot|glance"`.
-[LAB-VALIDATED: VM-LOG-19] Rows *lab 19*. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, Glance file
+[LAB-VALIDATED: VM-LOG-19] (source page still `draft`) Rows *lab 19*. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, Glance file
 store, local qcow2 disks, `glance_api` stopped during a boot; not injected: any upload failure, RBD,
 signed images. [DOCUMENTED-UNVERIFIED: VM-LOG-20] Rows *src*.
 
@@ -372,7 +372,7 @@ signed images. [DOCUMENTED-UNVERIFIED: VM-LOG-20] Rows *src*.
 then for `reason=crashed` `journalctl -k -o short-iso-precise --since "<time>" --until "<time>"`.
 Console: `openstack console log show --lines 50 <server-id>`, or
 `docker exec -u root nova_compute tail -n 50 /var/lib/nova/instances/<server-id>/console.log`.
-[LAB-VALIDATED: VM-LOG-21] Rows *lab 21* and these commands (except `journalctl -k`). Lab: 2026.1,
+[LAB-VALIDATED: VM-LOG-21] (source page still `draft`) Rows *lab 21* and these commands (except `journalctl -k`). Lab: 2026.1,
 Kolla-Ansible 22.2.0 all-in-one, libvirt 10.0.0, QEMU 8.2.2, QEMU killed with SIGKILL and SIGTERM,
 server stop and hard reboot; not run: live migration, KVM errors, panic, the OOM killer.
 [DOCUMENTED-UNVERIFIED: VM-LOG-22] Rows *src* and the kernel commands: `journalctl -k` reads the
@@ -398,7 +398,7 @@ database: hand over to `openstack-incident-analysis`.
 | `DBConnectionError` with code 2002 / 2003 / 2006 / 2013 / 1047; `OperationalError (9001, …)` | local socket or name / host and port / server gone / lost during query / Galera node not synced; 9001 = ProxySQL has no healthy backend | 2003, 2013, 9001 lab 23; others src |
 | `DBDeadlock` (1213) | occasional: usually retried, harmless | src |
 
-[LAB-VALIDATED: VM-LOG-23] Rows *lab 23*. Lab: 2026.1, Kolla-Ansible 22.2.0, three controllers
+[LAB-VALIDATED: VM-LOG-23] (source page still `draft`) Rows *lab 23*. Lab: 2026.1, Kolla-Ansible 22.2.0, three controllers
 (RabbitMQ cluster, Galera behind ProxySQL), two computes, RabbitMQ stopped on one then all nodes,
 ProxySQL stopped on all controllers; lab run recorded in the page body only. A 90 s stop of every
 RabbitMQ node produced no `MessagingTimeout`. Not seen on that run: `Check login credentials`,
@@ -424,7 +424,7 @@ RabbitMQ node produced no `MessagingTimeout`. Not seen on that run: `Check login
 some nodes after a rotation); 503 with CRITICAL `Unable to validate token` is a service that cannot
 use Keystone. `sudo sh -c 'grep -l "Unable to validate token" /var/log/kolla/*/*.log'`;
 `sudo grep -c "Authorization failed for token" /var/log/kolla/nova/nova-api.log`.
-[LAB-VALIDATED: VM-LOG-26] Rows *lab 26*. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, one
+[LAB-VALIDATED: VM-LOG-26] (source page still `draft`) Rows *lab 26*. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, one
 Keystone, no HAProxy; not seen: `Bad response code`, refused service credentials, key repository
 errors, a Fernet mismatch between nodes. [DOCUMENTED-UNVERIFIED: VM-LOG-27] Rows *src*, and: token
 expiry is checked against the validating node's clock, so a clock ahead gives 401 for valid tokens.
@@ -484,7 +484,7 @@ ovs-appctl vlog/set rconn:file:info
 ```
 
 Never run `ovs-appctl vlog/set` without arguments (every module to `dbg`) or `vlog/close` on
-production. [LAB-VALIDATED: VM-LOG-30] Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, ML2/OVS, Open
+production. [LAB-VALIDATED: VM-LOG-30] (source page still `draft`) Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, ML2/OVS, Open
 vSwitch 3.7.1; 1799 bytes in 30 s on an idle lab. Not run: package installs,
 `vlog/disable-rate-limit`.
 
@@ -509,7 +509,7 @@ the debug file. Persistent, *State-changing*: `nova_libvirt_logging_debug: true`
 alone misses most) and `nova_libvirt` in the host's PID and cgroup namespaces (see *Restarts that
 keep instances running* in compute-host-events.md); otherwise every instance can stop or a migration
 fail. Undo: remove the variable and rerun, same precondition. The debug lines stay in
-`libvirtd.log`: leave them to logrotate, do not truncate. [LAB-VALIDATED: VM-LOG-31] Lab: 2026.1,
+`libvirtd.log`: leave them to logrotate, do not truncate. [LAB-VALIDATED: VM-LOG-31] (source page still `draft`) Lab: 2026.1,
 Kolla-Ansible 22.2.0 all-in-one, libvirt 10.0.0; runtime debug and undo (780 KB per instance start),
 persistent debug and undo (4 min 33 s and 3 min 47 s, instance kept its QEMU pid). Not run: package
 installs (modular `virtqemud`), a migration in progress.

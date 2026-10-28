@@ -458,7 +458,7 @@ working copy. The source page is a draft.
 3. Heat: `openstack user set --domain heat_user_domain --password <new> heat_domain_admin`.
 4. *State-changing*: `reconfigure`; containers whose configuration changed restart.
 
-[LAB-VALIDATED: KA-OPS-23] `kolla-ansible stop` without
+[LAB-VALIDATED: KA-OPS-23] (source page still `draft`) `kolla-ansible stop` without
 `--yes-i-really-really-mean-it` exits with `the following arguments are
 required: --yes-i-really-really-mean-it` and stops nothing (the guide omits
 the flag). Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, Docker; not run:

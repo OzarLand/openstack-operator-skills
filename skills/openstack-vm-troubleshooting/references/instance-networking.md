@@ -250,7 +250,7 @@ port <port-id>, please check neutron logs for more information.`
   source, port keeps its `ovs` binding there.
 Running instances with bound ports keep their network.
 
-[LAB-VALIDATED: VM-NET-11] Recognition, quick checks and the default-level
+[LAB-VALIDATED: VM-NET-11] (source page still `draft`) Recognition, quick checks and the default-level
 dead-agent line, ML2/OVS. Lab: 2026.1, Kolla-Ansible 22.2.0, multinode (3
 controllers, 2 computes), Neutron server without `debug`; dead agent `Alive
 False` 71 s after its unit stopped; 10 bind attempts in 0.4 s. Not run: the
@@ -283,7 +283,7 @@ debug-level lines, every ML2/OVN step.
    Nova uses>` in the OVS agent configuration, restart the agent, then
    `openstack network agent delete <old-agent-id>`. Never change Nova's `host`
    on a compute with instances: it becomes a new compute and orphans them.
-   [LAB-VALIDATED: VM-NET-12] Fix options 1 and 2 and the test boot below.
+   [LAB-VALIDATED: VM-NET-12] (source page still `draft`) Fix options 1 and 2 and the test boot below.
    Lab: 2026.1, Kolla-Ansible 22.2.0, multinode, ML2/OVS; agent alive 10 s
    after `systemctl start`, same build and migration then succeeded; cause 2
    simulated with the agent's `host` option. Not run: `docker restart`, the
@@ -335,7 +335,7 @@ ID), unmatched traffic to `sg-fallback` (drop), written by the OVS agent.
 still let it pass; the instance is up. Lab: `nc: connect to <instance-address>
 port 8080 (tcp) timed out: Operation now in progress` while port 22 passed.
 
-[LAB-VALIDATED: VM-NET-15] Quick checks, the iptables view, and the cause 6
+[LAB-VALIDATED: VM-NET-15] (source page still `draft`) Quick checks, the iptables view, and the cause 6
 read-only check. Lab: 2026.1, Kolla-Ansible 22.2.0, all-in-one, ML2/OVS with
 the iptables hybrid driver. Not run: the native OVS driver, ML2/OVN checks.
 
@@ -374,7 +374,7 @@ the iptables hybrid driver. Not run: the native OVS driver, ML2/OVN checks.
    `sudo systemctl start kolla-neutron_openvswitch_agent-container.service`;
    the log shows `Agent has just been revived. Doing a full sync.` (rule
    applied 18 s after the start; the stop took 61 s, exit 137).
-   [LAB-VALIDATED: VM-NET-16] Fix options 1 to 3. Lab: 2026.1, Kolla-Ansible
+   [LAB-VALIDATED: VM-NET-16] (source page still `draft`) Fix options 1 to 3. Lab: 2026.1, Kolla-Ansible
    22.2.0, all-in-one, ML2/OVS iptables hybrid. Not run: `docker stop`/`start`,
    OVN, the native driver.
 4. Cause 6. *State-changing*, the instance loses what `default` gave it:

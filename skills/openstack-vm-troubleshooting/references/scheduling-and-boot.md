@@ -417,7 +417,7 @@ hypervisor whose ID is `compute_id`, one provider with that UUID.
 | `Got 409 ... Conflicting resource provider name`; provider UUID not in `hypervisor list` | C: old provider left |
 | Kolla-Ansible deploy: `Found multiple compute services with same host name` | two services (short name and FQDN) |
 
-[LAB-VALIDATED: VM-SCH-18] Checks and causes A (simulated with `[DEFAULT]
+[LAB-VALIDATED: VM-SCH-18] (source page still `draft`) Checks and causes A (simulated with `[DEFAULT]
 host`) and B. Lab: 2026.1, Kolla-Ansible 22.2.0, multinode lab, ML2/OVS, compute
 without instances. Cause A: the process stayed up, container `healthy`,
 service went `down`: read the log, not the container status; `hostnamectl
@@ -428,7 +428,7 @@ compute node record` instead).
   `compute_id` and restarts its containers; running instances keep running;
   precondition: one hypervisor with this node name. Kolla-Ansible:
   `kolla-ansible reconfigure -i <inventory> -t nova --limit <host>`.
-  [LAB-VALIDATED: VM-SCH-19] Lab: 2026.1, Kolla-Ansible 22.2.0, multinode, ML2/OVS, local disks; 2 minutes, both files got
+  [LAB-VALIDATED: VM-SCH-19] (source page still `draft`) Lab: 2026.1, Kolla-Ansible 22.2.0, multinode, ML2/OVS, local disks; 2 minutes, both files got
   the old ID, service `up`. Not run: the hand-written `compute_id` of other
   deployments, a compute with running instances (the lab compute had none, so
   "running instances keep running" is from documentation).

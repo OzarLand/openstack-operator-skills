@@ -105,7 +105,7 @@ Traps the page is written against (none observed):
    `healthy` (`docker ps`), a real API call works; then the checks of
    *Checking a deployment after a change*.
 
-[LAB-VALIDATED: KA-CMD-03] Steps 1-5 and the undo, on Glance (`debug = True`
+[LAB-VALIDATED: KA-CMD-03] (source page still `draft`) Steps 1-5 and the undo, on Glance (`debug = True`
 in `/etc/kolla/config/glance.conf`). Lab: 2026.1, Kolla-Ansible 22.2.0,
 all-in-one, Docker, ML2/OVS, no HAProxy; `prechecks --tags glance` 15 s,
 `genconfig` 10 s (no restart), `validate-config` 23 s, `diff -u root` showed
@@ -131,7 +131,7 @@ several hosts, HAProxy enabled, data-plane agents.
   containers for <service>` among changed tasks; confirm with
   `docker inspect -f '{{.Name}} {{.State.StartedAt}}'` before and after.
 
-[LAB-VALIDATED: KA-CMD-04] Change-only restarts and how to see them. Lab:
+[LAB-VALIDATED: KA-CMD-04] (source page still `draft`) Change-only restarts and how to see them. Lab:
 2026.1, Kolla-Ansible 22.2.0, all-in-one, Docker, ML2/OVS, no HAProxy,
 `reconfigure` on Glance only. Not run: `deploy`, other roles, several hosts.
 
@@ -164,7 +164,7 @@ facts for every host (the `gather-facts` play delegates it to the limited
 hosts): an unreachable host still fails the run, in task
 `Gather facts for all hosts (if using --limit)` (`UNREACHABLE`, rc 4).
 
-[LAB-VALIDATED: KA-CMD-07] Lab: 2026.1, Kolla-Ansible 22.2.0, all-in-one,
+[LAB-VALIDATED: KA-CMD-07] (source page still `draft`) Lab: 2026.1, Kolla-Ansible 22.2.0, all-in-one,
 Docker, ML2/OVS; `--limit localhost` with an unreachable host in the
 inventory. Not run: `--limit` across real hosts.
 
@@ -189,7 +189,7 @@ after the operator's own `-e` options; Ansible keeps the last value, so a
 **not** rolling. Observed: `kolla-ansible reconfigure … -e kolla_serial=1`
 ran `ansible-playbook` with `-e kolla_serial=1 -e kolla_action=reconfigure -e kolla_serial=0`.
 
-[LAB-VALIDATED: KA-CMD-09] Override seen on the command line. Lab: 2026.1,
+[LAB-VALIDATED: KA-CMD-09] (source page still `draft`) Override seen on the command line. Lab: 2026.1,
 Kolla-Ansible 22.2.0, all-in-one, Docker; `reconfigure` only. Not run: the
 same with `upgrade` (from the code), any multi-host run.
 

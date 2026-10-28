@@ -389,7 +389,7 @@ not necessarily the one killed. The scheduler offers host memory minus
 `reserved_host_memory_mb`, times `ram_allocation_ratio`; Kolla-Ansible 2026.1
 does not change these for libvirt computes.
 
-[LAB-VALIDATED: VM-LC-14] Nova, libvirt and kernel signatures and the
+[LAB-VALIDATED: VM-LC-14] (source page still `draft`) Nova, libvirt and kernel signatures and the
 read-only checks, for a **cgroup-level** OOM only. Lab: 2026.1, Kolla-Ansible
 22.2.0 all-in-one, Ubuntu 24.04, no swap; `memory.max` of one guest's libvirt
 cgroup set to 50M: `Memory cgroup out of memory: Killed process` at once,
@@ -412,7 +412,7 @@ and its `Out of memory: Killed process` line, causes 2 and 3.
    (running instances not affected); the inventory shrinks, instances already
    there stay. Undo: set back the values written down, explicitly, and
    reconfigure again.
-   [LAB-VALIDATED: VM-LC-15] Lab: as VM-LC-14; `server start`: `ACTIVE` in
+   [LAB-VALIDATED: VM-LC-15] (source page still `draft`) Lab: as VM-LC-14; `server start`: `ACTIVE` in
    18 s; `reserved_host_memory_mb = 4096` and reconfigure: 4 min 42 s,
    `nova_compute` recreated, `nova_libvirt` and the guest's QEMU not,
    inventory `reserved 4096`. Undo was run by removing the override, not by

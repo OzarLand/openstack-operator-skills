@@ -47,10 +47,10 @@ versions in use.
   restart containers for the targeted services; scope with `--limit` and
   `--tags` and know which containers will restart before running in production.
   On a lab, only containers whose configuration or image differed were
-  restarted [LAB-VALIDATED: KA-CMD-04], and `--limit` still gathered facts from
-  every host, so an unreachable host failed the run [LAB-VALIDATED: KA-CMD-07];
+  restarted [LAB-VALIDATED: KA-CMD-04] (source page still `draft`), and `--limit` still gathered facts from
+  every host, so an unreachable host failed the run [LAB-VALIDATED: KA-CMD-07] (source page still `draft`);
   `reconfigure` overrides a `kolla_serial` passed with `-e`, so it cannot be
-  made rolling that way [LAB-VALIDATED: KA-CMD-09]. Details and limits:
+  made rolling that way [LAB-VALIDATED: KA-CMD-09] (source page still `draft`). Details and limits:
   `openstack-kolla-ansible-operations`.
 - Configuration overrides under `/etc/kolla/config/` are merged into generated
   service configuration; local overrides are carried divergence that must be
@@ -60,7 +60,7 @@ versions in use.
 - `destroy` is destructive by design and protected by an explicit confirmation
   flag; it should never appear in routine automation. `kolla-ansible stop` is
   protected the same way on 2026.1 (it exits without
-  `--yes-i-really-really-mean-it`) [LAB-VALIDATED: KA-OPS-23]; the `destroy`
+  `--yes-i-really-really-mean-it`) [LAB-VALIDATED: KA-OPS-23] (source page still `draft`); the `destroy`
   flag itself was not exercised [DOCUMENTED-UNVERIFIED: AR-KA-01].
 - Command syntax and available subcommands differ between releases; check the
   installed version's help.

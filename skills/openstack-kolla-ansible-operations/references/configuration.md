@@ -381,7 +381,7 @@ filter lands instances on hosts that cannot hold them.
    vcpupin <domain>` and `virsh dumpxml <domain> | grep -A3 -E
    "hugepages|numatune"`.
 
-[LAB-VALIDATED: KA-CFG-13] Steps 1-5. Lab: 2026.1, Kolla-Ansible 22.2.0,
+[LAB-VALIDATED: KA-CFG-13] (source page still `draft`) Steps 1-5. Lab: 2026.1, Kolla-Ansible 22.2.0,
 all-in-one VM (4 vCPUs, 1 NUMA node, no SMT, nested KVM), Docker, ML2/OVS;
 512 pages of 2 MB; `cpu_dedicated_set = 2-3`, `cpu_shared_set = 1`,
 `reserved_host_memory_mb = 1024`: Placement went from `VCPU 4` to `VCPU` 1,
