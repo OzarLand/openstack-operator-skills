@@ -6,18 +6,17 @@
   <a href="https://github.com/OzarLand/openstack-operator-skills/actions/workflows/validate.yml"><img src="https://github.com/OzarLand/openstack-operator-skills/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License: Apache-2.0"></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.0-informational.svg" alt="Version 0.2.0"></a>
-  <a href="#-the-nine-skills"><img src="https://img.shields.io/badge/Agent%20Skills-9-8A2BE2.svg" alt="9 Agent Skills"></a>
-  <a href="#-quick-start"><img src="https://img.shields.io/badge/Claude%20Code-plugin-D97757.svg" alt="Claude Code plugin"></a>
+  <a href="#-pick-a-skill"><img src="https://img.shields.io/badge/Agent%20Skills-9-8A2BE2.svg" alt="9 Agent Skills"></a>
+  <a href="#-install-in-one-minute"><img src="https://img.shields.io/badge/Claude%20Code-plugin-D97757.svg" alt="Claude Code plugin"></a>
   <a href="https://github.com/OzarLand/openstack-operator-skills/stargazers"><img src="https://img.shields.io/github/stars/OzarLand/openstack-operator-skills?style=flat&color=yellow" alt="GitHub stars"></a>
 </p>
 
 <p>
-  <a href="#-quick-start"><b>Quick start</b></a> ·
-  <a href="#-the-nine-skills"><b>Skills</b></a> ·
+  <a href="#-install-in-one-minute"><b>Install</b></a> ·
+  <a href="#-pick-a-skill"><b>Skills</b></a> ·
   <a href="#-validation-status"><b>Validation</b></a> ·
   <a href="docs/examples.md"><b>Examples</b></a> ·
-  <a href="#-results"><b>Results</b></a> ·
-  <a href="docs/installation.md"><b>Install guide</b></a> ·
+  <a href="#-does-it-help"><b>Results</b></a> ·
   <a href="CONTRIBUTING.md"><b>Contribute</b></a>
 </p>
 
@@ -26,16 +25,15 @@
 ---
 
 **Nine [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)
-that make Claude reason like a senior OpenStack operator.** Investigate before
-acting, separate facts from hypotheses, weigh business impact, keep a way
-back, and leave disruptive decisions to the people accountable for them.
-Built from the operating method of the book
-[*OpenStack, the Day After Tomorrow*](https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow)
-and from the operational knowledge of the OzarLand
-[VM runbooks](https://github.com/OzarLand/openstack-vm-runbooks) and
-[Kolla-Ansible deployment patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns);
-you don't need to have read them. Every procedure says how well it has been
-validated: on a lab, in production, or not yet.
+that make Claude reason like a senior OpenStack operator** during incidents,
+changes, maintenance and troubleshooting.
+
+- **For** people who run OpenStack in production: operators, SREs, platform
+  engineers and their leads.
+- **What changes:** Claude investigates before acting, separates facts from
+  guesses, and tells you how well each procedure has been tested.
+- **What does not:** it never touches your platform, and you make every
+  disruptive decision.
 
 <div align="center">
   <img src="assets/demo.svg" alt="Claude Code session: asked whether to evacuate a host reported down, Claude loads openstack-incident-analysis and answers: fence the host first" width="820">
@@ -43,7 +41,26 @@ validated: on a lab, in production, or not yet.
   <sub>A real answer from the evaluation (scenario IA-2), shortened. <a href="evals/results/final-openstack-incident-analysis/IA-2.skill.md">Full answer</a>.</sub>
 </div>
 
-## ⚡ Quick start
+## 🔄 How it works
+
+You ask Claude what you would ask a colleague. The right skill loads on its
+own and shapes the answer:
+
+```mermaid
+flowchart LR
+    Q["You describe<br/>the problem or the plan"] --> S["The matching<br/>skill loads"]
+    S --> R["Read-only checks<br/>first"]
+    R --> E["Facts, hypotheses<br/>and gaps, kept apart"]
+    E --> O["Options, each with<br/>risk, stop conditions,<br/>way back and<br/>validation status"]
+    O --> D{"You decide"}
+    D -->|approved| V["You run it,<br/>then verify"]
+    D -->|not yet| R
+```
+
+Claude only sees what you paste or show it. It asks for the output it needs
+instead of guessing it, and it never runs anything on your platform.
+
+## ⚡ Install in one minute
 
 In Claude Code:
 
@@ -52,8 +69,7 @@ In Claude Code:
 /plugin install openstack-operations@openstack-operator-skills
 ```
 
-That's it. Ask Claude what you would ask a colleague; the right skill loads
-on its own. The first time a skill opens its reference files, Claude Code asks
+That's it. The first time a skill opens its reference files, Claude Code asks
 for permission to read them: allow it.
 
 <details>
@@ -80,24 +96,13 @@ Details and caveats: [docs/installation.md](docs/installation.md).
 
 </details>
 
-## 💡 Why
+| Claude Code | claude.ai | Claude API | Agent SDK |
+|:-:|:-:|:-:|:-:|
+| ✅ tested | ✅ tested | expected, not tested yet | expected, not tested yet |
 
-A capable assistant can be confidently wrong exactly where production
-OpenStack punishes you. "Should we evacuate the host that stopped
-reporting?" Without asking whether the host is dead or only cut off, the
-honest-sounding yes gives you two copies of every VM writing to the same disk.
+## 🧰 Pick a skill
 
-These skills change **how** Claude reasons, not only what it knows:
-
-| You ask | Without the skills | With the skills |
-|---|---|---|
-| "Turn our incident notes into a runbook" | A fixed sequence: stop APIs, purge queues, restart | Decision point for partition vs node loss, an approver for the purge, what is lost, a must-not-do list, marked *Draft, not yet validated* |
-| "The runbook says reset rabbit-03. Should I?" | Sensible checks, but assumes the node crashed | *"The alert doesn't tell you whether rabbit-03 left the cluster or the cluster is partitioned, and the runbook is only safe for the first case."* |
-| "A seventh security backport on an unmaintained series?" | Approves it | A stopgap with gates (owner, test, exit condition) and the lifecycle problem behind it |
-
-👉 Side by side, verbatim: [docs/examples.md](docs/examples.md)
-
-## 🧰 The nine skills
+You don't have to pick: Claude chooses. This table is for knowing what's there.
 
 | | Skill | Ask it when you need to… |
 |:-:|---|---|
@@ -111,13 +116,8 @@ These skills change **how** Claude reasons, not only what it knows:
 | 🖥️ | [**vm-troubleshooting**](skills/openstack-vm-troubleshooting/SKILL.md) | diagnose one instance, volume or port: stuck states, No valid host, no IP or metadata, port binding, volumes stuck attaching or deleting, OOM, host events |
 | 🐳 | [**kolla-ansible-operations**](skills/openstack-kolla-ansible-operations/SKILL.md) | run, narrow and check `kolla-ansible` commands, read a failed run, add or replace hosts, MariaDB backup and recovery, secrets, design trade-offs (Kolla-Ansible only) |
 
-All names start with `openstack-`. Each works alone and hands off to the
-others when a task crosses boundaries.
-
-<details>
-<summary><b>How they fit together</b></summary>
-
-<br>
+All names start with `openstack-`. Each works alone and hands off to another
+when a task crosses its boundary:
 
 ```mermaid
 flowchart LR
@@ -148,10 +148,8 @@ flowchart LR
     VM --> KA
 ```
 
-</details>
-
 <details>
-<summary><b>Things to ask</b></summary>
+<summary><b>Things to ask</b> (French works too)</summary>
 
 <br>
 
@@ -168,52 +166,26 @@ flowchart LR
 - "Which kolla-ansible command after changing nova.conf overrides, and what
   will it restart?"
 
-French works too.
-
 </details>
 
-## 📊 Results
+## 💡 Why it matters
 
-24 scenarios written from the book's field cases, each answered by
-`claude-sonnet-5-5` with and without the skills, then graded by a separate
-model against a rubric.
+"Should we evacuate the host that stopped reporting?" Answer yes without
+asking whether the host is dead or only cut off, and you can end up with two
+copies of every VM writing to the same disk. A capable assistant can be
+confidently wrong exactly where production OpenStack punishes you.
 
-<div align="center">
+| You ask | Without the skills | With the skills |
+|---|---|---|
+| "Turn our incident notes into a runbook" | A fixed sequence: stop APIs, purge queues, restart | Decision point for partition vs node loss, an approver for the purge, what is lost, a must-not-do list, marked *Draft, not yet validated* |
+| "The runbook says reset rabbit-03. Should I?" | Sensible checks, but assumes the node crashed | *"The alert doesn't tell you whether rabbit-03 left the cluster or the cluster is partitioned, and the runbook is only safe for the first case."* |
+| "A seventh security backport on an unmaintained series?" | Approves it | A stopgap with gates (owner, test, exit condition) and the lifecycle problem behind it |
 
-| | Without skills | With skills |
-|---|:-:|:-:|
-| Mean rubric score | 0.68 | **0.97** |
-| Answers with a critical error | 3 | **0** |
-| Right skill loaded automatically | n/a | **24 / 24** |
-
-</div>
-
-Repeated three times on all 30 scenarios, including French prompts and
-multi-turn conversations: 0.98 vs 0.73, and no critical error with the skills
-in 90 answers (16 without). Also checked: Haiku triggering, an end-to-end
-plugin install from GitHub, and the zips uploaded to claude.ai. Grading is by a model, so read it as a direction
-more than an exact effect size. The two 0.2.0 skills, on 8 new scenarios: 0.96
-with skills, 0.66 without, 8/8 loaded, no critical error with the skills (2
-without); incident analysis still loads on all 6 of its scenarios. These runs
-measure reasoning, not whether a procedure works on OpenStack.
-[Full evaluation report →](docs/evaluation-report.md)
+👉 Side by side, verbatim: [docs/examples.md](docs/examples.md)
 
 ## 🔬 Validation status
 
-This repository follows a strict technical validation policy
-([docs/knowledge-validation-policy.md](docs/knowledge-validation-policy.md)).
-Every procedure and technical claim an operator could act on carries a status
-tag in the skill text and an entry in
-[`validation/inventory.yaml`](validation/inventory.yaml), and Claude states
-that status when it recommends the procedure:
-
-| Status | Meaning |
-|---|---|
-| `PRODUCTION-VALIDATED` | executed and verified in a real production environment, documented |
-| `LAB-VALIDATED` | executed and verified on a lab of the stated configuration, for the steps stated |
-| `DOCUMENTED-UNVERIFIED` | from documentation, source code, the book or a runbook; no execution evidence |
-| `PROPOSED-UNVERIFIED` | written here, not executed yet |
-| `NEEDS-REVALIDATION` | was validated; the procedure or its context has changed |
+How much can you trust a procedure? Here is the rule:
 
 **All procedures presented as validated in this knowledge base have been
 successfully tested either in production or, at minimum, in a laboratory
@@ -222,21 +194,33 @@ identified as unvalidated or experimental.** A lab result is never presented
 as a production result, and reading or reviewing a procedure is not
 validation.
 
-In the terms commonly used for operational knowledge:
+Every procedure or technical claim an operator could act on carries a tag in
+the skill text, such as `[LAB-VALIDATED: VM-NET-03]`, and an entry in
+[`validation/inventory.yaml`](validation/inventory.yaml). Claude states that
+status, and what the test did not cover, when it recommends the procedure.
 
-| Classification | Status used here |
+```mermaid
+flowchart LR
+    P["PROPOSED-UNVERIFIED<br/>written here,<br/>not executed"] --> L
+    D["DOCUMENTED-UNVERIFIED<br/>from docs, the book<br/>or a runbook"] --> L
+    L["LAB-VALIDATED<br/>executed on a lab,<br/>for the steps<br/>and setup recorded"] --> PR["PRODUCTION-VALIDATED<br/>executed and verified<br/>in production"]
+    L -. "procedure or<br/>context changes" .-> N["NEEDS-REVALIDATION"]
+    PR -.-> N
+```
+
+| Usual term | Status here |
 |---|---|
 | Production-validated | `PRODUCTION-VALIDATED` |
 | Lab-validated | `LAB-VALIDATED`, for the steps and configuration recorded |
-| Partially validated | each `LAB-VALIDATED` entry records the steps *not* observed; per skill, see the table below |
-| Unvalidated | `DOCUMENTED-UNVERIFIED`: from documentation, the book or a runbook, never executed here |
-| Experimental | `PROPOSED-UNVERIFIED`: written here, not executed |
+| Partially validated | each `LAB-VALIDATED` entry lists the steps *not* observed; per skill, see the table below |
+| Unvalidated | `DOCUMENTED-UNVERIFIED` |
+| Experimental | `PROPOSED-UNVERIFIED` |
 | Possibly outdated | `NEEDS-REVALIDATION` |
 
 **The knowledge base is undergoing validation.** It is not fully validated,
 and no repository-wide validation claim will be made until every item in the
-declared scope is production- or lab-validated. Current coverage, generated
-from the inventory:
+declared scope is production- or lab-validated. Where things stand,
+generated from the inventory:
 
 <!-- validation-coverage:start -->
 163 of 352 items in scope (46 %) are validated: 0 in production, 163 in a lab. 189 are not validated yet.
@@ -263,18 +247,22 @@ from the inventory:
 | `openstack-vm-troubleshooting` | Partially lab-validated: 101 of 174 items | Kolla-Ansible labs | OpenStack 2026.1 | 101 lab records, 2026-10-13 to 2026-10-27; [details](docs/validation-coverage.md) | No production evidence; runs by an automated lab agent, no independent human check; 73 items unverified |
 <!-- validation-coverage:end -->
 
-What the lab evidence covers: OpenStack 2026.1 deployed with Kolla-Ansible
-(mostly 22.x), Docker, Ubuntu 24.04, ML2/OVS, small nested labs (all-in-one,
-or up to 3 controllers and 2 computes), RabbitMQ 4.2 with Khepri, Galera
-behind ProxySQL. The runs were executed by an automated lab agent and
-recorded in the OzarLand repositories; no human operator has independently
-reproduced them yet, and this repository has not re-executed them. Nothing is
-production-validated: the few production observations recorded are too thin
-to qualify. OVN, Ceph, other releases and other deployment tools are mostly
-untested. Per-item evidence and missing evidence:
-[docs/validation-coverage.md](docs/validation-coverage.md).
+**What the lab evidence covers**
 
-Passing CI and the behavioural evaluations below say the bookkeeping is
+- ✅ OpenStack 2026.1 with Kolla-Ansible (mostly 22.x), Docker, Ubuntu 24.04,
+  ML2/OVS, RabbitMQ 4.2 with Khepri, Galera behind ProxySQL.
+- ✅ Small nested labs: all-in-one, or up to 3 controllers and 2 computes.
+- ⚠️ The runs were executed by an automated lab agent and recorded in the
+  OzarLand repositories. No human operator has independently reproduced them
+  yet, and this repository has not re-executed them.
+- ⚠️ Nothing is production-validated: the few production observations
+  recorded are too thin to qualify.
+- ❌ OVN, Ceph, other releases and other deployment tools are mostly untested.
+
+Per-item evidence and missing evidence:
+[docs/validation-coverage.md](docs/validation-coverage.md). The policy:
+[docs/knowledge-validation-policy.md](docs/knowledge-validation-policy.md).
+Passing CI and the behavioural evaluations show that the bookkeeping is
 consistent and that Claude reasons well; neither shows that an OpenStack
 procedure works.
 
@@ -289,14 +277,80 @@ procedure works.
 | cite the book (`[Book: Ch. 9]`) and mark everything else `[Addition]` | hide uncertainty: release-specific facts are flagged to verify |
 | state the validation status of each procedure, and what its lab run did not cover | present an untested procedure as tested, or a lab result as valid everywhere |
 
-## 🌐 Where it works
+## 📊 Does it help?
 
-| Claude Code | claude.ai | Claude API | Agent SDK |
-|:-:|:-:|:-:|:-:|
-| ✅ tested | ✅ tested | expected, not tested yet | expected, not tested yet |
+Scenarios written from the book's field cases, each answered by
+`claude-sonnet-5-5` with and without the skills, then graded by a separate
+model against a rubric:
 
-Portable frontmatter only (`name`, `description`, `license`, `metadata`). The
-one script, `weighted_score.py`, needs plain Python 3 and is optional.
+<div align="center">
+
+| | Without skills | With skills |
+|---|:-:|:-:|
+| Mean rubric score (24 scenarios) | 0.68 | **0.97** |
+| Answers with a critical error | 3 | **0** |
+| Right skill loaded automatically | n/a | **24 / 24** |
+
+</div>
+
+- **Repeated three times on all 30 scenarios**, including French prompts and
+  multi-turn conversations: 0.98 vs 0.73, and no critical error with the skills
+  in 90 answers (16 without).
+- **The two 0.2.0 skills, on 8 new scenarios:** 0.96 with skills, 0.66
+  without, 8/8 loaded, no critical error with the skills (2 without);
+  incident analysis still loads on all 6 of its scenarios.
+- **Also checked:** Haiku triggering, an end-to-end plugin install from
+  GitHub, and the zips uploaded to claude.ai.
+
+Grading is by a model, so read it as a direction more than an exact effect
+size. These runs measure reasoning, not whether a procedure works on
+OpenStack. [Full evaluation report →](docs/evaluation-report.md)
+
+## 🏝️ Part of OzarLand
+
+[OzarLand](https://github.com/OzarLand/ozarland) is an early-stage,
+independent space where OpenStack operators share what they learn running it.
+The skills draw on its knowledge and keep its validation status attached:
+
+```mermaid
+flowchart LR
+    BOOK["Book<br/><i>OpenStack, the Day<br/>After Tomorrow</i>"] -->|operating method| SK
+    RB["openstack-vm-runbooks<br/>symptom-driven runbooks"] -->|procedures + lab evidence| SK
+    KP["kolla-ansible-deployment-patterns<br/>deployment choices"] -->|procedures + lab evidence| SK
+    QL["openstack-quick-lab<br/>disposable lab"] -.->|practise the runbooks| RB
+    SK["openstack-operator-skills<br/>(here)"] --> C["Claude"]
+```
+
+| Repository | Role |
+|---|---|
+| [ozarland](https://github.com/OzarLand/ozarland) | Community home: principles, conventions, how pages are reviewed and validated |
+| [openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) | Symptom-driven runbooks for instance problems; source of most lab evidence here |
+| [kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns) | Kolla-Ansible deployment choices and their trade-offs, compared rather than prescribed |
+| [openstack-quick-lab](https://github.com/OzarLand/openstack-quick-lab) | A disposable lab to try OpenStack and practise the runbooks |
+| openstack-operator-skills (here) | Claude skills that apply this knowledge and an operating method, and say how well each procedure was tested |
+
+A correction to a procedure belongs first in the runbook or pattern it comes
+from; the skill then picks it up ([docs/source-mapping.md](docs/source-mapping.md)).
+You don't need to have read the book or the runbooks to use the skills.
+
+## 🤝 Contributing
+
+The most valuable contribution is operational experience. No code needed:
+
+- 🐛 [Report unsafe or wrong advice](https://github.com/OzarLand/openstack-operator-skills/issues/new?template=unsafe-or-wrong-advice.yml):
+  a case where a skill gave unsafe or unhelpful advice.
+- 🧪 [Share validation evidence](https://github.com/OzarLand/openstack-operator-skills/issues/new?template=validation-evidence.yml):
+  you ran a procedure on your platform; tell us what happened, success or failure.
+- ✏️ [Suggest an improvement or correction](https://github.com/OzarLand/openstack-operator-skills/issues/new?template=improvement.yml):
+  a missing decision point, a technical note that has aged.
+- 📘 Read [CONTRIBUTING.md](CONTRIBUTING.md) to send a pull request.
+
+Something that could cause harm before it is fixed, or a secret you found,
+goes privately through the [security policy](SECURITY.md).
+
+<a href="https://github.com/OzarLand/openstack-operator-skills/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=OzarLand/openstack-operator-skills" alt="Contributors">
+</a>
 
 <details>
 <summary><b>Repository layout</b></summary>
@@ -325,46 +379,13 @@ assets/                         images used in this README
 
 </details>
 
-## 🏝️ Part of OzarLand
-
-[OzarLand](https://github.com/OzarLand/ozarland) is an early-stage, independent
-space where OpenStack operators share what they learn running it. This
-repository is the AI-assisted part: the skills read the same knowledge that
-operators can read directly, and keep its validation status attached.
-
-| Repository | Role |
-|---|---|
-| [ozarland](https://github.com/OzarLand/ozarland) | Community home: principles, conventions, how pages are reviewed and validated |
-| [openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) | Symptom-driven runbooks for instance problems; source of most lab evidence here |
-| [kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns) | Kolla-Ansible deployment choices and their trade-offs, compared rather than prescribed |
-| [openstack-quick-lab](https://github.com/OzarLand/openstack-quick-lab) | A disposable lab to try OpenStack and practise the runbooks |
-| openstack-operator-skills (here) | Claude skills that apply this knowledge and an operating method, and say how well each procedure was tested |
-
-A correction to a procedure belongs first in the runbook or pattern it comes
-from; the skill then picks it up ([docs/source-mapping.md](docs/source-mapping.md)).
-
-## 🤝 Contributing
-
-The most valuable contribution is operational experience: a case where a skill
-gave unsafe or unhelpful advice, a missing decision point, a technical note
-that has aged. No code needed:
-
-- 🐛 [Report unsafe or wrong advice](https://github.com/OzarLand/openstack-operator-skills/issues/new?template=unsafe-or-wrong-advice.yml)
-- ✏️ [Suggest an improvement or correction](https://github.com/OzarLand/openstack-operator-skills/issues/new?template=improvement.yml)
-- 📘 Read [CONTRIBUTING.md](CONTRIBUTING.md) to send a pull request
-
-Six corrections from the first community review are already in 0.1.0.
-
-<a href="https://github.com/OzarLand/openstack-operator-skills/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=OzarLand/openstack-operator-skills" alt="Contributors">
-</a>
-
 ## 📚 The book, licence and citation
 
-The skills paraphrase and restructure the book's method; they do not
-reproduce its text. The book stays under CC BY-NC-ND 4.0 in
-[its own repository](https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow).
-This repository is Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE)).
+The skills paraphrase and restructure the method of
+[*OpenStack, the Day After Tomorrow*](https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow);
+they do not reproduce its text. The book stays under CC BY-NC-ND 4.0 in its
+own repository. This repository is Apache-2.0 ([LICENSE](LICENSE),
+[NOTICE](NOTICE)).
 
 ```text
 Zaouam, S. (2026). OpenStack, the Day After Tomorrow: Operating
