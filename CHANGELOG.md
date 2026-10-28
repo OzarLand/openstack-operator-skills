@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+- Shared rule 12: every recommended step carries its validation status, the
+  untested ones included, and answers that recommend steps end with a
+  validation summary line (`shared/evidence-and-safety.md`). Found in the
+  recorded VM-1 and KA-4 answers, which labelled the lab-tested step and left
+  untested steps beside it unlabelled. VM-1 and KA-4 gain a grading criterion
+  for it; not re-run yet.
+
 ## [0.2.0] — 2026-10-28
 
 Operational knowledge with a validation status on every procedure, and the move
