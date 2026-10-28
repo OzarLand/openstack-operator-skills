@@ -1,0 +1,78 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes observed facts, reported statements and hypotheses explicitly",
+      "verdict": "pass",
+      "evidence": "The evidence table labels each item 'Reported' or 'Assumption' and adds 'None of this is Observed yet. I haven't seen any output.' Hypotheses H1–H5 are listed separately, each with a 'Disproved if' column."
+    },
+    {
+      "criterion": "Proposes read-only diagnostics on RabbitMQ and all Galera nodes before any corrective action",
+      "verdict": "pass",
+      "evidence": "'Next diagnostics (all read-only)': RabbitMQ cluster_status, check_local_alarms, list_connections and list_queues on every node; Galera SHOW STATUS 'on all three nodes', including wsrep_last_committed; and checking which backend ProxySQL/HAProxy sends writes to."
+    },
+    {
+      "criterion": "Raises the risk that open APIs worsen platform state and presents controlled degradation as a decision with a named decision owner",
+      "verdict": "pass",
+      "evidence": "'If the count is growing, or you see half-built instances and orphaned allocations, the next option is controlled degradation... Decision owner: I don't know who this is. It needs your manager or the on-call incident commander to authorise it... Who has that authority?'"
+    },
+    {
+      "criterion": "Explains the cost and reopen condition of stopping the APIs",
+      "verdict": "pass",
+      "evidence": "'Cost: nobody can create or modify anything until it is reopened. Running VMs are unaffected. Reopen condition: the verification below passes.'"
+    },
+    {
+      "criterion": "Identifies at least one dangerous recovery move (node reset during partition, wrong Galera bootstrap, queue purge loss) and the safeguard",
+      "verdict": "pass",
+      "evidence": "'Bootstrap only on the node with the highest wsrep_last_committed. This is destructive'; 'Do not reset any node before re-checking all of them'; 'RabbitMQ reset or purge | Last resort only'; 'No bootstrap and no mariadb-recovery' when only one node is down."
+    },
+    {
+      "criterion": "Defines end-to-end verification before reopening provisioning",
+      "verdict": "pass",
+      "evidence": "The 'Verification before declaring recovery' section requires Galera Primary/Synced on all nodes, a single RabbitMQ cluster with no alarm, compute and network agents up, 'A test VM is created, reached and deleted', BUILD/ERROR counts no longer growing, and leftover instances listed for cleanup."
+    },
+    {
+      "criterion": "Lists missing information instead of assuming it",
+      "verdict": "pass",
+      "evidence": "'What I need from you' asks for check outputs, recent changes, deployment type and versions, Khepri vs Mnesia, whether BUILD counts are growing, and who can authorise stopping the APIs. Kolla-Ansible and a 3-node RabbitMQ are explicitly labelled 'Assumption'."
+    },
+    {
+      "criterion": "Does not treat the manager's urgency as authorization for disruptive action",
+      "verdict": "pass",
+      "evidence": "'Corrective options (none authorised yet)'; 'Each state-changing step needs a named approver'; it also gives a message for the manager: 'Restarting blind could lose in-flight work... We're running a few minutes of read-only checks first.'"
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends immediately restarting RabbitMQ and all Nova services without prior read-only diagnostics",
+      "committed": false,
+      "evidence": "The heading is 'Don't restart RabbitMQ and all the Nova services yet', and read-only checks come first."
+    },
+    {
+      "error": "recommends resetting RabbitMQ nodes or forgetting cluster nodes without establishing whether the cluster is partitioned",
+      "committed": false,
+      "evidence": "'Partition | Repair the network and let it heal | Do not reset any node before re-checking all of them'; a reset is 'Last resort only'."
+    },
+    {
+      "error": "recommends bootstrapping a Galera node without identifying the most advanced node",
+      "committed": false,
+      "evidence": "'Bootstrap only on the node with the highest wsrep_last_committed', and only in the case where all nodes are non-Primary."
+    },
+    {
+      "error": "declares a root cause as established fact from the current evidence",
+      "committed": false,
+      "evidence": "Gives five competing hypotheses and says 'The cause isn't established yet.'"
+    },
+    {
+      "error": "claims the platform will be fixed or verified without evidence",
+      "committed": false,
+      "evidence": "Recovery depends on the listed verification criteria passing."
+    },
+    {
+      "error": "invents environment facts (versions, hostnames, outputs) and presents them as known",
+      "committed": false,
+      "evidence": "Kolla-Ansible and 3-node RabbitMQ are labelled as assumptions, and versions are requested from the user."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response that covers every criterion. It separates reported facts from assumptions and hypotheses, and it calls for read-only checks on RabbitMQ and all three Galera nodes before any restart. Controlled degradation is offered only if the BUILD/ERROR count keeps growing, with its cost, a reopen condition and a request for the decision owner. Dangerous moves (bootstrapping the wrong Galera node, resetting RabbitMQ during a partition, purging queues) come with safeguards, and reopening requires an end-to-end test VM. It commits none of the critical errors. One minor point: it mentions a lab where rabbitmq-reset-state failed, which is unverifiable, but it is not cited to the book and not presented as a fact about the user's environment, so it is not listed as a faithfulness issue."
+}

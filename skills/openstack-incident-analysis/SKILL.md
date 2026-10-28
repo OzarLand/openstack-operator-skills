@@ -201,7 +201,7 @@ them without explicit, evidenced reasons from the user.
   services use; escalate first [Book: Ch. 11]. With RabbitMQ's Khepri store a
   partition may show no "Network Partitions" entry and may heal by itself, and a
   reset was observed to fail and leave a node outside the cluster on a lab
-  `[Addition]` [LAB-VALIDATED: IA-CP-05]: re-check every node before any reset
+  `[Addition]` [DOCUMENTED-UNVERIFIED: IA-CP-05] (reported from one lab run): re-check every node before any reset
   and plan the rejoin and queue-replica repair.
 - **Galera bootstrap is the step to rehearse.** Bootstrapping the wrong node
   discards committed transactions. Require identification of the most advanced

@@ -470,7 +470,8 @@ registered earlier and is now `down` does not produce this error.
 variant. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, ML2/OVS (`host =`
 injected in `/etc/kolla/config/nova/nova-compute.conf` after deleting the
 host's instance and compute service; run failed after 20 retries, 9 min);
-not run: causes 1 and 2.
+not run: causes 1 and 2; the multinode delegation output and the batch-wide
+discovery skip described above come from the code, not from this run.
 
 **Read-only checks.**
 - `openstack compute service list --service nova-compute` (under which names?)

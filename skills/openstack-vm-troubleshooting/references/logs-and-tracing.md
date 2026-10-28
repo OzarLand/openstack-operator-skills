@@ -258,7 +258,7 @@ older `.gz`); journal (`journalctl REQUEST_ID=<request-id> -o short-iso-precise`
 [LAB-VALIDATED: VM-LOG-10] Rows *lab 10*. Lab: 2026.1 (Nova 33.0.3), Kolla-Ansible 22.2.0
 all-in-one, captures 2026-10-23 to 27; not seen: network allocation, block device or libvirt
 connection failures, max retries on that run. [LAB-VALIDATED: VM-LOG-11] Rows *lab 11*. Lab: 2026.1,
-Kolla-Ansible 22.2.0 all-in-one, one compute, ML2/OVS, INFO logs; not seen:
+Kolla-Ansible 22.2.0 all-in-one, one compute, ML2/OVS, INFO logs; recorded by the lab agent in the page body of a draft page (no `confirmed_by`); not seen:
 `Exceeded max scheduling attempts`, a reschedule to another compute, DEBUG lines.
 [LAB-VALIDATED: VM-LOG-12] Rows *lab 12*. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, 409s made
 with a test consumer; not seen: retry limit, generation conflict, 500, report-client lines.

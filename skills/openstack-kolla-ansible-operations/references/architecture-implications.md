@@ -255,10 +255,11 @@ Kolla-Ansible all-in-one, ML2/OVS, local store and LVM; not run: Nova on Ceph
 RBD, migration.
 
 Evacuation with the local store rebuilds the root disk from its image: data
-written in the instance is lost; a boot-from-volume instance keeps its disk.
-[LAB-VALIDATED: KA-ARCH-14] Lab: 2026.1, Kolla-Ansible multinode (1
-controller, 2 computes), ML2/OVS, local disks and a volume; not run: Ceph RBD
-instance disks. A full instance store pauses the instances that write while
+written in the instance is lost. [LAB-VALIDATED: KA-ARCH-14] Lab: 2026.1,
+Kolla-Ansible 22.2.0, ML2/OVS, local instance disks, no Cinder; not run: boot
+from volume, Ceph RBD instance disks. A boot-from-volume instance keeps its
+disk through an evacuation [DOCUMENTED-UNVERIFIED: KA-ARCH-31] (the source's
+frontmatter says it was seen, its body says boot from volume was not run). A full instance store pauses the instances that write while
 Nova still shows them `ACTIVE`; `df` on the Docker volume path needs `sudo`.
 Monitor each compute's store, and give it its own file system, or it fills
 the root file system with Docker and logs. [LAB-VALIDATED: KA-ARCH-15] Lab:
@@ -457,8 +458,9 @@ explicit `enable_proxysql: "no"` no ProxySQL was deployed; without HAProxy,
 Horizon stayed on 80. MariaDB 10.11 → 11.4.13 (major: check tooling), RabbitMQ
 4.0.9 → 4.2.9, Nova max microversion 2.100 → 2.103.
 [LAB-VALIDATED: KA-ARCH-29] Lab: 2025.1 → 2026.1, Kolla-Ansible 20.6.0 →
-22.2.0, all-in-one, ML2/OVS, local disk, no HAProxy; not run: multinode with
-HAProxy, OVN, Cinder, Valkey migration, rollback.
+22.2.0, all-in-one, ML2/OVS, local disk, no HAProxy; one run, recorded by the
+lab agent in a draft experience report without a `confirmed_by` record; not
+run: multinode with HAProxy, OVN, Cinder, Valkey migration, rollback.
 
 Everything that went wrong came before `upgrade`:
 - Docker settings are not part of `kolla-ansible upgrade`: a move to a

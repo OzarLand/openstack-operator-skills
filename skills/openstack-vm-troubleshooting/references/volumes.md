@@ -321,7 +321,7 @@ whatever the status says later. [DOCUMENTED-UNVERIFIED: VM-VOL-22]
    no undo: `openstack volume delete <volume-id>`; preconditions: owner confirms
    the data is not needed or backed up, attached nowhere. [LAB-VALIDATED: VM-VOL-24]
    Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, Cinder LVM over iSCSI, LV held
-   open; gone in 6 s, quota back to 0; not run: Ceph.
+   open; gone in 6 s, quota back to 0; not run: Ceph, the undo of the reset.
 3. Cause 1 still `deleting` with the service up and no delete in its log: the same
    reset and delete; `openstack volume delete --force <volume-id>` equals both, with
    both preconditions. Cause 6: fix the key manager (Barbican or the configured one),
@@ -367,7 +367,7 @@ FC via os-brick; RBD has no host device) and tells QEMU. If that refresh fails
 (`Extend volume failed, volume_id=<id>, reason: ...`) **Cinder is not told**.
 Partition and file system in the guest never grow by themselves.
 
-[LAB-VALIDATED: VM-VOL-27] Recognition and checks. Normal path: `Extend volume completed successfully.`
+[DOCUMENTED-UNVERIFIED: VM-VOL-27] Recognition and checks, reported from a lab run recorded only in a draft source page, executor not recorded (so not counted as validated). Normal path: `Extend volume completed successfully.`
 2 s after the command, `Nova event response` 1 s later, the Nova line 1 s after,
 guest `lsblk` at the new size. Shut-off guest: saw the new size at start (no
 `Skipping block device resize` at INFO). Lab (recorded in the page body; the page
@@ -390,20 +390,20 @@ from the source code, not the lab. [DOCUMENTED-UNVERIFIED: VM-VOL-28]
 **Fix options.**
 1. Cause 1. *State-changing*, no undo (cannot shrink; quota charged):
    `openstack --os-volume-api-version 3.42 volume set --size <new-GB> <volume-id>`.
-   [LAB-VALIDATED: VM-VOL-29] Lab: as VM-VOL-27, normal path 1 GB to 2 GB; not run: Ceph RBD, FC.
+   [DOCUMENTED-UNVERIFIED: VM-VOL-29] Lab: as VM-VOL-27, normal path 1 GB to 2 GB; not run: Ceph RBD, FC.
 2. Cause 2. Fix what `cinder-volume` names; size in Cinder is still the old one.
    *State-changing*: `openstack volume set --state in-use <volume-id>` (or `available`
    if detached), record only; precondition: backend volume healthy at its old size,
    attached as Cinder says; undo `cinder reset-state --state error_extending <volume-id>`
    (`volume set --state` does not accept it). Then extend again.
-   [LAB-VALIDATED: VM-VOL-30] Lab: as VM-VOL-27, failure injected by renaming the
+   [DOCUMENTED-UNVERIFIED: VM-VOL-30] Lab: as VM-VOL-27, failure injected by renaming the
    backend LV (`error_extending` within 8 s); not run: the undo, other backend errors.
 3. Cause 3. Bring `nova-compute` back first: the queued event was processed 18 s
    after `systemctl start` and the guest saw the new size without reboot; check
    `Cinder extended volume <volume-id>` and `lsblk` before anything else. Cinder
    does not resend the event; if it was lost: *State-changing*:
    `openstack server reboot --hard <server-id>` (guest loses unwritten data; agree
-   with the owner); 22 s with `--wait` on the lab. [LAB-VALIDATED: VM-VOL-31]
+   with the owner); 22 s with `--wait` on the lab. [DOCUMENTED-UNVERIFIED: VM-VOL-31]
    Lab: as VM-VOL-27, `nova-compute` stopped with `systemctl stop kolla-nova_compute-container.service`,
    lost event simulated by removing it from the queue; not run: a refresh failure, Ceph RBD.
 4. Cause 3 alternative for a data volume: *State-changing*: `openstack server remove volume`

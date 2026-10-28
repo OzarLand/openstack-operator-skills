@@ -14,9 +14,10 @@
   `kolla-ansible-deployment-patterns`. Kolla-Ansible only.
 - **Incident analysis**: `control-plane-recovery.md` (RabbitMQ, Galera,
   HAProxy and keepalived, database connections, Keystone Fernet keys, Nova
-  conductor and scheduler). The hard rule on RabbitMQ resets now says that a
-  reset failed on a lab with Khepri and how the node and its queue replicas
-  were recovered; controlled degradation keeps Placement and Keystone up.
+  conductor and scheduler). The hard rule on RabbitMQ resets now warns that a
+  reset was reported to fail on a lab with Khepri, and how the node and its
+  queue replicas were recovered; controlled degradation keeps Placement and
+  Keystone up.
 - **Validation status everywhere**: knowledge validation policy, inventory of
   every actionable claim (`validation/inventory.yaml`), inline status tags,
   shared safety rule 12 (state the status and its scope), generated coverage

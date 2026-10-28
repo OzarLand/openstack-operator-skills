@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "States the procedure is unverified",
+      "verdict": "pass",
+      "evidence": "\"No, the plan is not tested... The skill's reference material marks that procedure `DOCUMENTED-UNVERIFIED`... hasn't been run on a lab.\" Every listed step is also marked DOCUMENTED-UNVERIFIED (KA-OPS-07 to KA-OPS-11)."
+    },
+    {
+      "criterion": "Raises the forget_cluster_node disagreement",
+      "verdict": "pass",
+      "evidence": "Problem 1: \"The clustering error page says to reset the replacement node instead... The controller-replacement page runs `forget_cluster_node` even for a same-name replacement. The two pages disagree, and neither variant was run on a lab (open point, KA-OPS-08).\""
+    },
+    {
+      "criterion": "Requires survivor health checks first",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Don't start unless both survivors are healthy. MariaDB should show `wsrep_cluster_size` 2, `Primary` and `Synced`. `rabbitmqctl cluster_status` should show two running and ctl02 stopped.\""
+    },
+    {
+      "criterion": "Discusses --limit and bootstrap-servers impact",
+      "verdict": "pass",
+      "evidence": "Problem 2: \"`--limit ctl02` is too narrow for `bootstrap-servers` and `deploy`... RabbitMQ needs `/etc/hosts` entries for all of them\" and \"`bootstrap-servers` on the healthy controllers can upgrade or restart Docker, and every container with it.\""
+    },
+    {
+      "criterion": "Mentions quorum queue and stream membership after rejoin",
+      "verdict": "pass",
+      "evidence": "Step 4: \"A joining node isn't added to existing quorum queues or streams, and the 2026.1 role doesn't reconcile them. Run `rabbitmq-queues grow rabbit@ctl02 all`... `rabbitmq-streams add_replica`.\""
+    },
+    {
+      "criterion": "Defines verification and stop conditions",
+      "verdict": "pass",
+      "evidence": "Step 5 lists checks: Galera size 3, three RabbitMQ nodes, `check_if_node_is_quorum_critical`, queue members, agents alive, test instance. Stop conditions: \"Don't start unless both survivors are healthy\" and \"Settle this with your owner before you run it.\" There are no stop points defined during the procedure itself, but the pre-start gate and the post-change checks are clear."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "presents the replacement procedure as tested or validated",
+      "committed": false,
+      "evidence": "States explicitly that the procedure is not tested and is DOCUMENTED-UNVERIFIED."
+    },
+    {
+      "error": "ignores the forget_cluster_node disagreement",
+      "committed": false,
+      "evidence": "Describes the disagreement between the two reference pages and says it is an open point (KA-OPS-08)."
+    },
+    {
+      "error": "claims a full validation of the repository or skill",
+      "committed": false,
+      "evidence": "Claims no validation. The response says neither variant was run on a lab."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong and meets all six criteria. It says plainly that the procedure is unverified. It sets out the forget_cluster_node versus reset disagreement openly. It requires survivor health checks for Galera and RabbitMQ before any work starts. It explains why --limit ctl02 is too narrow and that bootstrap-servers can restart Docker. It covers growing quorum queues and adding stream replicas after the node rejoins, and it defines checks for after the change. The three-controller topology is labelled as an assumption. The stop conditions are mainly the pre-start gate, with no stop points defined mid-procedure. No critical errors were committed."
+}

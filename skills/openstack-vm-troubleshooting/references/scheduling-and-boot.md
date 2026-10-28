@@ -295,7 +295,8 @@ Ceph. On older releases the fault can read `Failure prepping block device.`
    [LAB-VALIDATED: VM-SCH-11] Fixes 1 to 3 as observed: refusals, `iscsid`
    started, boot with `--volume` from the left-over volume (causes 3 and 4),
    delete with Delete On Termination `False` leaving the volume `available`.
-   Lab: 2026.1, Kolla-Ansible 22.2.0, all-in-one, Cinder LVM over iSCSI. Not run: the `True` case, Ceph.
+   Lab: 2026.1, Kolla-Ansible 22.2.0, all-in-one, Cinder LVM over iSCSI. Not run: the `True` case, Ceph;
+   the command used to start `iscsid` on the lab was not recorded.
 4. [DOCUMENTED-UNVERIFIED: VM-SCH-12] Not run on the lab:
    - Cause 2: fix what Cinder reported (`openstack quota show <project-id>`;
      LVM space `sudo vgs cinder-volumes`), retry once. A stopped
@@ -429,7 +430,8 @@ compute node record` instead).
   `kolla-ansible reconfigure -i <inventory> -t nova --limit <host>`.
   [LAB-VALIDATED: VM-SCH-19] Lab: 2026.1, Kolla-Ansible 22.2.0, multinode, ML2/OVS, local disks; 2 minutes, both files got
   the old ID, service `up`. Not run: the hand-written `compute_id` of other
-  deployments.
+  deployments, a compute with running instances (the lab compute had none, so
+  "running instances keep running" is from documentation).
 - [DOCUMENTED-UNVERIFIED: VM-SCH-20] Cause A: give the old name back,
   *State-changing* (`sudo hostnamectl set-hostname <old-host>`; undo: set the
   new name), then Kolla-Ansible `reconfigure ... --limit <old-host>`; renaming

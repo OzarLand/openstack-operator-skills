@@ -241,33 +241,20 @@ items:
   risk: destructive
   skill: openstack-incident-analysis
   location: references/control-plane-recovery.md
-  status: LAB-VALIDATED
+  status: DOCUMENTED-UNVERIFIED
   scope: Kolla-Ansible 22.2.0 (2026.1), RabbitMQ 4.2.9 with Khepri, quorum queues and stream fanout
   sources:
   - repo: openstack-vm-runbooks
     path: recovery/reopening-provisioning-after-control-plane-incident.md
-  validation:
-    environment: 'lab: kolla-ansible 22.2.0, 3 controllers, RabbitMQ 4.2.9 with Khepri, Galera with ProxySQL, no
-      Cinder; topology as recorded: HA control plane (clustered RabbitMQ, Galera)'
-    openstack_release: '2026.1'
-    deployment: kolla-ansible 22.2.0, 3 controllers, RabbitMQ 4.2.9 with Khepri, Galera with ProxySQL, no Cinder
-    network_backend: ml2/ovs
-    storage_backend: no Cinder
-    executed_by: 'not recorded on the page (lab run reported in the page text and in the commit of PR #137)'
-    date: '2026-10-27'
-    observed: force_reset refused; rabbitmq-reset-state failed (reset timed out on one node; others 'Not enough
-      nodes joined'); node recovered with reset, join_cluster, start_app; PRECONDITION_FAILED on streams without
-      a local replica; add_replica and grow fixed it; instance needed a hard reboot for DHCP.
-    not_observed: force_reset or purge_queue outside Kolla-Ansible; Mnesia; the reset was run after the partition
-      had healed.
-    evidence:
-    - https://github.com/OzarLand/openstack-vm-runbooks/pull/137
-    - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/recovery/reopening-provisioning-after-control-plane-incident.md
-    - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
-    independent_human_check: false
-  revalidate_when: RabbitMQ or Kolla-Ansible version change (rabbitmq-reset-state may be fixed upstream).
-  limitations: The source page records this run in its text and commit message but keeps status draft and an empty
-    confirmed_by; one run only.
+  missing_evidence: 'A recorded lab run with a named executor of rabbitmq-reset-state on a 3-node RabbitMQ 4.2 Khepri
+    cluster (in its precondition: partition not healed), and of the rejoin plus queue-replica repair.'
+  limitations: 'The source page records this run in its text and commit message but keeps status draft and an empty
+    confirmed_by; one run only. Reported lab run (executor not recorded, source page draft without confirmed_by):
+    kolla-ansible 22.2.0, 3 controllers, RabbitMQ 4.2.9 with Khepri, Galera with ProxySQL, no Cinder, 2026-10-27.
+    Observed per the page: force_reset refused; rabbitmq-reset-state failed (reset timed out on one node; others
+    ''Not enough nodes joined''); node recovered with reset, join_cluster, start_app; PRECONDITION_FAILED on streams
+    without a local replica; add_replica and grow fixed it; instance needed a hard reboot for DHCP. Not observed:
+    force_reset or purge_queue outside Kolla-Ansible; Mnesia; the reset was run after the partition had healed.'
 - id: IA-CP-06
   claim: 'Last-resort Kolla-Ansible reset sequence: genconfig, stop the tagged services keeping nova_libvirt, rabbitmq-reset-state,
     deploy the tagged services.'
@@ -293,32 +280,20 @@ items:
   risk: state-changing
   skill: openstack-incident-analysis
   location: references/control-plane-recovery.md
-  status: LAB-VALIDATED
+  status: DOCUMENTED-UNVERIFIED
   scope: Kolla-Ansible 22.2.0 (2026.1), ML2/OVS, RabbitMQ 4.2 Khepri, single internal VIP
   sources:
   - repo: openstack-vm-runbooks
     path: recovery/reopening-provisioning-after-control-plane-incident.md
   - book: Ch. 19
-  validation:
-    environment: 'lab: kolla-ansible 22.2.0, 3 controllers, RabbitMQ 4.2.9 with Khepri, Galera with ProxySQL, no
-      Cinder; topology as recorded: HA control plane (clustered RabbitMQ, Galera)'
-    openstack_release: '2026.1'
-    deployment: kolla-ansible 22.2.0, 3 controllers, RabbitMQ 4.2.9 with Khepri, Galera with ProxySQL, no Cinder
-    network_backend: ml2/ovs
-    storage_backend: no Cinder
-    executed_by: 'not recorded on the page (lab run reported in the page text and in the commit of PR #137)'
-    date: '2026-10-27'
-    observed: 'Steps 1 (API units stopped), 2 (bus reset, which failed: IA-CP-05), 3 (read-only, Galera healthy),
-      4 (service restarts), verification and reopening, in order; stopping Placement made conductor and scheduler
-      exit at start-up; test instance reachable after the stream replica repair and a hard reboot.'
-    not_observed: HAProxy MAINT; a Galera recovery; OVN; Mnesia.
-    evidence:
-    - https://github.com/OzarLand/openstack-vm-runbooks/pull/137
-    - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/recovery/reopening-provisioning-after-control-plane-incident.md
-    - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
-    independent_human_check: false
-  revalidate_when: Kolla-Ansible or RabbitMQ version change; procedure change.
-  limitations: Source page stays draft with empty confirmed_by; one run.
+  missing_evidence: A recorded run with a named executor of the full controlled-degradation sequence on a 3-controller
+    Kolla-Ansible lab, with a working bus reset.
+  limitations: 'Source page stays draft with empty confirmed_by; one run. Reported lab run (executor not recorded,
+    source page draft without confirmed_by): kolla-ansible 22.2.0, 3 controllers, RabbitMQ 4.2.9 with Khepri, Galera
+    with ProxySQL, no Cinder, 2026-10-27. Observed per the page: Steps 1 (API units stopped), 2 (bus reset, which
+    failed: IA-CP-05), 3 (read-only, Galera healthy), 4 (service restarts), verification and reopening, in order;
+    stopping Placement made conductor and scheduler exit at start-up; test instance reachable after the stream replica
+    repair and a hard reboot. Not observed: HAProxy MAINT; a Galera recovery; OVN; Mnesia.'
 - id: IA-CP-08
   claim: 'Galera diagnosis on every node (wsrep status, containers, mariadb.log, grastate.dat) and the case table:
     one node, quorum lost, every node stopped; ProxySQL clients see 9001 instead of 1047.'
@@ -372,8 +347,8 @@ items:
     storage_backend: not recorded
     executed_by: agent:lab-reviewer
     date: '2026-10-26'
-    observed: Writer stopped (docker stop) and started; Synced in 18 s by IST; no API error.
-    not_observed: Start through the systemd unit (the lab used docker stop/start); a node needing SST.
+    observed: 'Writer stopped with docker stop and started with docker start: Synced in 18 s by IST; no API error.'
+    not_observed: The systemctl start form given in the skill; a node needing SST.
     evidence:
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/130
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/89
@@ -557,30 +532,19 @@ items:
   risk: read-only
   skill: openstack-incident-analysis
   location: references/control-plane-recovery.md
-  status: LAB-VALIDATED
+  status: DOCUMENTED-UNVERIFIED
   scope: Kolla-Ansible 2026.1 with ProxySQL in front of Galera
   sources:
   - repo: openstack-vm-runbooks
     path: recovery/database-too-many-connections-or-pool-exhausted.md
-  validation:
-    environment: 'lab: kolla-ansible 22.2.0, 3 controllers with Galera behind ProxySQL 3.0.11, MariaDB 11.4, 2 computes;
-      topology as recorded: multinode, 3 controllers, ProxySQL in front of Galera'
-    openstack_release: '2026.1'
-    deployment: kolla-ansible 22.2.0, 3 controllers with Galera behind ProxySQL 3.0.11, MariaDB 11.4, 2 computes
-    network_backend: ml2/ovs
-    storage_backend: not recorded
-    executed_by: not recorded on the page
-    date: '2026-10-27'
-    observed: 'MariaDB full (max_connections 20 on the writer: APIs worked ~2.5 min, then every service 9001, CLI
-      502); no synced writer (hostgroup 0 empty, every service 9001).'
-    not_observed: QueuePool limit (not reproducible with Kolla uWSGI one thread per process); ProxySQL client limit.
-    evidence:
-    - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/recovery/database-too-many-connections-or-pool-exhausted.md
-    - https://github.com/OzarLand/openstack-vm-runbooks/pull/124
-    - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
-    independent_human_check: false
-  revalidate_when: ProxySQL, MariaDB or Kolla-Ansible version change.
-  limitations: Source page is draft with empty confirmed_by; the lab run is recorded in its Lab observations section.
+  missing_evidence: A recorded run with a named executor reproducing each row (MariaDB full, backend pool full,
+    no synced writer, QueuePool, ProxySQL client limit).
+  limitations: 'Source page is draft with empty confirmed_by; the lab run is recorded in its Lab observations section.
+    Reported lab run (executor not recorded, source page draft without confirmed_by): kolla-ansible 22.2.0, 3 controllers
+    with Galera behind ProxySQL 3.0.11, MariaDB 11.4, 2 computes, 2026-10-27. Observed per the page: MariaDB full
+    (max_connections 20 on the writer: APIs worked ~2.5 min, then every service 9001, CLI 502); no synced writer
+    (hostgroup 0 empty, every service 9001). Not observed: QueuePool limit (not reproducible with Kolla uWSGI one
+    thread per process); ProxySQL client limit.'
 - id: IA-CP-17
   claim: 'Database connection fixes: restart the holding service per controller; restart a full MariaDB node when
     the two others are Synced; kill idle sessions of the identified service as a last resort.'
@@ -588,31 +552,19 @@ items:
   risk: destructive
   skill: openstack-incident-analysis
   location: references/control-plane-recovery.md
-  status: LAB-VALIDATED
+  status: DOCUMENTED-UNVERIFIED
   scope: Kolla-Ansible 2026.1 with ProxySQL
   sources:
   - repo: openstack-vm-runbooks
     path: recovery/database-too-many-connections-or-pool-exhausted.md
-  validation:
-    environment: 'lab: kolla-ansible 22.2.0, 3 controllers with Galera behind ProxySQL 3.0.11, MariaDB 11.4, 2 computes;
-      topology as recorded: multinode, 3 controllers, ProxySQL in front of Galera'
-    openstack_release: '2026.1'
-    deployment: kolla-ansible 22.2.0, 3 controllers with Galera behind ProxySQL 3.0.11, MariaDB 11.4, 2 computes
-    network_backend: ml2/ovs
-    storage_backend: not recorded
-    executed_by: not recorded on the page
-    date: '2026-10-27'
-    observed: Restart of the full MariaDB node (APIs answered 54 s later; rejoined by IST, Synced 33 s after restart);
-      one idle neutron session killed, next API calls succeeded.
-    not_observed: SET GLOBAL max_connections on a full node (root refused); raising pool sizes; restarting the holding
-      service.
-    evidence:
-    - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/recovery/database-too-many-connections-or-pool-exhausted.md
-    - https://github.com/OzarLand/openstack-vm-runbooks/pull/124
-    - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
-    independent_human_check: false
-  revalidate_when: ProxySQL, MariaDB or Kolla-Ansible version change.
-  limitations: Source page is draft with empty confirmed_by.
+  missing_evidence: A recorded run with a named executor of the MariaDB node restart, the session kill and the service
+    restart on a full-connections lab.
+  limitations: 'Source page is draft with empty confirmed_by. Reported lab run (executor not recorded, source page
+    draft without confirmed_by): kolla-ansible 22.2.0, 3 controllers with Galera behind ProxySQL 3.0.11, MariaDB
+    11.4, 2 computes, 2026-10-27. Observed per the page: Restart of the full MariaDB node (APIs answered 54 s later;
+    rejoined by IST, Synced 33 s after restart); one idle neutron session killed, next API calls succeeded. Not
+    observed: SET GLOBAL max_connections on a full node (root refused); raising pool sizes; restarting the holding
+    service.'
 - id: IA-CP-18
   claim: 'Keystone 401 diagnosis: compare Fernet key checksums (each primary present in every set), keystone_fernet
     health, aged-token check per node and the 404 reason, clock state.'
@@ -718,7 +670,8 @@ items:
       restart, a start left powering-on, fixed with --state error and reboot --hard; schedulers stopped: build ERROR
       after 61-63 s with MessagingTimeout; cell0 clean-up commands run.'
     not_observed: Resize, migrations, evacuate, local delete, cell0 database unreachable, --state active, kolla-ansible
-      reconfigure.
+      reconfigure; a stop or reboot of a running instance with the conductor down; start, stop or reboot with the
+      scheduler down.
     evidence:
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/134
     - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/recovery/nova-conductor-or-scheduler-down-what-still-works.md
@@ -1346,8 +1299,8 @@ items:
     independent_human_check: false
   revalidate_when: Change of nova_instance_datadir_volume or image backend defaults; Podman.
 - id: KA-ARCH-14
-  claim: With the local instance store, evacuation rebuilds the root disk from its image (data written is lost);
-    a boot-from-volume instance keeps its disk.
+  claim: 'Evacuation of an instance on the local instance store rebuilds its root disk from the image: data written
+    in the instance is lost.'
   kind: behaviour
   risk: destructive
   skill: openstack-kolla-ansible-operations
@@ -1364,11 +1317,12 @@ items:
     openstack_release: '2026.1'
     deployment: kolla-ansible multinode (1 controller, 2 computes)
     network_backend: ml2/ovs
-    storage_backend: local instance disks; a boot-from-volume instance
+    storage_backend: local instance disks, no Cinder (per the source body)
     executed_by: agent:lab-reviewer
     date: '2026-10-23'
-    observed: Evacuated local-disk instance rebuilt from its image; boot-from-volume disk kept.
-    not_observed: Nova on Ceph RBD or shared instance store.
+    observed: 'One instance with a local disk evacuated: rebuilt from its image on the other compute, kept its port
+      and floating IP.'
+    not_observed: Boot from volume; Ceph RBD instance disks; shared storage.
     evidence:
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/31
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/2
@@ -1378,6 +1332,8 @@ items:
       evacuation); clean-up on the host''s return'
     independent_human_check: false
   revalidate_when: New Nova release; evacuate behaviour changes.
+  limitations: The source's confirmed_by says a boot-from-volume disk was kept; its body says boot from volume was
+    not run; the narrower body is used and the boot-from-volume claim is KA-ARCH-31.
 - id: KA-ARCH-15
   claim: A full local instance store pauses the instances that write while Nova still shows them ACTIVE; df on the
     Docker volume path needs sudo; give the store its own file system.
@@ -1762,6 +1718,22 @@ items:
     - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
     independent_human_check: false
   revalidate_when: New Kolla-Ansible or openstack.kolla collection release; Docker major version.
+- id: KA-ARCH-31
+  claim: A boot-from-volume instance keeps its disk through an evacuation.
+  kind: behaviour
+  risk: destructive
+  skill: openstack-kolla-ansible-operations
+  location: references/architecture-implications.md
+  status: DOCUMENTED-UNVERIFIED
+  scope: Libvirt driver, Cinder volumes
+  sources:
+  - repo: openstack-vm-runbooks
+    path: recovery/compute-host-failure-fence-before-evacuate.md
+  - repo: kolla-ansible-deployment-patterns
+    path: storage/nova-instance-disks-local-ceph-rbd-or-boot-from-volume.md
+  missing_evidence: Evacuate a boot-from-volume instance from a fenced compute on a lab with Cinder and check the
+    volume is reattached with its data.
+  limitations: The source page's confirmed_by mentions it; its body says boot from volume was not run.
 - id: KA-CFG-01
   claim: 'Kolla-Ansible configuration precedence and override locations: globals.yml and globals.d are extra variables
     (globals.d after globals.yml, wins; globals.yml beats host_vars/group_vars); per-host overrides under config/<service>/<inventory_hostname>/
@@ -1788,7 +1760,7 @@ items:
       globals.yml won; only in host_vars: applied; config/nova/<inventory-name>/nova.conf and config/nova/nova-compute.conf
       applied; config/nova/<machine-hostname>/nova.conf ignored without any message (inventory name was localhost).'
     not_observed: Multinode inventory with group_vars; the full five-step nova-cell merge order; non-INI overrides
-      replaced whole; config/global.conf; several -i.
+      replaced whole; config/global.conf; several -i; config/global.conf and several -i.
     evidence:
     - https://github.com/OzarLand/kolla-ansible-deployment-patterns/pull/20
     - https://github.com/OzarLand/kolla-ansible-deployment-patterns/blob/dee2c60b9db4/configuration/inventory-globals-overrides-and-secrets-layout.md
@@ -3100,7 +3072,7 @@ items:
       compute service; deploy --tags nova failed after the 20 retries with the quoted message (9 min for the run);
       nova-compute logged the rename refusal while docker ps showed it healthy.
     not_observed: Causes 1 (libvirt) and 2 (RabbitMQ); multinode delegation output (described, not captured on this
-      run).
+      run); the multinode delegation output and batch-wide discovery skip (from the code).
     evidence:
     - https://github.com/OzarLand/kolla-ansible-deployment-patterns/pull/70
     - https://github.com/OzarLand/kolla-ansible-deployment-patterns/blob/dee2c60b9db4/deployment-errors/nova-compute-services-failed-to-register.md
@@ -3856,7 +3828,8 @@ items:
       other line unchanged); heat_domain_admin_password regenerated and set on the Keystone user; reconfigure --tags
       glance,cinder,heat in 5 min with failed=0; Glance listed images, a volume and a Heat stack were created and
       deleted.
-    not_observed: A full reconfigure without --tags; any other secret; multinode; Ansible Vault working copy.
+    not_observed: A full reconfigure without --tags; any other secret; multinode; Ansible Vault working copy; the
+      Ansible Vault working copy.
     evidence:
     - https://github.com/OzarLand/kolla-ansible-deployment-patterns/pull/73
     - https://github.com/OzarLand/kolla-ansible-deployment-patterns/blob/dee2c60b9db4/configuration/rotating-secrets-in-passwords-yml.md
@@ -4373,7 +4346,8 @@ items:
     date: '2026-10-24'
     observed: server start brought both instances back, floating IPs answered; override and reconfigure worked as
       written, only nova_compute recreated, instances unaffected; removing the file and reconfiguring undid it.
-    not_observed: Multinode; the global /etc/kolla/config/nova.conf variant.
+    not_observed: Multinode; the global /etc/kolla/config/nova.conf variant; the global /etc/kolla/config/nova.conf
+      variant.
     evidence:
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/39
     - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/recovery/after-a-compute-reboot-instances-shutoff-or-without-network.md
@@ -7554,7 +7528,7 @@ items:
     observed: Boot with --volume from the volume left available after cause 3 and after cause 4 (iscsid started)
       worked; deleting the cause-5 instance with Delete On Termination False left the volume available.
     not_observed: Delete with Delete On Termination True; Ceph; the exact systemctl start unit command is not recorded
-      in the lab notes.
+      in the lab notes; the command used to start iscsid was not recorded.
     evidence:
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/77
     - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/scheduling/instance-fails-to-boot-from-volume.md
@@ -7789,7 +7763,8 @@ items:
     date: '2026-10-27'
     observed: reconfigure ran 'Copy the matched hypervisor UUID to compute_id' in about 2 minutes; service up; both
       files held the old ID; Verification run.
-    not_observed: Compute with running instances (lab compute had none); the hand-written compute_id of other deployments.
+    not_observed: Compute with running instances (lab compute had none); the hand-written compute_id of other deployments;
+      a compute with running instances (the lab compute had none).
     evidence:
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/142
     - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/scheduling/compute-renamed-or-re-registered-resource-provider-conflict.md
@@ -8701,7 +8676,7 @@ items:
     date: '2026-10-27'
     observed: 'After closing the device: volume set --state error and volume delete, gone in 6 s; volume show ''No
       Volume found''; quota show --usage back to 0.'
-    not_observed: Ceph RBD or vendor backend errors; the undo of the reset.
+    not_observed: Ceph RBD or vendor backend errors; the undo of the reset; the undo of the reset.
     evidence:
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/133
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/104
@@ -8769,35 +8744,24 @@ items:
   risk: read-only
   skill: openstack-vm-troubleshooting
   location: references/volumes.md
-  status: LAB-VALIDATED
+  status: DOCUMENTED-UNVERIFIED
   scope: 2026.1, Kolla-Ansible or any, any Cinder backend as written; lab evidence Cinder LVM (thin) over iSCSI
     only
   sources:
   - repo: openstack-vm-runbooks
     path: volumes/extend-in-use-volume-guest-sees-old-size.md
-  validation:
-    environment: 'lab: Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over iSCSI; topology as recorded: any'
-    openstack_release: '2026.1'
-    deployment: Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over iSCSI
-    network_backend: not recorded (not relevant to the claim)
-    storage_backend: Cinder LVM (thin) over iSCSI
-    executed_by: not recorded
-    date: '2026-10-27'
-    observed: 'Normal path: ''Extend volume completed successfully.'' 2 s after the command, Nova event response
-      1 s later, nova-compute line 1 s after, os-brick ''Extend volume for'', guest lsblk 2 GB. Client refusal without
-      3.42 (exit 1). 500 GB extend: exit 0, CapacityFilter removed the backend, volume unchanged, message ''Could
-      not find any available weighted backend.''. Injected driver failure: error_extending within 8 s with the logged
-      and user messages. nova-compute stopped: Cinder new size, guest old size. Guest shut off: new size at start.
-      CirrOS, 1 GB data volume, python-openstackclient 9.0.0.'
-    not_observed: A refresh failure on the compute (Extend volume failed); Ceph RBD; Fibre Channel; encrypted or
-      multi-attached volumes; root volumes.
-    evidence:
-    - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/volumes/extend-in-use-volume-guest-sees-old-size.md
-    - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
-    independent_human_check: false
-  revalidate_when: New OpenStack release; the source page gains a confirmed_by entry or changes; another backend.
-  limitations: The source page is status draft with confirmed_by []; the lab run is recorded only in its body (Lab
-    observations, Validity and limits), with no executor named. It stays draft upstream.
+  missing_evidence: A confirmed lab record with a named executor for the extend procedure on LVM/iSCSI, and runs
+    on Ceph RBD.
+  limitations: 'The source page is status draft with confirmed_by []; the lab run is recorded only in its body (Lab
+    observations, Validity and limits), with no executor named. It stays draft upstream. Reported lab run (executor
+    not recorded, source page draft without confirmed_by): Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over
+    iSCSI, 2026-10-27. Observed per the page: Normal path: ''Extend volume completed successfully.'' 2 s after the
+    command, Nova event response 1 s later, nova-compute line 1 s after, os-brick ''Extend volume for'', guest lsblk
+    2 GB. Client refusal without 3.42 (exit 1). 500 GB extend: exit 0, CapacityFilter removed the backend, volume
+    unchanged, message ''Could not find any available weighted backend.''. Injected driver failure: error_extending
+    within 8 s with the logged and user messages. nova-compute stopped: Cinder new size, guest old size. Guest shut
+    off: new size at start. CirrOS, 1 GB data volume, python-openstackclient 9.0.0. Not observed: A refresh failure
+    on the compute (Extend volume failed); Ceph RBD; Fibre Channel; encrypted or multi-attached volumes; root volumes.'
 - id: VM-VOL-28
   claim: 'Extend refusals other than the missing microversion: size not larger, quota or volume type size limits,
     status not available/in-use, policy volume:extend_attached_volume, API message ''status must be ... to extend''.'
@@ -8818,27 +8782,17 @@ items:
   risk: state-changing
   skill: openstack-vm-troubleshooting
   location: references/volumes.md
-  status: LAB-VALIDATED
+  status: DOCUMENTED-UNVERIFIED
   scope: 2026.1, any deployment, any Cinder backend as written; lab evidence Cinder LVM (thin) over iSCSI
   sources:
   - repo: openstack-vm-runbooks
     path: volumes/extend-in-use-volume-guest-sees-old-size.md
-  validation:
-    environment: 'lab: Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over iSCSI; topology as recorded: any'
-    openstack_release: '2026.1'
-    deployment: Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over iSCSI
-    network_backend: not recorded (not relevant to the claim)
-    storage_backend: Cinder LVM (thin) over iSCSI
-    executed_by: not recorded
-    date: '2026-10-27'
-    observed: 'Normal path 1 GB to 2 GB: in-use at 2 GB, guest lsblk 2 GB.'
-    not_observed: Ceph RBD; Fibre Channel; root volumes; encrypted volumes.
-    evidence:
-    - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/volumes/extend-in-use-volume-guest-sees-old-size.md
-    - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
-    independent_human_check: false
-  revalidate_when: New OpenStack release; change of microversion 3.42 behaviour.
-  limitations: Source page is draft with confirmed_by []; lab run recorded in its body only.
+  missing_evidence: A confirmed lab record with a named executor for the extend procedure on LVM/iSCSI, and runs
+    on Ceph RBD.
+  limitations: 'Source page is draft with confirmed_by []; lab run recorded in its body only. Reported lab run (executor
+    not recorded, source page draft without confirmed_by): Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over
+    iSCSI, 2026-10-27. Observed per the page: Normal path 1 GB to 2 GB: in-use at 2 GB, guest lsblk 2 GB. Not observed:
+    Ceph RBD; Fibre Channel; root volumes; encrypted volumes.'
 - id: VM-VOL-30
   claim: 'error_extending: fix the backend, openstack volume set --state in-use (or available), then extend again;
     undo with cinder reset-state --state error_extending.'
@@ -8846,28 +8800,18 @@ items:
   risk: state-changing
   skill: openstack-vm-troubleshooting
   location: references/volumes.md
-  status: LAB-VALIDATED
+  status: DOCUMENTED-UNVERIFIED
   scope: 2026.1, any deployment, any Cinder backend as written; lab evidence Cinder LVM (thin) over iSCSI
   sources:
   - repo: openstack-vm-runbooks
     path: volumes/extend-in-use-volume-guest-sees-old-size.md
-  validation:
-    environment: 'lab: Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over iSCSI; topology as recorded: any'
-    openstack_release: '2026.1'
-    deployment: Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over iSCSI
-    network_backend: not recorded (not relevant to the claim)
-    storage_backend: Cinder LVM (thin) over iSCSI
-    executed_by: not recorded
-    date: '2026-10-27'
-    observed: 'Backend LV renamed: error_extending within 8 s; LV renamed back; volume set --state in-use and the
-      extend again worked.'
-    not_observed: The cinder reset-state undo; other driver errors; Ceph RBD.
-    evidence:
-    - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/volumes/extend-in-use-volume-guest-sees-old-size.md
-    - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
-    independent_human_check: false
-  revalidate_when: New OpenStack release; another backend.
-  limitations: Source page is draft with confirmed_by []; lab run recorded in its body only.
+  missing_evidence: A confirmed lab record with a named executor for the extend procedure on LVM/iSCSI, and runs
+    on Ceph RBD.
+  limitations: 'Source page is draft with confirmed_by []; lab run recorded in its body only. Reported lab run (executor
+    not recorded, source page draft without confirmed_by): Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over
+    iSCSI, 2026-10-27. Observed per the page: Backend LV renamed: error_extending within 8 s; LV renamed back; volume
+    set --state in-use and the extend again worked. Not observed: The cinder reset-state undo; other driver errors;
+    Ceph RBD.'
 - id: VM-VOL-31
   claim: 'Guest still at the old size: bring nova-compute back (the queued volume-extended event is processed),
     else hard reboot the instance.'
@@ -8875,29 +8819,19 @@ items:
   risk: state-changing
   skill: openstack-vm-troubleshooting
   location: references/volumes.md
-  status: LAB-VALIDATED
+  status: DOCUMENTED-UNVERIFIED
   scope: 2026.1, Kolla-Ansible as run, any as written; lab evidence Cinder LVM (thin) over iSCSI
   sources:
   - repo: openstack-vm-runbooks
     path: volumes/extend-in-use-volume-guest-sees-old-size.md
-  validation:
-    environment: 'lab: Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over iSCSI; topology as recorded: any'
-    openstack_release: '2026.1'
-    deployment: Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over iSCSI
-    network_backend: not recorded (not relevant to the claim)
-    storage_backend: Cinder LVM (thin) over iSCSI
-    executed_by: not recorded
-    date: '2026-10-27'
-    observed: 'nova-compute stopped then started: queued event processed 18 s later, guest saw the new size without
-      reboot. Event removed from the compute''s queue: old size after start; server reboot --hard (22 s with --wait)
-      brought the new size.'
-    not_observed: A refresh failure on the compute; Ceph RBD; Fibre Channel.
-    evidence:
-    - https://github.com/OzarLand/openstack-vm-runbooks/blob/babdd8c07971/volumes/extend-in-use-volume-guest-sees-old-size.md
-    - 'source confirmed_by note: lab run recorded in the page body; no confirmed_by entry on the source page'
-    independent_human_check: false
-  revalidate_when: New OpenStack release; change of Nova's extend_volume handling.
-  limitations: Source page is draft with confirmed_by []; lab run recorded in its body only.
+  missing_evidence: A confirmed lab record with a named executor for the extend procedure on LVM/iSCSI, and runs
+    on Ceph RBD.
+  limitations: 'Source page is draft with confirmed_by []; lab run recorded in its body only. Reported lab run (executor
+    not recorded, source page draft without confirmed_by): Kolla-Ansible 22.2.0, all-in-one, Cinder LVM (thin) over
+    iSCSI, 2026-10-27. Observed per the page: nova-compute stopped then started: queued event processed 18 s later,
+    guest saw the new size without reboot. Event removed from the compute''s queue: old size after start; server
+    reboot --hard (22 s with --wait) brought the new size. Not observed: A refresh failure on the compute; Ceph
+    RBD; Fibre Channel.'
 - id: VM-VOL-32
   claim: Detach and attach a data volume again to make the guest see the new size, and growing the partition and
     file system inside the guest (growpart, resize2fs, xfs_growfs).

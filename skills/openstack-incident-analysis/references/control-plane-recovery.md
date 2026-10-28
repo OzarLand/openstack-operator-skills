@@ -8,6 +8,12 @@ file is an `[Addition]` to the book unless it carries a book citation; the book'
 method in `SKILL.md` and failure-patterns.md still decides *whether* to act.
 Each procedure carries its validation tag (rule 12 of the safety rules).
 
+Two sources below record their lab runs only in the page text, without a
+named executor or a `confirmed_by` record; their findings are given as
+*reported from a lab run* and tagged `DOCUMENTED-UNVERIFIED` (policy: the
+executor of a validating run must be recorded). They are still the best
+available warning about what can go wrong.
+
 Lab context for every `LAB-VALIDATED` item below unless stated otherwise:
 OpenStack 2026.1, Kolla-Ansible 22.2.0, Docker, 3 controllers and 2 computes
 nested in an OpenStack cloud, ML2/OVS, RabbitMQ 4.2.9 with **Khepri** and
@@ -107,8 +113,9 @@ The book's incident purged and recovered the bus [Book: Ch. 19]. On a
 current Kolla-Ansible platform with Khepri, the reset path did **not** behave
 as written:
 
-[LAB-VALIDATED: IA-CP-05] Observed on the lab (2026.1, Kolla-Ansible 22.2.0,
-RabbitMQ 4.2.9 with Khepri, quorum queues and stream fanout):
+[DOCUMENTED-UNVERIFIED: IA-CP-05] Reported from one lab run (2026.1,
+Kolla-Ansible 22.2.0, RabbitMQ 4.2.9 with Khepri, quorum queues and stream
+fanout), recorded in a draft source page without a named executor:
 - `rabbitmqctl force_reset` is refused with Khepri (`Forced reset is
   unsupported with Khepri`).
 - `kolla-ansible rabbitmq-reset-state` **failed**: the fallback
@@ -129,7 +136,9 @@ RabbitMQ 4.2.9 with Khepri, quorum queues and stream fanout):
   the instance needed a hard reboot to get its lease. Check with `rabbitmqctl
   list_queues name type members` after any reset or rejoin.
 Not run: `force_reset` or `purge_queue` outside Kolla-Ansible, Mnesia. The
-reset was run after the partition had healed, to test it.
+reset was run after the partition had healed, outside the step's
+precondition, to test it. Treat the failure as a real risk and the recovery
+commands as unverified.
 
 The documented last-resort sequence (Kolla-Ansible) is `kolla-ansible
 genconfig`, `kolla-ansible stop --tags <services> --yes-i-really-really-mean-it
@@ -141,7 +150,7 @@ the tagged services are down from stop to deploy (no DHCP or metadata while
 Neutron agents are stopped). Preconditions: causes 1 to 4 ruled out, a
 window, `globals.yml` and overrides unchanged since the last deploy or
 reviewed. No undo. [DOCUMENTED-UNVERIFIED: IA-CP-06] Given IA-CP-05, treat it
-as unproven with Khepri: rehearse it on a lab of the same RabbitMQ version
+as unproven with Khepri and reported to fail: rehearse it on a lab of the same RabbitMQ version
 first, and have the rejoin and replica repair above ready.
 
 ## Controlled degradation and reopening provisioning, as run on a lab
@@ -176,13 +185,12 @@ record in `BUILD`. What the run added:
   empty); Galera full and `Primary`; no compute service `down`, every agent
   alive; a test instance created, reached and deleted [Book: Ch. 19].
 
-[LAB-VALIDATED: IA-CP-07] Steps above, run in order on the lab (stop API
+[DOCUMENTED-UNVERIFIED: IA-CP-07] Reported from the same lab run (stop API
 units, bus reset — which failed, see IA-CP-05 — Galera checks read-only
-because it was healthy, service restarts, verification, reopening). The test
+because it was healthy, service restarts, verification, reopening); the test
 instance was reachable only after the stream replicas were repaired and a
 hard reboot. Not run: HAProxy `MAINT`, a Galera recovery, OVN, Mnesia. The
-source page records this run in its text but stays a draft without a
-`confirmed_by` entry.
+source page stays a draft without a `confirmed_by` entry or a named executor.
 
 ## Galera: one node, quorum lost, every node stopped
 
@@ -213,8 +221,9 @@ nothing unless `enable_mariabackup` is set):
 - **A**: fix the node, `sudo systemctl start kolla-mariadb-container.service`
   (*state-changing*, IST/SST from a donor); `Synced` in 18 s on the lab. Do not
   run `mariadb-recovery` for this case: it stops the healthy nodes too.
-  [LAB-VALIDATED: IA-CP-09] Lab: as described; the lab stopped the node with
-  `docker stop`.
+  [LAB-VALIDATED: IA-CP-09] Lab: the node was stopped with `docker stop` and
+  started with `docker start` (`Synced` 18 s later by IST); the `systemctl
+  start` form above was not run.
 - **B**: repair the network first; the nodes reformed `Primary` within 3 s on
   the lab. If missing nodes cannot return: on the node with the highest
   `wsrep_last_committed` **only**, `SET GLOBAL wsrep_provider_pc_bootstrap=ON`
@@ -301,11 +310,13 @@ oslo.db does not retry `1040` or `9001`. Behind ProxySQL, services never see
 `max_connections`, `Threads_connected`, processlist grouped by user;
 ProxySQL `stats_mysql_connection_pool` on the node holding the VIP.
 
-[LAB-VALIDATED: IA-CP-16] Lab (ProxySQL 3.0.11, MariaDB 11.4): MariaDB full
+[DOCUMENTED-UNVERIFIED: IA-CP-16] Reported from a lab run recorded in a
+draft source page without a named executor (ProxySQL 3.0.11, MariaDB 11.4): MariaDB full
 (`max_connections` lowered to 20 on the writer: APIs worked about 2.5 min,
 then every service on `9001`, CLI `502`) and no synced writer (hostgroup 0
 empty, every service `9001`). Not reproduced: `QueuePool limit` (Kolla's uWSGI
-runs one thread per process), the ProxySQL client limit.
+runs one thread per process), the ProxySQL client limit, the ProxySQL backend
+pool full.
 
 Fixes: restart the service that holds the connections, one controller at a
 time. A full node: `SET GLOBAL max_connections` may be impossible (root was
@@ -313,10 +324,10 @@ refused on the lab); restart MariaDB on that node (*state-changing*, only if
 the two others are `Synced` and size is 3; it rejoined by IST, `Synced` 33 s
 later). Killing idle sessions of the identified service (`KILL <id>` on the
 node holding them) is *destructive*: their open transactions roll back.
-[LAB-VALIDATED: IA-CP-17] Lab: the node restart and killing one idle
-`neutron` session. Not run: raising `max_connections` on a full node, raising
-pool sizes. The source page records the run in its text but stays a draft
-without a `confirmed_by` entry.
+[DOCUMENTED-UNVERIFIED: IA-CP-17] Reported from the same lab run: the node
+restart and killing one idle `neutron` session. Not run: restarting the
+service holding the connections, raising `max_connections` on a full node,
+raising pool sizes.
 
 ## Keystone 401 for valid tokens: Fernet keys or clock
 
@@ -397,4 +408,6 @@ only.
 a start left `powering-on`, fixed with `--state error` and a hard reboot);
 schedulers stopped (build `ERROR` after 61-63 s, fault `MessagingTimeout`);
 cell0 clean-up. Not run: resize, migrations, evacuate, a local delete, cell0
-database unreachable, `--state active`.
+database unreachable, `--state active`, a stop or reboot of a running
+instance with the conductor down, any start, stop or reboot with the
+scheduler down (those table cells come from the code).

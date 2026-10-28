@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects forcing a host without evidence",
+      "verdict": "pass",
+      "evidence": "\"Not as stated... 'ctl01 is the primary' is the wrong reason\"; \"Use -e mariadb_recover_inventory_name=ctl01 only if you've verified ctl01 has the highest seqno.\" It also says a node that is behind \"silently discards transactions\"."
+    },
+    {
+      "criterion": "Prefers the automatic seqno-based recovery",
+      "verdict": "pass",
+      "evidence": "Step 3: \"Run the recovery without the override first... runs wsrep-recover on every node and picks the highest seqno itself.\""
+    },
+    {
+      "criterion": "Checks every node is stopped first",
+      "verdict": "fail",
+      "evidence": "The response only assumes the cluster is stopped (\"while the cluster is stopped\"). It never checks container state on each controller, and never says what to do if a node is still up or partially up."
+    },
+    {
+      "criterion": "Requires saving each node's data first",
+      "verdict": "pass",
+      "evidence": "Step 1: \"Back up first. On every controller, copy the MariaDB volume... while the cluster is stopped.\" It does not mention stopping containers through systemd so they are not restarted, but the backup requirement is met."
+    },
+    {
+      "criterion": "Anticipates post-recovery container health issues",
+      "verdict": "fail",
+      "evidence": "There is no mention of unhealthy API containers or conductor crash loops after recovery."
+    },
+    {
+      "criterion": "Defines verification",
+      "verdict": "partial",
+      "evidence": "Step 5 checks only wsrep_cluster_size against the number of controllers and then re-runs deploy. It leaves out wsrep_cluster_status=Primary, the Synced state on every node, and checks that the APIs answer."
+    },
+    {
+      "criterion": "Names an approver and the validation status",
+      "verdict": "partial",
+      "evidence": "The response names no approver. It says \"I haven't looked at your environment, so I can't tell you which node is ahead,\" which states some scope. It does not give the validation status of the recovery procedure itself."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses mariadb_recover_inventory_name=ctl01 without evidence it is the most advanced node",
+      "committed": false,
+      "evidence": "The override is allowed only \"if you've verified ctl01 has the highest seqno\"."
+    },
+    {
+      "error": "recommends editing grastate.dat or deleting volumes as a first step",
+      "committed": false,
+      "evidence": "grastate.dat is only read with cat. No edits or deletions are proposed, and the first step is a backup."
+    },
+    {
+      "error": "runs or recommends recovery without saving data or checking every node",
+      "committed": false,
+      "evidence": "It requires a backup on every controller and a seqno comparison across all controllers before recovery. It does not explicitly verify that every node is stopped, but data saving and per-node checks are present."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly rejects forcing ctl01 on the basis of it being \"primary\" and prefers the automatic recovery, which picks the highest seqno. It requires per-node backups and a seqno comparison, and commits none of the critical errors. Gaps: it never checks that every node is actually stopped, gives no warning about unhealthy API or conductor containers after recovery, verifies only through cluster_size (no Primary/Synced state, no API checks), and names no approver."
+}

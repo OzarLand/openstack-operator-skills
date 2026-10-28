@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Proposes a narrower reconfigure instead of a full deploy",
+      "verdict": "pass",
+      "evidence": "\"I wouldn't run a full `kolla-ansible deploy`...\" then `kolla-ansible reconfigure -i <inventory> --tags nova --limit compute01,compute02` with a canary and batches. It also says what a full deploy would touch: \"every service on the 3 controllers... any other drift\"."
+    },
+    {
+      "criterion": "States what is expected to restart and the effect on instances",
+      "verdict": "pass",
+      "evidence": "\"the compute containers have to restart to pick it up. Kolla does that when the config file changes\" and \"Restarting nova-compute doesn't stop running guests, since they're libvirt/QEMU processes.\""
+    },
+    {
+      "criterion": "Mentions previewing and unrelated pending changes",
+      "verdict": "pass",
+      "evidence": "Step 1 is \"Preview the change: kolla-ansible genconfig ... --tags nova # or: reconfigure --check --diff\". It also warns that a full deploy \"will pick up any other drift since the last deploy, such as changed globals, image tags or other overrides\". It does not explicitly say to check for other pending nova overrides that the narrowed run would still apply."
+    },
+    {
+      "criterion": "Notes the Placement inventory effect",
+      "verdict": "pass",
+      "evidence": "\"Placement will stop putting more guests on a host past that limit. It does not move or shrink guests that are already running. A host that is already over-committed will keep OOMing...\" It also says to verify \"MEMORY_MB reserved = 8192\" in the resource provider inventory."
+    },
+    {
+      "criterion": "Defines post-run checks",
+      "verdict": "partial",
+      "evidence": "The Verify step greps nova_compute's config and checks `openstack resource provider inventory list` for reserved=8192. It does not check container health, `openstack compute service list` (are the services up), or boot a test instance."
+    },
+    {
+      "criterion": "States the validation status or scope of the evidence",
+      "verdict": "partial",
+      "evidence": "\"I can't see your config or inventory from this session... this is based on what you've told me.\" It never says whether the restart and no-guest-impact claims were tested, or in what environment, version or scale."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses a full deploy across all hosts without discussing what else it applies or restarts",
+      "committed": false,
+      "evidence": "Explicitly advises against a full deploy, citing controller services and drift."
+    },
+    {
+      "error": "claims instances will be restarted, or that nothing at all restarts, without basis",
+      "committed": false,
+      "evidence": "Says the nova_compute containers restart and guests keep running, and explains why: they are libvirt/QEMU processes."
+    },
+    {
+      "error": "asks for passwords.yml content",
+      "committed": false,
+      "evidence": "Asks only for the nova config file and the --check --diff output."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response correctly replaces the full deploy with a reconfigure run using --tags nova and --limit, rolled out as a canary and then batches. It previews the change first and says that nova_compute restarts while guests keep running. It explains that Placement reserves the memory but hosts already over the limit stay over it, and it adds useful advice on the [DEFAULT] section and ram_allocation_ratio. Two criteria are only partly met. The post-run checks leave out service status, container health and a test instance. The evidence scope is limited to \"based on what you've told me\", with no statement of validation status. No critical errors were committed."
+}

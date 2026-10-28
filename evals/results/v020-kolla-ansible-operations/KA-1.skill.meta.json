@@ -1,0 +1,22 @@
+{
+  "skill_under_test": "openstack-kolla-ansible-operations",
+  "scenario": "KA-1",
+  "mode": "skill",
+  "model": "claude-sonnet-5-5",
+  "skills_invoked": [
+    "openstack-kolla-ansible-operations",
+    "openstack-change-review"
+  ],
+  "triggered": true,
+  "reference_files_read": [
+    "evidence-and-safety.md",
+    "commands-and-changes.md",
+    "configuration.md"
+  ],
+  "exit_code": 0,
+  "stderr_tail": "",
+  "score": {
+    "criteria_score": 1.0,
+    "critical_errors_committed": []
+  }
+}

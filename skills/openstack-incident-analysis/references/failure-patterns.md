@@ -56,9 +56,10 @@ Source: [Book: Ch. 19] (field decision), [Book: Ch. 1], [Book: Ch. 4].
   with Khepri a partition can heal by itself, so check every node again before
   any reset; `force_reset` is refused and `kolla-ansible rabbitmq-reset-state`
   failed, leaving a node outside the cluster and queues without a replica on it
-  [LAB-VALIDATED: IA-CP-05]; keep `placement_api` and Keystone running while the
-  other APIs are stopped, and expect the verification build to need the APIs
-  back [LAB-VALIDATED: IA-CP-07].
+  [DOCUMENTED-UNVERIFIED: IA-CP-05]; keep `placement_api` and Keystone running
+  while the other APIs are stopped, and expect the verification build to need
+  the APIs back [DOCUMENTED-UNVERIFIED: IA-CP-07]. Both are reported from one
+  lab run whose executor is not recorded.
 - **Dangerous moves**: repairing bus and database while APIs keep accepting
   writes; restarting components repeatedly without a hypothesis.
 
@@ -85,8 +86,8 @@ Source: [Book: Ch. 11], [Book: Ch. 10].
   hosted on the node; a node removed for good must also be dropped with
   `forget_cluster_node`, and quorum queues may need `rabbitmq-queues grow` /
   `shrink` to restore their replica count. State-changing and irreversible for
-  that node's data. [DOCUMENTED-UNVERIFIED: IA-FP-02] (the replica repair
-  after a rejoin was run on a lab: IA-CP-05.)
+  that node's data. [DOCUMENTED-UNVERIFIED: IA-FP-02] (a replica repair
+  after a rejoin is reported from one lab run: IA-CP-05.)
 
 ## P3 Compute host unreachable or failed
 

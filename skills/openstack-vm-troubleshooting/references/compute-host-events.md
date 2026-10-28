@@ -221,7 +221,8 @@ Nova containers whose configuration changed; running instances not affected.
 Undo: remove the override and reconfigure again.
 [LAB-VALIDATED: VM-HOST-12] Lab: as VM-HOST-11; start brought both instances
 and their floating IPs back; reconfigure recreated only `nova_compute`,
-instances unaffected; removal and reconfigure undid it. Not run: multinode.
+instances unaffected; removal and reconfigure undid it. Not run: multinode,
+the global `/etc/kolla/config/nova.conf` variant.
 
 **Fix, cause 3.** Persist the interface, bond, VLAN and MTU in the host's
 network configuration (netplan, NetworkManager, systemd-networkd);

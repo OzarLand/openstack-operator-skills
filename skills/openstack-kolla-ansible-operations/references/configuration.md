@@ -76,7 +76,8 @@ Kolla-Ansible 22.2.0, all-in-one, Docker; same variable in `globals.yml` and
 `config/nova/<inventory-name>/nova.conf` and `config/nova/nova-compute.conf`
 applied; `config/nova/<machine-hostname>/nova.conf` **ignored without any
 message**. Not run: multinode inventory with `group_vars`, a second
-environment, the full `nova-cell` merge order, non-INI overrides.
+environment, the full `nova-cell` merge order, non-INI overrides,
+`config/global.conf`, several `-i`.
 
 **What a host actually got.** Kolla-Ansible does not report an override
 directory it did not use. After a change:

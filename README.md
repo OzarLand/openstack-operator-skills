@@ -218,16 +218,16 @@ declared scope is production- or lab-validated. Current coverage, generated
 from the inventory:
 
 <!-- validation-coverage:start -->
-171 of 351 items in scope (49 %) are validated: 0 in production, 171 in a lab. 180 are not validated yet.
+163 of 352 items in scope (46 %) are validated: 0 in production, 163 in a lab. 189 are not validated yet.
 
 | Status | Items | Share |
 |---|---:|---:|
 | `PRODUCTION-VALIDATED` | 0 | 0 % |
-| `LAB-VALIDATED` | 171 | 49 % |
-| `DOCUMENTED-UNVERIFIED` | 179 | 51 % |
+| `LAB-VALIDATED` | 163 | 46 % |
+| `DOCUMENTED-UNVERIFIED` | 188 | 53 % |
 | `PROPOSED-UNVERIFIED` | 1 | 0 % |
 | `NEEDS-REVALIDATION` | 0 | 0 % |
-| **Total in scope** | **351** | |
+| **Total in scope** | **352** | |
 <!-- validation-coverage:end -->
 
 What the lab evidence covers: OpenStack 2026.1 deployed with Kolla-Ansible

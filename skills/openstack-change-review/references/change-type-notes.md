@@ -106,8 +106,9 @@ untagged items here are review questions, not procedures.
 - Partition handling (`cluster_partition_handling`) applies to the Mnesia
   metadata store, not Khepri; check which store is in use
   [DOCUMENTED-UNVERIFIED: IA-DEP-03]. Any change that resets or rejoins nodes:
-  with Khepri, `force_reset` is refused and a Kolla-Ansible reset failed on a
-  lab [LAB-VALIDATED: IA-CP-05]; plan the queue-replica repair.
+  with Khepri, `force_reset` is refused and a Kolla-Ansible reset was reported
+  to fail on a lab [DOCUMENTED-UNVERIFIED: IA-CP-05]; plan the queue-replica
+  repair.
 
 ## Changes carrying a local patch or backport
 

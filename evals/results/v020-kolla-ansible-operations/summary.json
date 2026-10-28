@@ -1,0 +1,149 @@
+[
+  {
+    "skill_under_test": "openstack-kolla-ansible-operations",
+    "scenario": "KA-1",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-kolla-ansible-operations",
+      "openstack-change-review"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "commands-and-changes.md",
+      "configuration.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-kolla-ansible-operations",
+    "scenario": "KA-1",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [
+      "nova-compute.conf"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.833,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-kolla-ansible-operations",
+    "scenario": "KA-2",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis",
+      "openstack-kolla-ansible-operations"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "host-and-database-operations.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.929,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-kolla-ansible-operations",
+    "scenario": "KA-2",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.571,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-kolla-ansible-operations",
+    "scenario": "KA-3",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-kolla-ansible-operations"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "host-and-database-operations.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-kolla-ansible-operations",
+    "scenario": "KA-3",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.5,
+      "critical_errors_committed": [
+        "ignores the forget_cluster_node disagreement"
+      ]
+    }
+  },
+  {
+    "skill_under_test": "openstack-kolla-ansible-operations",
+    "scenario": "KA-4",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-kolla-ansible-operations"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "host-and-database-operations.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-kolla-ansible-operations",
+    "scenario": "KA-4",
+    "mode": "baseline",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [],
+    "triggered": false,
+    "reference_files_read": [],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.6,
+      "critical_errors_committed": []
+    }
+  }
+]

@@ -434,7 +434,8 @@ Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, no HAProxy, Docker;
 `heat_domain_admin_password` manual step, then `kolla-ansible reconfigure -i
 <inventory> --tags glance,cinder,heat` (5 min, `failed=0`; Glance listed
 images, a volume and a Heat stack were created and deleted). Not run: a full
-`reconfigure` without `--tags`, any other secret, multinode.
+`reconfigure` without `--tags`, any other secret, multinode, the Ansible Vault
+working copy. The source page is a draft.
 1. Back up first: `cp /etc/kolla/passwords.yml ./passwords.yml.bak` (keep it
    out of any repository until the rotation is checked).
 2. Empty each value to rotate (`foo: "old"` -> `foo:`); *State-changing*:

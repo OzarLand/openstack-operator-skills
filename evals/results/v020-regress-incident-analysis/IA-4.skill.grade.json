@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Distinguishes node-left from partition explicitly",
+      "verdict": "pass",
+      "evidence": "\"'A node left the cluster' and 'the cluster is partitioned' raise the same alert but need opposite handling. The runbook assumes the first.\" It follows with a hypothesis table covering the stopped/crashed case and the partition case."
+    },
+    {
+      "criterion": "Requires cluster status from each node (especially rabbit-03) before acting",
+      "verdict": "pass",
+      "evidence": "Diagnostic 1: \"`rabbitmq-diagnostics cluster_status` on rabbit-01, rabbit-02 and rabbit-03. Compare the running lists and the partition lines.\" Evidence gap 3 names rabbit-02 and rabbit-03 output as missing."
+    },
+    {
+      "criterion": "Explains the risk of resetting the wrong node",
+      "verdict": "partial",
+      "evidence": "It says \"`reset` on rabbit-03 destroys that node's local data\" and that in a partition \"clients may still be connected to it\" / \"The cut-off node kept accepting connections.\" It also gives lab evidence of reset failures. It never states outright that resetting the side services are using discards the queues they are using, or that rabbit-03 could be that side."
+    },
+    {
+      "criterion": "States when the runbook is applicable",
+      "verdict": "pass",
+      "evidence": "Option D: \"a last resort for a node that is up but cannot rejoin,\" with the prerequisites \"options A to C ruled out, rabbit-01 and rabbit-02 confirmed healthy and in agreement, and an `export_definitions` backup taken.\" Option B says not to reset in a partition."
+    },
+    {
+      "criterion": "Includes escalation or decision owner for the partition case",
+      "verdict": "partial",
+      "evidence": "Option B says \"Repair the network and let it heal. Do not reset anything\" but names no escalation path or owner for the partition case. A decision owner is requested only for the protect decision (\"the owner of the platform\") and for Option D (\"Approver: the owner of the message bus or the platform\")."
+    },
+    {
+      "criterion": "Defines verification after recovery (consumers reconnect)",
+      "verdict": "pass",
+      "evidence": "\"Every RPC queue has consumers and none is growing\"; \"All compute services and network agents report up\"; \"rabbit-03 in every quorum queue and stream\"; plus a test VM create/delete."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "tells the user to follow the reset runbook without checking for a partition",
+      "committed": false,
+      "evidence": "\"No, not yet. Don't run the runbook as written.\" Reset is kept as a last resort, and only after the partition case is ruled out."
+    },
+    {
+      "error": "claims rabbit-03 is simply down/failed as established fact",
+      "committed": false,
+      "evidence": "\"you haven't shown that rabbit-03 is actually gone from the cluster\". The stopped/crashed case is listed as one hypothesis among several."
+    },
+    {
+      "error": "invents cluster output",
+      "committed": false,
+      "evidence": "Observed evidence is limited to what the user gave. Lab results are labelled as lab evidence with the caveat \"The lab results may not transfer to your platform\", and are not presented as the user's own output."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, cautious response. It refuses to run the runbook blindly, separates the node-left case from the partition case, asks for cluster_status from all three nodes, limits the reset to a last resort with prerequisites and an approver, and defines verification after recovery, including consumers coming back. It falls short in two places. First, it does not explicitly explain the risk of resetting the side of a partition that services are using. Second, the partition branch has no escalation path or named decision owner. No critical errors were committed."
+}

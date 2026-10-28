@@ -1,0 +1,124 @@
+[
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-1",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "control-plane-recovery.md",
+      "failure-patterns.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-2",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.929,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-3",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-automation-review",
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "compute-host-events.md",
+      "failure-patterns.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-4",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "control-plane-recovery.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 0.833,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-2-FR",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  },
+  {
+    "skill_under_test": "openstack-incident-analysis",
+    "scenario": "IA-5",
+    "mode": "skill",
+    "model": "claude-sonnet-5-5",
+    "skills_invoked": [
+      "openstack-incident-analysis"
+    ],
+    "triggered": true,
+    "reference_files_read": [
+      "evidence-and-safety.md",
+      "dependency-map.md",
+      "failure-patterns.md"
+    ],
+    "exit_code": 0,
+    "stderr_tail": "",
+    "score": {
+      "criteria_score": 1.0,
+      "critical_errors_committed": []
+    }
+  }
+]

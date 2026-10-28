@@ -124,6 +124,13 @@ what was run, no outcome) is recorded as supporting information in
 `production_reports`, and does not by itself make an item
 `PRODUCTION-VALIDATED`.
 
+A lab run described in a source page's text, without a named executor
+(no `confirmed_by` record, no provenance naming who ran it), is reported
+evidence: the item stays unverified and the run is summarised under
+`limitations`, so its findings, especially failures, still reach the
+operator as warnings. When a source's `confirmed_by` record and its own text
+disagree about what was run, the narrower account is used.
+
 Never put in evidence: credentials, tokens, real hostnames or addresses,
 customer or person names, unredacted logs.
 

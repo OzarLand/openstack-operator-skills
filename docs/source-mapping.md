@@ -28,7 +28,7 @@ behaviourally evaluated (90 answers over three runs, see
 
 | Skill | Strengths | Weaknesses found |
 |---|---|---|
-| incident-analysis | Evidence ledger, competing hypotheses, protect decision, hard rules (fence before evacuate, partition is not node loss) | Command-level recovery for RabbitMQ, Galera, HAProxy, Keystone only as book technical notes; the book's RabbitMQ purge-and-restart sequence untested on current RabbitMQ (it failed as written with Khepri on a lab, see section 7); no route for single-instance problems |
+| incident-analysis | Evidence ledger, competing hypotheses, protect decision, hard rules (fence before evacuate, partition is not node loss) | Command-level recovery for RabbitMQ, Galera, HAProxy, Keystone only as book technical notes; the book's RabbitMQ purge-and-restart sequence untested on current RabbitMQ (a source page reports it failed as written with Khepri on a lab, see section 7); no route for single-instance problems |
 | change-review | Gates, recovery, stop conditions, decision record | Technical notes (rotation, upgrade) without execution evidence |
 | maintenance-planning | Criticality times migratability, capacity per failure domain | No measured migration behaviour (interruption at switch-over) |
 | operational-decisions | Gates before scoring, sensitivity, decision rights | Method only; nothing to execute |

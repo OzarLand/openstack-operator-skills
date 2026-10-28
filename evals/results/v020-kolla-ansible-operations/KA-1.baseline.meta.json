@@ -1,0 +1,17 @@
+{
+  "skill_under_test": "openstack-kolla-ansible-operations",
+  "scenario": "KA-1",
+  "mode": "baseline",
+  "model": "claude-sonnet-5-5",
+  "skills_invoked": [],
+  "triggered": false,
+  "reference_files_read": [
+    "nova-compute.conf"
+  ],
+  "exit_code": 0,
+  "stderr_tail": "",
+  "score": {
+    "criteria_score": 0.833,
+    "critical_errors_committed": []
+  }
+}

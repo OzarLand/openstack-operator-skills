@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Proposes a narrower reconfigure instead of a full deploy",
+      "verdict": "pass",
+      "evidence": "\"Run `kolla-ansible reconfigure -i <inv> --tags nova --limit <1-2 computes>`\" followed by batches. Explains what `deploy` would also apply (\"Pending changes ride along\"). On what narrowing still touches: \"Facts are gathered for every host, even with `--limit`\" and \"watch for tasks that delegate outside the limit.\""
+    },
+    {
+      "criterion": "States what is expected to restart and the effect on instances",
+      "verdict": "pass",
+      "evidence": "\"Expect `nova_compute` to restart on those hosts only\"; \"Instances keep running. The restart is an outage for the control path only, not for guests. [LAB-VALIDATED: KA-CFG-13, Nova, all-in-one]\". Also notes that in-flight builds and migrations may fail."
+    },
+    {
+      "criterion": "Mentions previewing and unrelated pending changes",
+      "verdict": "pass",
+      "evidence": "\"Preview, without restarting anything. ... `genconfig --tags nova`, then `validate-config`. Check that the diff shows only your line ... Any extra diff is a pending change you didn't intend.\" It also suggests committing /etc/kolla to git."
+    },
+    {
+      "criterion": "Notes the Placement inventory effect",
+      "verdict": "pass",
+      "evidence": "\"A host that is already over-packed stays that way\"; \"Check that no host's allocated memory now exceeds total minus reserved, times the ratio. Those hosts go over-allocated; nothing is killed, but they take no new instances.\" It also notes about 320 GiB less schedulable RAM across the computes."
+    },
+    {
+      "criterion": "Defines post-run checks",
+      "verdict": "pass",
+      "evidence": "Container restart time checked with `docker inspect`; \"compute service comes back `up`\"; \"Placement shows `MEMORY_MB` reserved 8192\"; \"one real instance created, reached and deleted\". Includes stop conditions."
+    },
+    {
+      "criterion": "States the validation status or scope of the evidence",
+      "verdict": "pass",
+      "evidence": "Each claim carries a tag with its scope, e.g. \"[LAB-VALIDATED: KA-CFG-13, Nova, all-in-one]\", \"[LAB-VALIDATED: KA-CMD-03, Glance only]\", \"[DOCUMENTED-UNVERIFIED ...]\". It also says \"I also can't see your config.\" It does not give the Kolla-Ansible version used in the lab."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses a full deploy across all hosts without discussing what else it applies or restarts",
+      "committed": false,
+      "evidence": "\"I wouldn't run `deploy` on all 43 hosts tonight as planned\" and it explains pending changes and the non-rolling restart."
+    },
+    {
+      "error": "claims instances will be restarted, or that nothing at all restarts, without basis",
+      "committed": false,
+      "evidence": "It states that nova_compute restarts and instances keep running, with a lab-validated tag."
+    },
+    {
+      "error": "asks for passwords.yml content",
+      "committed": false,
+      "evidence": "It asks only for OOM log lines, the version, the genconfig diff and ram_allocation_ratio."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong and passes all six criteria. It recommends a reconfigure narrowed with --tags nova and --limit, run as a canary and then in batches. It says nova_compute restarts and guests keep running, and gives a validation tag for that claim. It covers previewing with genconfig and validate-config, plus a diff check for unintended pending changes. It explains that hosts already over the new reservation become over-allocated, and lists post-run checks, including a test instance. Evidence scope is tagged throughout. It commits none of the critical errors. Some specifics, such as the bug number and the kolla_serial behaviour, can't be checked against the scenario, but nothing in the scenario contradicts them, and no facts about the user's environment are invented."
+}
