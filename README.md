@@ -1,3 +1,5 @@
+[← OzarLand home](https://github.com/OzarLand/ozarland)
+
 <div align="center">
 
 <img src="assets/banner.svg" alt="OpenStack Operator Skills: senior-operator judgement for Claude" width="100%">
@@ -352,10 +354,15 @@ Grading is by a model, so read it as a direction more than an exact effect
 size. These runs measure reasoning, not whether a procedure works on
 OpenStack. [Full evaluation report →](docs/evaluation-report.md)
 
-## Part of OzarLand
+## 🌍 Part of OzarLand
 
-[OzarLand](https://github.com/OzarLand/ozarland) is an early-stage,
-independent space where OpenStack operators share what they learn running it.
+**[OzarLand](https://github.com/OzarLand/ozarland): a shared land for better
+OpenStack operations.** It started as a personal initiative by Soufian Zaouam
+to share practical OpenStack operational knowledge, and it is meant to grow
+into a space where operators exchange experience, document solutions and help
+each other run more reliable platforms. It is open to everyone: your
+knowledge, questions and corrections are welcome.
+
 The skills draw on its knowledge and keep its validation status attached:
 
 ```mermaid
