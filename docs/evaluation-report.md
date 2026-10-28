@@ -18,6 +18,7 @@ development session; raw outputs and grades are under `evals/results/`.
 10. Robustness: three runs of all 30 scenarios
 11. claude.ai manual check
 12. Limitations and what has not been tested
+13. Version 0.2.0: new skills, regression and validation checks
 
 ## 1. Summary
 
@@ -452,3 +453,79 @@ Observations:
   scripted follow-ups rather than a person reacting to the answers.
 - **No real infrastructure.** Skills were never connected to an OpenStack
   environment; tool-enabled sessions were deliberately excluded.
+
+## 13. Version 0.2.0: new skills, regression and validation checks
+
+Run on 2026-10-28 in the 0.2.0 development session, same harness and
+models as above (model under test `claude-sonnet-5-5`, grader
+`claude-opus-5-5`), all nine skills installed. Raw outputs and grades:
+`evals/results/v020-*`. One run per cell.
+
+### New skills, with and without skills
+
+| Scenario | With skills | Skill loaded | Baseline | Baseline critical error |
+|---|---:|---|---:|---|
+| VM-1 stuck in deleting, compute down | 1.00 | vm-troubleshooting | 0.64 | recommends `compute service set --down` without fencing |
+| VM-2 new instance without IP | 0.92 | vm-troubleshooting | 0.75 | — |
+| VM-3 volume in-use for a deleted instance | 0.93 | vm-troubleshooting | 0.79 | — |
+| VM-4 is the OVN fix tested? | 0.90 | vm-troubleshooting | 0.60 | — |
+| KA-1 command after a compute override | 1.00 | kolla-ansible-operations, change-review | 0.83 | — |
+| KA-2 MariaDB cluster stopped after a power cut | 0.93 | incident-analysis, kolla-ansible-operations | 0.57 | — |
+| KA-3 replacing a controller with the same name | 1.00 | kolla-ansible-operations | 0.50 | ignores the `forget_cluster_node` disagreement |
+| KA-4 rotate every secret | 1.00 | kolla-ansible-operations | 0.60 | — |
+| **Mean** | **0.96** | 8/8 | **0.66** | 2 |
+
+KA-3's baseline critical error depends on a disagreement between two source
+pages that only the skill's references contain; it shows the value of the
+knowledge, not a reasoning failure of the baseline.
+
+In VM-4 the answer gave the validation status of each step in a table, said
+the lab evidence was ML2/OVS while the user runs OVN, and refused to extend
+the lab result: the behaviour rule 12 asks for. In IA-4 the incident skill
+used the new lab evidence on RabbitMQ resets.
+
+### Changes made from these runs, and regression
+
+- VM-2 and VM-3 lost points on verification (no check with a new resource,
+  no post-fix check of the old host); VM-4 on "one compute first". Added to
+  `openstack-vm-troubleshooting` SKILL.md (verification with a new resource,
+  nothing left on the old host, one host first). Re-run in skill mode:
+  VM-2 1.00, VM-3 1.00, VM-4 0.90, 0 critical errors (`v020-regress-vm-troubleshooting`).
+- KA-2 lost a point on post-recovery container health; the lab-observed
+  aftermath of a power-loss recovery was added to the Kolla-Ansible
+  reference (tag IA-CP-11). Not re-run.
+
+### Incident-analysis triggering regression
+
+The new VM skill overlaps incident-analysis prompts (instances stuck,
+compute down). All six incident-analysis scenarios in skill mode
+(`v020-regress-incident-analysis`): incident-analysis loaded 6/6 (with
+automation-review alongside in IA-3), mean 0.96, 0 critical errors. These runs
+used the skill text from before the audit fixes below; those fixes narrowed
+tags and wording only.
+
+### Validation bookkeeping and the claims audit
+
+- `tools/validate_knowledge.py`: 352 inventory items, 0 errors.
+  `tools/test_validate_knowledge.py` (in CI) injects seven faults into a copy
+  of the repository: a tag whose status differs from the inventory, an
+  unknown ID, a misspelt status tag, a validated item without its evidence
+  record, a hand-edited coverage block, a README without the "undergoing
+  validation" statement, and a skill text that claims complete validation. Each is
+  reported. The first run found that a misspelt status was not detected; the
+  detector was fixed.
+- An independent audit (a separate agent with the source repositories)
+  compared 116 `LAB-VALIDATED` items with their sources: no wrong command,
+  number or message; 20 over-claims (tagged text covering steps the lab did not
+  run, or runs recorded only in a draft page's text without a named
+  executor). All were fixed: not-run lists extended, one claim split
+  (KA-ARCH-31), eight items downgraded to `DOCUMENTED-UNVERIFIED`.
+  Result: 163 of 352 items lab-validated.
+
+### What these runs do not show
+
+Behavioural runs grade how Claude reasons with the skills. They do not show
+that any OpenStack procedure works: that rests only on the recorded lab
+executions listed in `docs/validation-coverage.md`, which this repository
+did not re-execute (no OpenStack environment was available in the session).
+

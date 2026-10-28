@@ -4,7 +4,7 @@ description: Reviews a planned change to a production OpenStack platform for rea
 license: Apache-2.0
 metadata:
   source: "OpenStack, the Day After Tomorrow (Soufian Zaouam), v1.2 - Ch. 1, 9, 13, 14, 17, 19, App. A, App. C"
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # OpenStack change review

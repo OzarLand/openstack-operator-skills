@@ -4,7 +4,7 @@ description: Plans OpenStack compute host maintenance and patching campaigns - O
 license: Apache-2.0
 metadata:
   source: "OpenStack, the Day After Tomorrow (Soufian Zaouam), v1.2 - Ch. 20, 9, 10, 17, 13"
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # OpenStack maintenance planning
@@ -148,6 +148,11 @@ platform cannot absorb [Book: Ch. 20].
    have the owner confirm the application is reachable `[Addition]`.
 7. Optionally validate with a test instance `[Addition]`.
 8. Re-enable the compute service.
+
+Steps 2, 3 (live block migration), 4 and 8 were run on a small lab, and the
+`SHUTOFF` behaviour of step 4 too; cold migration was not
+[LAB-VALIDATED: MP-MECH-01] [LAB-VALIDATED: MP-MECH-02]. Details and limits in
+[references/host-maintenance-mechanics.md](references/host-maintenance-mechanics.md).
 
 A patch to the hypervisor or QEMU protects only instances migrated or
 restarted since; instances still running on the old binary are **not**

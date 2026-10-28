@@ -4,7 +4,7 @@ description: Reviews automation that acts on production OpenStack - Ansible play
 license: Apache-2.0
 metadata:
   source: "OpenStack, the Day After Tomorrow (Soufian Zaouam), v1.2 - Ch. 16, 10, 3, 15, 14"
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # OpenStack automation review

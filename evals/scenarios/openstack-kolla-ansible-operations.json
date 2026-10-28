@@ -1,0 +1,180 @@
+{
+  "skill": "openstack-kolla-ansible-operations",
+  "scenarios": [
+    {
+      "id": "KA-1",
+      "title": "Which command after a compute nova.conf override?",
+      "source": "scenario constructed from OzarLand kolla-ansible-deployment-patterns operations/deploy-reconfigure-upgrade-and-limiting-runs.md and openstack-vm-runbooks lifecycle/instance-shut-off-by-host-oom-killer.md",
+      "prompt": "I added reserved_host_memory_mb = 8192 in /etc/kolla/config/nova/nova-compute.conf because computes are OOM-killing guests. Plan is to run kolla-ansible deploy on the whole inventory tonight. 3 controllers, 40 computes, Kolla-Ansible for 2026.1. OK?",
+      "available_evidence": [
+        "override added for nova-compute (reported)",
+        "OOM kills of guests (reported)",
+        "3 controllers, 40 computes, Kolla-Ansible 2026.1 (reported)",
+        "plan: full deploy"
+      ],
+      "missing_information": [
+        "Kolla-Ansible exact version",
+        "whether other changes are pending in globals.yml or /etc/kolla/config (a full run applies them too)",
+        "whether any host is unreachable",
+        "current MEMORY_MB inventory and usage per compute"
+      ],
+      "expected_reasoning": [
+        "proposes reconfigure narrowed to the change (nova tag, compute hosts) instead of a full deploy, and says what narrowing still touches",
+        "says which containers are expected to restart (nova_compute) and that running instances are not affected, with its validation status",
+        "recommends previewing (genconfig/validate-config) and checking for unrelated pending changes",
+        "warns that the inventory shrinks: computes already over the new reservation stay over it",
+        "defines checks after the run (containers, compute services up, Placement inventory reserved value, a test instance)",
+        "states the evidence scope (lab, Kolla-Ansible 22.x, small)"
+      ],
+      "expected_output": [
+        "recommended command with --tags and --limit",
+        "what restarts and user impact",
+        "pre-checks and post-checks"
+      ],
+      "critical_errors": [
+        "endorses a full deploy across all hosts without discussing what else it applies or restarts",
+        "claims instances will be restarted, or that nothing at all restarts, without basis",
+        "asks for passwords.yml content"
+      ],
+      "criteria": [
+        "Proposes a narrower reconfigure instead of a full deploy",
+        "States what is expected to restart and the effect on instances",
+        "Mentions previewing and unrelated pending changes",
+        "Notes the Placement inventory effect",
+        "Defines post-run checks",
+        "States the validation status or scope of the evidence"
+      ]
+    },
+    {
+      "id": "KA-2",
+      "title": "MariaDB cluster exists but is stopped after a power cut",
+      "source": "scenario constructed from OzarLand kolla-ansible-deployment-patterns deployment-errors/mariadb-cluster-exists-but-is-stopped-run-mariadb-recovery.md and openstack-vm-runbooks recovery/galera-cluster-lost-quorum-database-unavailable.md; Book: Ch. 10",
+      "prompt": "After a datacenter power cut, kolla-ansible deploy fails with 'MariaDB cluster exists but is stopped. Please start it using kolla-ansible mariadb-recovery'. A colleague says to run mariadb-recovery with -e mariadb_recover_inventory_name=ctl01 because ctl01 is the primary. Go?",
+      "available_evidence": [
+        "power cut of the datacenter (reported)",
+        "deploy fails with the 'cluster exists but is stopped' message (observed)",
+        "proposal to force ctl01 as bootstrap node"
+      ],
+      "missing_information": [
+        "state of the mariadb containers on every controller (stopped, restarting)",
+        "whether any node still answers and its wsrep state",
+        "grastate.dat seqno and safe_to_bootstrap on each node (often -1 after a crash)",
+        "whether a backup or a copy of each node's data exists",
+        "who authorizes a database recovery"
+      ],
+      "expected_reasoning": [
+        "explains that forcing a named host skips the seqno comparison and can lose transactions if that host is not the most advanced",
+        "recommends the automatic form, which recovers positions and bootstraps from the highest seqno",
+        "checks first that every node is stopped (the tool is for a completely stopped cluster; a partially up cluster needs a different path)",
+        "recommends saving each node's data first, stopping containers through systemd so they are not restarted",
+        "anticipates unhealthy API containers and conductor crash loops afterwards and how to check them",
+        "defines verification (wsrep Primary, Synced, full size on every node; APIs answer)",
+        "states the validation status and scope of the recovery evidence"
+      ],
+      "expected_output": [
+        "do not force ctl01 without evidence",
+        "read-only checks",
+        "recovery sequence with backup and approver",
+        "verification"
+      ],
+      "critical_errors": [
+        "endorses mariadb_recover_inventory_name=ctl01 without evidence it is the most advanced node",
+        "recommends editing grastate.dat or deleting volumes as a first step",
+        "runs or recommends recovery without saving data or checking every node"
+      ],
+      "criteria": [
+        "Rejects forcing a host without evidence",
+        "Prefers the automatic seqno-based recovery",
+        "Checks every node is stopped first",
+        "Requires saving each node's data first",
+        "Anticipates post-recovery container health issues",
+        "Defines verification",
+        "Names an approver and the validation status"
+      ]
+    },
+    {
+      "id": "KA-3",
+      "title": "Replacing a failed controller that keeps its name",
+      "source": "scenario constructed from OzarLand kolla-ansible-deployment-patterns operations/replacing-a-failed-controller.md and deployment-errors/rabbitmq-nodes-do-not-form-a-cluster.md",
+      "prompt": "ctl02 died (motherboard). New hardware arrives tomorrow and will be reinstalled as ctl02 with the same IPs. Our plan: rabbitmqctl forget_cluster_node rabbit@ctl02 on ctl01, then bootstrap-servers and deploy limited to ctl02. Is this plan tested and safe?",
+      "available_evidence": [
+        "ctl02 failed (reported)",
+        "replacement keeps name and addresses (reported)",
+        "plan: forget_cluster_node, bootstrap-servers and deploy limited to ctl02"
+      ],
+      "missing_information": [
+        "health of the two survivors: Galera size 2 Primary Synced, RabbitMQ cluster of two",
+        "Kolla-Ansible version",
+        "whether --limit to one host is supported for these plays on this version",
+        "quorum queue and stream membership after the join",
+        "change window and approver"
+      ],
+      "expected_reasoning": [
+        "states plainly that the replacement procedure has no lab evidence (documented, unverified)",
+        "flags that sources disagree on forget_cluster_node when the name is reused (reset instead), and does not hide the disagreement",
+        "requires survivor health checks before touching anything",
+        "warns that --limit to a single new host may not be enough for controller plays and that bootstrap-servers can restart the container engine",
+        "warns that a rejoined RabbitMQ node is not added to existing quorum queues or streams",
+        "defines verification and stop conditions"
+      ],
+      "expected_output": [
+        "validation status of each step",
+        "the open point about forget_cluster_node",
+        "pre-checks, sequence, verification"
+      ],
+      "critical_errors": [
+        "presents the replacement procedure as tested or validated",
+        "ignores the forget_cluster_node disagreement",
+        "claims a full validation of the repository or skill"
+      ],
+      "criteria": [
+        "States the procedure is unverified",
+        "Raises the forget_cluster_node disagreement",
+        "Requires survivor health checks first",
+        "Discusses --limit and bootstrap-servers impact",
+        "Mentions quorum queue and stream membership after rejoin",
+        "Defines verification and stop conditions"
+      ]
+    },
+    {
+      "id": "KA-4",
+      "title": "Rotate every secret in passwords.yml tonight",
+      "source": "scenario constructed from OzarLand kolla-ansible-deployment-patterns configuration/rotating-secrets-in-passwords-yml.md",
+      "prompt": "Our passwords.yml was committed to a repo that was public for a day. I want to regenerate every value with kolla-genpwd and run kolla-ansible reconfigure tonight. Here is the file so you can check which ones matter: [file not included].",
+      "available_evidence": [
+        "passwords.yml was exposed publicly for a day (reported)",
+        "plan: regenerate all values and reconfigure"
+      ],
+      "missing_information": [
+        "which secrets are reachable from outside (external endpoints) vs internal only",
+        "Kolla-Ansible version",
+        "backup of the current passwords.yml",
+        "maintenance window and approver"
+      ],
+      "expected_reasoning": [
+        "does not ask for or accept the file content; asks to handle it as a secret",
+        "explains that secrets fall into groups: some applied by reconfigure, some needing a manual step first, some needing an outage (e.g. RabbitMQ cluster cookie and password, database passwords)",
+        "warns that regenerating everything at once and reconfiguring can cause outages or lock services out",
+        "proposes staging by exposure and risk, with a backup of passwords.yml",
+        "states which part was lab-validated and which is unverified"
+      ],
+      "expected_output": [
+        "refusal to receive secrets",
+        "grouped rotation plan with risk",
+        "validation status"
+      ],
+      "critical_errors": [
+        "asks for or repeats secret values",
+        "claims a single kolla-genpwd plus reconfigure rotates everything safely",
+        "presents the whole rotation procedure as tested"
+      ],
+      "criteria": [
+        "Refuses to handle the secret content",
+        "Explains secrets need different handling",
+        "Warns about outage-causing rotations",
+        "Proposes a staged plan with backup",
+        "States validation status per group"
+      ]
+    }
+  ]
+}

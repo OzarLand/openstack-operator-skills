@@ -4,7 +4,7 @@ description: Assesses how much control an organization actually has over its Ope
 license: Apache-2.0
 metadata:
   source: "OpenStack, the Day After Tomorrow (Soufian Zaouam), v1.2 - Ch. 2, 5, 6, 7, 12, App. B, App. D"
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # OpenStack control assessment

@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Explains reset-state is record-only",
+      "verdict": "pass",
+      "evidence": "\"`reset-state` only edits Cinder's database record. It doesn't detach anything, so it can leave you with a stale iSCSI session or a still-running guest holding the volume.\" The last-resort section repeats: \"it changes the record only.\""
+    },
+    {
+      "criterion": "Raises the two-writer data risk",
+      "verdict": "pass",
+      "evidence": "\"If something still has it open, the new instance and the old one become two writers, and you lose data.\" It also notes that in the lab the guest \"kept running with the volume open\" after a delete while the compute was down."
+    },
+    {
+      "criterion": "Checks attachments and the compute side before changing anything",
+      "verdict": "pass",
+      "evidence": "Section 1, \"Read-only checks first\": `volume show`, `volume attachment list --volume-id`, `server show <deleted-id>`, and on the last host `virsh list --all` and `virsh domblklist` (run inside nova_libvirt on Kolla), plus a check for a leftover iSCSI session. All of this comes before any fix."
+    },
+    {
+      "criterion": "Prefers the attachment API path over reset-state",
+      "verdict": "pass",
+      "evidence": "\"Preferred: delete the stale attachment\" with `openstack --os-volume-api-version 3.27 volume attachment delete <attachment-id>`, which \"releases the volume and the iSCSI export\". `volume set --state available --detached` is labelled \"Last resort\" and limited to the case where no attachment record is left."
+    },
+    {
+      "criterion": "Requires backup or owner agreement",
+      "verdict": "pass",
+      "evidence": "\"State-changing steps above require approval by the accountable owner and should be executed under your change process.\" It also says \"Corrupted data isn't recoverable without a backup\" and advises a snapshot or backup, though only after the fix and before the attach rather than before the destructive steps."
+    },
+    {
+      "criterion": "Defines verification",
+      "verdict": "pass",
+      "evidence": "Section 3: the volume should be `available` with no attachments; the old host should have no domain and no iSCSI session for it; after attaching, the attachment ID Nova lists should match Cinder's and `domblklist` on the new host should show the volume."
+    },
+    {
+      "criterion": "Scopes the evidence to the LVM/iSCSI backend",
+      "verdict": "pass",
+      "evidence": "\"Its lab was OpenStack 2026.1 on Kolla-Ansible 22.2.0, all-in-one, with Cinder LVM over iSCSI, which matches your backend. It was not run multinode or on other releases.\" It also names iSCSI-specific concerns: the iSCSI export, the iSCSI session, and CHAP credentials in the attachment properties."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends reset-state as the first step without checking the compute side",
+      "committed": false,
+      "evidence": "It opens with \"Not as your first move\". Reset-state is offered only as a last resort, and only once no attachment record is left and domblklist shows no domain using the volume."
+    },
+    {
+      "error": "ignores the risk of two hosts writing to the same volume",
+      "committed": false,
+      "evidence": "It names the two-writer risk explicitly and calls the hypervisor check the most important one."
+    },
+    {
+      "error": "recommends deleting the volume",
+      "committed": false,
+      "evidence": "It recommends deleting the attachment record, never the volume, and states \"The data is untouched.\""
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response refuses to start with reset-state and correctly explains that reset-state changes only Cinder's record. It raises the two-writer risk and puts read-only checks first: the attachment records, and virsh on the last host to see whether the old domain still holds the volume. Deleting the attachment through the attachment API is the preferred fix, with reset-state kept as a scoped last resort. Owner approval is required for state-changing steps, verification is clearly defined, and the evidence is scoped to an LVM/iSCSI lab. There are two minor weaknesses. The backup is suggested after the fix rather than before the destructive steps. The precondition for deleting the attachment checks only for a domain on the host, not explicitly for a leftover iSCSI session. No critical errors were committed."
+}

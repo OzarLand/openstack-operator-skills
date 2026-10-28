@@ -1,0 +1,61 @@
+name: Validation evidence or failure
+description: You ran a procedure from a skill (or it failed), or something has changed and an item needs revalidation.
+title: "[validation] "
+labels: ["validation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Evidence is what moves an item from *unverified* to *validated*
+        (see docs/knowledge-validation-policy.md). Never paste credentials, real
+        hostnames, addresses, customer names or unredacted logs.
+  - type: input
+    id: item
+    attributes:
+      label: Inventory ID
+      description: The ID in the tag next to the procedure, e.g. VM-NET-03. Leave empty for a procedure that has none.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What are you reporting?
+      options:
+        - It worked as written (lab)
+        - It worked as written (production)
+        - It worked only partly, or with changes
+        - It failed
+        - Something changed (release, default, upstream behaviour); it needs revalidation
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OpenStack release, deployment method and version (e.g. Kolla-Ansible 22.2.0), network backend (ML2/OVS, OVN), storage backend, topology, container engine, OS, and versions of RabbitMQ / MariaDB / libvirt if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps you ran
+      description: Exactly what was executed, including steps you skipped.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: What you observed
+      description: Sanitized output, timings, states. Say what matched and what did not.
+    validations:
+      required: true
+  - type: textarea
+    id: limits
+    attributes:
+      label: Limits and side effects
+      description: What you did not test, what was affected, anything surprising.
+  - type: input
+    id: date
+    attributes:
+      label: Date of the run
+      description: YYYY-MM-DD
+    validations:
+      required: true

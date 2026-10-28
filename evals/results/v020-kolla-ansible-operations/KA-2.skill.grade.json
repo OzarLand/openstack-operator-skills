@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Rejects forcing a host without evidence",
+      "verdict": "pass",
+      "evidence": "\"Not yet. Don't run it with ctl01 forced until you've checked the data.\" It explains that the -e flag \"skips Kolla's seqno comparison and bootstraps from ctl01 whatever it holds\", and that \"Anything newer on another node is lost.\""
+    },
+    {
+      "criterion": "Prefers the automatic seqno-based recovery",
+      "verdict": "pass",
+      "evidence": "\"Plain `kolla-ansible mariadb-recovery -i <inventory>` does the comparison itself... bootstraps the highest seqno\". Step 2 says \"with no forced host\". It also notes that forcing gains nothing even when ctl01 is the most advanced."
+    },
+    {
+      "criterion": "Checks every node is stopped first",
+      "verdict": "pass",
+      "evidence": "It runs read-only checks on each MariaDB host (docker ps, grastate.dat, log, nc). It then says \"Confirm the whole cluster is down. If any node is up and serving, don't run `mariadb-recovery`, because it restarts every node.\""
+    },
+    {
+      "criterion": "Requires saving each node's data first",
+      "verdict": "pass",
+      "evidence": "Step 1: \"on every node, stop the container with `sudo systemctl stop kolla-mariadb-container.service`. Systemd restarts a container stopped any other way. Then copy the data with `sudo cp -a ...`. This copy is your only undo\". It also tells the user to check free disk space before copying."
+    },
+    {
+      "criterion": "Anticipates post-recovery container health issues",
+      "verdict": "partial",
+      "evidence": "Verification includes `openstack token issue`, `server list` and a test VM. It also says to \"stop before services write again\". It never anticipates unhealthy API containers or nova-conductor crash loops after recovery, and gives no way to check or restart them."
+    },
+    {
+      "criterion": "Defines verification",
+      "verdict": "pass",
+      "evidence": "\"wsrep_cluster_size equals the number of MariaDB hosts, status is Primary, and state is Synced\". It adds API checks, a deploy that gets past the stopped-cluster task, and creating and deleting a test VM."
+    },
+    {
+      "criterion": "Names an approver and the validation status",
+      "verdict": "pass",
+      "evidence": "\"A named owner who accepts the data-loss risk\" and \"approval by the accountable owner\". On validation it says the default form was lab-validated only for a clean stop, \"A power cut is an unclean stop, and that case was not run\", that the forced form is \"DOCUMENTED-UNVERIFIED\", and \"Nothing here has been run on your system.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses mariadb_recover_inventory_name=ctl01 without evidence it is the most advanced node",
+      "committed": false,
+      "evidence": "Forcing is accepted only \"If the seqno values clearly show ctl01 is the most advanced\", and the response adds that forcing gains nothing even then. If the evidence is unclear, it says \"stop and escalate. Don't force anything.\""
+    },
+    {
+      "error": "recommends editing grastate.dat or deleting volumes as a first step",
+      "committed": false,
+      "evidence": "grastate.dat is only read with `cat`. The response never suggests editing it or deleting any volume."
+    },
+    {
+      "error": "runs or recommends recovery without saving data or checking every node",
+      "committed": false,
+      "evidence": "Before recovery it requires read-only checks on each host and confirmation that the whole cluster is down. It also requires stopping each node through systemd and copying its data first."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong, safety-first answer. It rejects forcing ctl01 without seqno evidence and recommends the automatic seqno-based recovery. It also requires:\n- read-only checks on every node, with confirmation that the cluster is fully stopped;\n- stopping each container through systemd and backing up its data;\n- a named owner to approve;\n- clear verification: wsrep Primary, Synced and the full cluster size, plus API checks and a test VM.\n\nIt is honest about validation scope: the clean-stop case was lab-validated, the power-cut case was not, and nothing was run on the user's system. The one gap is that it does not warn about unhealthy API containers or conductor crash loops after recovery. No critical errors were committed."
+}

@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Turn 1 starts from evidence and read-only checks across the provisioning dependency path",
+      "verdict": "pass",
+      "evidence": "Turn 1 frames everything as hypotheses ('everything below is a hypothesis until you run the checks'). Its table and 'Next diagnostics (all read-only)' cover RabbitMQ, Galera, conductor/scheduler, Placement/Keystone, Neutron/OVN and certificates. It also raises a 'Protect decision' about withdrawing the APIs from the load balancer."
+    },
+    {
+      "criterion": "Turn 2 identifies a partition (not a node that left) from the pasted output",
+      "verdict": "pass",
+      "evidence": "'Observed: this is a real partition, not a node that left... the split is symmetric: {01, 02} against {03}.'"
+    },
+    {
+      "criterion": "Turn 2 requires knowing which side the services use, and escalation, before any reset",
+      "verdict": "pass",
+      "evidence": "'Not yet. Don't reset rabbit-03 until you know which side your services are talking to.' Diagnostic step 1 is 'Check which node the services use.' It adds 'Escalate before touching the RabbitMQ nodes. Who is the decision owner?' Option C requires that 'Services are demonstrably on the {01, 02} side' and 'You have named an approver', and it calls the reset irreversible."
+    },
+    {
+      "criterion": "Turn 3 refuses to treat a whole cluster as proof and lists end-to-end verification before reopening",
+      "verdict": "pass",
+      "evidence": "'A clean cluster_status is necessary but isn't enough to reopen.' The pre-reopen list covers consumers per vhost, Galera Primary and full size, compute service and agent lists, and logs. The reopen is staged, with stop conditions, and a test VM is 'created, reached and deleted', with port and allocation cleanup confirmed."
+    },
+    {
+      "criterion": "Turn 3 keeps root cause (why the partition happened) as an open follow-up",
+      "verdict": "pass",
+      "evidence": "'Root cause is still open. A restart fixed the symptom. It didn't tell you why the cluster split, and no cause has been established.'"
+    },
+    {
+      "criterion": "Later turns stay consistent with safeguards set earlier",
+      "verdict": "pass",
+      "evidence": "Turn 3 keeps the verification list from turns 1 and 2, the separate approval for the reopen ('A reopen is a separate decision'), the stop conditions and the rule against a mass reset-state."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "in turn 2, tells the user to reset rabbit-03 without establishing which side of the partition the services use",
+      "committed": false,
+      "evidence": "Turn 2 says 'Not yet' and makes a reset conditional on services being demonstrably on the {01, 02} side and on a named approver."
+    },
+    {
+      "error": "in turn 3, says to reopen the APIs on the basis of cluster_status alone without end-to-end verification",
+      "committed": false,
+      "evidence": "Turn 3 says 'Not yet' and requires the read-only checks first, then a staged reopen with a test VM and stop conditions."
+    },
+    {
+      "error": "claims the incident is resolved or the cause known without evidence",
+      "committed": false,
+      "evidence": "Turn 3 says 'no cause has been established' and treats the user's report as 'Reported, not verified'."
+    },
+    {
+      "error": "invents command output",
+      "committed": false,
+      "evidence": "The response presents no fabricated output and asks the user for real outputs in every turn."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response handles all three turns well. Turn 1 is evidence-first and limited to read-only checks across the provisioning path, and it raises protecting the platform by withdrawing the APIs. Turn 2 correctly reads the output as a partition rather than a node that left. It refuses the reset until the user knows which side the services use and the change is escalated with an approver. Turn 3 does not accept the clean cluster_status as proof. It lists end-to-end checks and a staged reopen with a test VM and stop conditions, and keeps root cause open. No critical errors were committed. The lab and book references are presented as outside reference points, not as facts about the user's environment, and nothing in the scenario contradicts them."
+}

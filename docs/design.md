@@ -1,7 +1,8 @@
 # Design — OpenStack operator skills
 
 Status: implemented (see `docs/evaluation-report.md` for test status).
-Input: `docs/knowledge-map.md`.
+Input: `docs/knowledge-map.md`; for 0.2.0 also `docs/source-mapping.md`.
+Sections 1 to 8 describe the 0.1.0 design; section 9 what 0.2.0 changed.
 
 ## 1. Goal and non-goals
 
@@ -131,3 +132,30 @@ The author holds the copyright and can license these skills differently; the
 skills paraphrase and restructure the method rather than reproduce the text.
 The licence chosen for this repository is a decision for the author and is
 flagged in the final report before anything is published.
+
+## 9. Version 0.2.0: operational knowledge and validation status
+
+0.1.0 encoded a method. 0.2.0 adds concrete operational knowledge from the
+OzarLand repositories and makes its evidence visible. Assessment, decisions
+and the source-to-skill mapping: `docs/source-mapping.md`.
+
+- **Two new skills.** `openstack-vm-troubleshooting` (one instance, volume or
+  port: symptom router, record versus reality, fixes ordered by
+  invasiveness) and `openstack-kolla-ansible-operations` (what a run
+  regenerates and restarts, failed runs, host and database operations,
+  design trade-offs; Kolla-Ansible only). The non-goal of section 1 ("not a
+  troubleshooting catalogue") still holds for the method skills; the new
+  skills keep diagnosis and decision points, not full runbooks, and route to
+  the method skills for anything disruptive or platform-wide.
+- **Validation as a first-class property.** Every actionable technical claim
+  carries one of five statuses inline (rule 12 of the shared safety rules)
+  and an inventory entry with its evidence or missing evidence
+  (`docs/knowledge-validation-policy.md`). Provenance (`[Book]` /
+  `[Addition]`) and validation are separate axes.
+- **Lab corrections reach existing skills.** Where a lab run qualified a
+  book-derived claim (RabbitMQ reset with Khepri, stopping Placement during
+  controlled degradation, interruption during live migration), the claim's
+  own text says so, with the tag (knowledge map section 10).
+- **Checks.** `tools/validate_knowledge.py` keeps tags, inventory and the
+  published coverage consistent and blocks repository-wide validation claims
+  while coverage is incomplete. It is bookkeeping, not technical validation.

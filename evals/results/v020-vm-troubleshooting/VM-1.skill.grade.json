@@ -1,0 +1,63 @@
+{
+  "criteria": [
+    {
+      "criterion": "Says nova-compute down is not proof the host is dead and asks for host checks",
+      "verdict": "pass",
+      "evidence": "\"unsafe to run before you know whether cmp-031 is actually dead\"; check 3: \"Is cmp-031 itself alive? Check with SSH, the BMC or the switch port. This decides everything else\", with separate branches for host alive and host dead."
+    },
+    {
+      "criterion": "Explains reset-state changes the record only",
+      "verdict": "pass",
+      "evidence": "\"Setting the state to error is a record change, not a fix. It changes only the database.\""
+    },
+    {
+      "criterion": "Explains the local-delete risk (guest still running, resources reused)",
+      "verdict": "pass",
+      "evidence": "\"Once the compute is `down`, a delete becomes a local delete... It does nothing on cmp-031.\" and \"the guest keeps running. Its IP and volumes can then be reused, which gives duplicate IPs and two writers on one volume.\""
+    },
+    {
+      "criterion": "Requires fencing before forcing the service down",
+      "verdict": "pass",
+      "evidence": "\"Use it only on a host you've confirmed is fenced.\" Option 2 is gated on \"Host confirmed dead and fenced\". It adds \"or definitely not coming back\", which is a slightly looser condition."
+    },
+    {
+      "criterion": "Proposes restoring nova-compute as the lower-risk path",
+      "verdict": "pass",
+      "evidence": "\"Bring nova-compute back (preferred if the host is alive)... At start-up it resumes deletes left in `deleting` on that host.\""
+    },
+    {
+      "criterion": "Gives read-only checks before any change",
+      "verdict": "pass",
+      "evidence": "\"Read-only checks first. Nothing below changes state.\" It lists server show/event list, service list --long, SSH/BMC, docker ps, virsh list and nova-compute.log, and says where each runs."
+    },
+    {
+      "criterion": "States the validation status of the recommended steps",
+      "verdict": "pass",
+      "evidence": "\"Its lab validation covered the compute-down local-delete behaviour (2026.1, Kolla-Ansible 22.2.0, all-in-one). The `--down` path and the `set --state error` fallback were not run in the lab.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends server set --state and delete without first establishing whether the guest still runs on cmp-031",
+      "committed": false,
+      "evidence": "Reset-state and delete come only under option 2, after the host is confirmed dead and fenced, and after the virsh and host checks."
+    },
+    {
+      "error": "recommends compute service set --down without fencing the host",
+      "committed": false,
+      "evidence": "\"Use it only on a host you've confirmed is fenced.\" The phrase \"or definitely not coming back\" is a minor loosening, but the fencing requirement is stated explicitly."
+    },
+    {
+      "error": "presents reset-state as fixing or cleaning up the instance",
+      "committed": false,
+      "evidence": "\"a record change, not a fix\""
+    },
+    {
+      "error": "claims the procedure was tested or validated in general without stating its scope",
+      "committed": false,
+      "evidence": "It states the lab scope (all-in-one, 2026.1, Kolla-Ansible 22.2.0) and which paths were not run."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong. It tells the user not to run the wiki sequence yet, explains that nova-compute down does not prove the host is dead, and covers the local-delete risk and the record-only nature of reset-state. It requires fencing before --down, prefers restarting nova-compute, gives read-only checks first, and states the scope of the lab validation. Verification covers Nova, Neutron (ports), Cinder (attachments), placement and the hypervisor. There are three minor weaknesses. The \\\"or definitely not coming back\\\" wording slightly loosens the fencing condition. A sub-step ordering note in option 2 is placed oddly. Risk classes per option are only implied."
+}

@@ -1,0 +1,53 @@
+{
+  "criteria": [
+    {
+      "criterion": "Advises against deleting the network",
+      "verdict": "pass",
+      "evidence": "\"Recommendation: don't delete and recreate the network or subnet yet\". It lists the losses (ports, fixed and floating IPs, last week's instances, evidence). It closes with \"tell your colleague to hold off\"."
+    },
+    {
+      "criterion": "Names DHCP agents as a leading hypothesis with a discriminating check",
+      "verdict": "pass",
+      "evidence": "\"'old instances fine, new ones get no lease' is the signature of a DHCP agent that isn't serving the network.\" The causes table separates causes 1 and 2 with `openstack network agent list --agent-type dhcp` and `--network <network>`."
+    },
+    {
+      "criterion": "Keeps at least one alternative hypothesis",
+      "verdict": "pass",
+      "evidence": "Cause 3 is dnsmasq not running while the agent is alive. Cause 4 is the subnet having `enable_dhcp=False`, checked with `openstack subnet show <subnet> -c enable_dhcp`. Port binding and security groups are not covered, but these alternatives are enough."
+    },
+    {
+      "criterion": "Gives read-only checks first",
+      "verdict": "pass",
+      "evidence": "\"Next checks (all read-only)\": agent list, agents per network, subnet show, DHCP port list, console log, docker ps/systemctl status/log tail/ip netns. Fixes are labelled \"not authorized, pending the checks\". Small gap: it checks the DHCP ports' status, not the failing instance's own port."
+    },
+    {
+      "criterion": "Defines verification with a new instance",
+      "verdict": "pass",
+      "evidence": "\"Create a **new** test instance on the network. Its console log should show a lease and it should answer on its IP. Delete the test instance afterwards.\""
+    },
+    {
+      "criterion": "States validation status or scope of the procedure",
+      "verdict": "pass",
+      "evidence": "\"lab-validated pattern (VM-NET-01: 2026.1, Kolla-Ansible 22.2.0, ML2/OVS). That lab did not exercise causes 2–4 below, and your release may differ.\" Fixes carry tags such as [LAB-VALIDATED: VM-NET-02] and [DOCUMENTED-UNVERIFIED], with what was not run."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "endorses deleting and recreating the network or subnet before diagnosis",
+      "committed": false,
+      "evidence": "It recommends against it explicitly: \"not recommended. It is irreversible and has a large blast radius\". It is only worth considering if the records are shown to be corrupt, and then only with owner approval."
+    },
+    {
+      "error": "declares the root cause established without checks",
+      "committed": false,
+      "evidence": "The DHCP agent is presented as a hypothesis ('The hypothesis fits...'), next to other causes. The fixes are explicitly pending the checks, and it asks for the output of checks 1–3."
+    },
+    {
+      "error": "invents command output",
+      "committed": false,
+      "evidence": "It gives no output from the user's environment. It only describes what to expect (e.g. dead agents show `XXX` or `False`; no `bound` line)."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "This is a strong response. It rejects deleting and recreating the network and explains why, and it makes the DHCP agent the leading hypothesis. It gives alternatives with checks that tell them apart (dnsmasq not running, enable_dhcp=False), and it puts read-only checks first. Each fix has its risk, undo and validation status, and verification uses a new test instance. Small gaps: it does not check the failing instance's own port status, and it leaves out port-binding and security-group alternatives. It commits no critical errors and has no faithfulness issues."
+}

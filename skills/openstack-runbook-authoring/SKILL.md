@@ -4,7 +4,7 @@ description: Turns OpenStack operational knowledge - an incident outcome, an exp
 license: Apache-2.0
 metadata:
   source: "OpenStack, the Day After Tomorrow (Soufian Zaouam), v1.2 - Ch. 11, 10, 12, 1, 7, 19"
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # OpenStack runbook authoring

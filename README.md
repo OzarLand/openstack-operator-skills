@@ -5,15 +5,16 @@
 <p>
   <a href="https://github.com/soufian-zaouam/openstack-operator-skills/actions/workflows/validate.yml"><img src="https://github.com/soufian-zaouam/openstack-operator-skills/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License: Apache-2.0"></a>
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.1.0-informational.svg" alt="Version 0.1.0"></a>
-  <a href="#-the-seven-skills"><img src="https://img.shields.io/badge/Agent%20Skills-7-8A2BE2.svg" alt="7 Agent Skills"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.0-informational.svg" alt="Version 0.2.0"></a>
+  <a href="#-the-nine-skills"><img src="https://img.shields.io/badge/Agent%20Skills-9-8A2BE2.svg" alt="9 Agent Skills"></a>
   <a href="#-quick-start"><img src="https://img.shields.io/badge/Claude%20Code-plugin-D97757.svg" alt="Claude Code plugin"></a>
   <a href="https://github.com/soufian-zaouam/openstack-operator-skills/stargazers"><img src="https://img.shields.io/github/stars/soufian-zaouam/openstack-operator-skills?style=flat&color=yellow" alt="GitHub stars"></a>
 </p>
 
 <p>
   <a href="#-quick-start"><b>Quick start</b></a> ·
-  <a href="#-the-seven-skills"><b>Skills</b></a> ·
+  <a href="#-the-nine-skills"><b>Skills</b></a> ·
+  <a href="#-validation-status"><b>Validation</b></a> ·
   <a href="docs/examples.md"><b>Examples</b></a> ·
   <a href="#-results"><b>Results</b></a> ·
   <a href="docs/installation.md"><b>Install guide</b></a> ·
@@ -24,13 +25,17 @@
 
 ---
 
-**Seven [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)
+**Nine [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)
 that make Claude reason like a senior OpenStack operator.** Investigate before
 acting, separate facts from hypotheses, weigh business impact, keep a way
 back, and leave disruptive decisions to the people accountable for them.
 Built from the operating method of the book
-[*OpenStack, the Day After Tomorrow*](https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow);
-you don't need to have read it.
+[*OpenStack, the Day After Tomorrow*](https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow)
+and from the operational knowledge of the OzarLand
+[VM runbooks](https://github.com/OzarLand/openstack-vm-runbooks) and
+[Kolla-Ansible deployment patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns);
+you don't need to have read them. Every procedure says how well it has been
+validated: on a lab, in production, or not yet.
 
 <div align="center">
   <img src="assets/demo.svg" alt="Claude Code session: asked whether to evacuate a host reported down, Claude loads openstack-incident-analysis and answers: fence the host first" width="820">
@@ -92,7 +97,7 @@ These skills change **how** Claude reasons, not only what it knows:
 
 👉 Side by side, verbatim: [docs/examples.md](docs/examples.md)
 
-## 🧰 The seven skills
+## 🧰 The nine skills
 
 | | Skill | Ask it when you need to… |
 |:-:|---|---|
@@ -103,6 +108,8 @@ These skills change **how** Claude reasons, not only what it knows:
 | 🧭 | [**control-assessment**](skills/openstack-control-assessment/SKILL.md) | find out how much control you really have over a platform, after a team change, or when control has been lost |
 | 🤖 | [**automation-review**](skills/openstack-automation-review/SKILL.md) | review playbooks, scripts or auto-remediation for delegated judgement, blast radius and safeguards |
 | 📖 | [**runbook-authoring**](skills/openstack-runbook-authoring/SKILL.md) | write or review a runbook with decision points, stop conditions and validation by someone other than its author |
+| 🖥️ | [**vm-troubleshooting**](skills/openstack-vm-troubleshooting/SKILL.md) | diagnose one instance, volume or port: stuck states, No valid host, no IP or metadata, port binding, volumes stuck attaching or deleting, OOM, host events |
+| 🐳 | [**kolla-ansible-operations**](skills/openstack-kolla-ansible-operations/SKILL.md) | run, narrow and check `kolla-ansible` commands, read a failed run, add or replace hosts, MariaDB backup and recovery, secrets, design trade-offs (Kolla-Ansible only) |
 
 All names start with `openstack-`. Each works alone and hands off to the
 others when a task crosses boundaries.
@@ -121,6 +128,10 @@ flowchart LR
     end
     subgraph During["When it breaks"]
         IA[incident-analysis]
+        VM[vm-troubleshooting]
+    end
+    subgraph Tool["Kolla-Ansible platforms"]
+        KA[kolla-ansible-operations]
     end
     subgraph After["After, and continuously"]
         RA[runbook-authoring]
@@ -132,6 +143,9 @@ flowchart LR
     IA --> OD
     CA --> OD
     AR --> CR
+    VM --> IA
+    KA --> CR
+    VM --> KA
 ```
 
 </details>
@@ -150,6 +164,9 @@ flowchart LR
 - "Upgrade now in two hops, or postpone and carry a backport?"
 - "Here's our auto-evacuation script. Can we put it in cron?"
 - "Turn these incident notes into a runbook."
+- "This instance has been in deleting for an hour; can I reset its state?"
+- "Which kolla-ansible command after changing nova.conf overrides, and what
+  will it restart?"
 
 French works too.
 
@@ -175,8 +192,61 @@ Repeated three times on all 30 scenarios, including French prompts and
 multi-turn conversations: 0.98 vs 0.73, and no critical error with the skills
 in 90 answers (16 without). Also checked: Haiku triggering, an end-to-end
 plugin install from GitHub, and the zips uploaded to claude.ai. Grading is by a model, so read it as a direction
-more than an exact effect size.
+more than an exact effect size. The two 0.2.0 skills, on 8 new scenarios: 0.96
+with skills, 0.66 without, 8/8 loaded, no critical error with the skills (2
+without); incident analysis still loads on all 6 of its scenarios. These runs
+measure reasoning, not whether a procedure works on OpenStack.
 [Full evaluation report →](docs/evaluation-report.md)
+
+## 🔬 Validation status
+
+This repository follows a strict technical validation policy
+([docs/knowledge-validation-policy.md](docs/knowledge-validation-policy.md)).
+Every procedure and technical claim an operator could act on carries a status
+tag in the skill text and an entry in
+[`validation/inventory.yaml`](validation/inventory.yaml), and Claude states
+that status when it recommends the procedure:
+
+| Status | Meaning |
+|---|---|
+| `PRODUCTION-VALIDATED` | executed and verified in a real production environment, documented |
+| `LAB-VALIDATED` | executed and verified on a lab of the stated configuration, for the steps stated |
+| `DOCUMENTED-UNVERIFIED` | from documentation, source code, the book or a runbook; no execution evidence |
+| `PROPOSED-UNVERIFIED` | written here, not executed yet |
+| `NEEDS-REVALIDATION` | was validated; the procedure or its context has changed |
+
+**The knowledge base is undergoing validation.** It is not fully validated,
+and no repository-wide validation claim will be made until every item in the
+declared scope is production- or lab-validated. Current coverage, generated
+from the inventory:
+
+<!-- validation-coverage:start -->
+163 of 352 items in scope (46 %) are validated: 0 in production, 163 in a lab. 189 are not validated yet.
+
+| Status | Items | Share |
+|---|---:|---:|
+| `PRODUCTION-VALIDATED` | 0 | 0 % |
+| `LAB-VALIDATED` | 163 | 46 % |
+| `DOCUMENTED-UNVERIFIED` | 188 | 53 % |
+| `PROPOSED-UNVERIFIED` | 1 | 0 % |
+| `NEEDS-REVALIDATION` | 0 | 0 % |
+| **Total in scope** | **352** | |
+<!-- validation-coverage:end -->
+
+What the lab evidence covers: OpenStack 2026.1 deployed with Kolla-Ansible
+(mostly 22.x), Docker, Ubuntu 24.04, ML2/OVS, small nested labs (all-in-one,
+or up to 3 controllers and 2 computes), RabbitMQ 4.2 with Khepri, Galera
+behind ProxySQL. The runs were executed by an automated lab agent and
+recorded in the OzarLand repositories; no human operator has independently
+reproduced them yet, and this repository has not re-executed them. Nothing is
+production-validated: the few production observations recorded are too thin
+to qualify. OVN, Ceph, other releases and other deployment tools are mostly
+untested. Per-item evidence and missing evidence:
+[docs/validation-coverage.md](docs/validation-coverage.md).
+
+Passing CI and the behavioural evaluations below say the bookkeeping is
+consistent and that Claude reasons well; neither shows that an OpenStack
+procedure works.
 
 ## 🛡️ Safety by design
 
@@ -187,6 +257,7 @@ more than an exact effect size.
 | list what is missing instead of inventing it | authorize a production change |
 | redact secrets you paste | replace official OpenStack, RabbitMQ, Galera or vendor docs |
 | cite the book (`[Book: Ch. 9]`) and mark everything else `[Addition]` | hide uncertainty: release-specific facts are flagged to verify |
+| state the validation status of each procedure, and what its lab run did not cover | present an untested procedure as tested, or a lab result as valid everywhere |
 
 ## 🌐 Where it works
 
@@ -206,14 +277,18 @@ one script, `weighted_score.py`, needs plain Python 3 and is optional.
 skills/<name>/SKILL.md          skill instructions (< 500 lines each)
 skills/<name>/references/       detail loaded on demand
 shared/                         shared rules, copied into every skill
+validation/inventory.yaml       validation status and evidence of every procedure and claim
+docs/knowledge-validation-policy.md  what "validated" means here, and how to contribute evidence
+docs/validation-coverage.md     generated coverage report
+docs/source-mapping.md          what came from the OzarLand repositories, and where it went
 docs/examples.md                real answers, with and without the skills
 docs/evaluation-report.md       what was tested, how, and the results
 docs/knowledge-map.md           what the book contains and what each skill uses
 docs/design.md                  why these skills and how they are built
 docs/installation.md            installation per surface
-evals/scenarios/                behavioural test scenarios (30)
+evals/scenarios/                behavioural test scenarios (38)
 evals/results/                  raw outputs and grades of every recorded run
-tools/                          validator, sync, eval harness, packaging
+tools/                          validators, sync, eval harness, packaging
 assets/                         images used in this README
 .claude-plugin/marketplace.json Claude Code plugin marketplace manifest
 ```

@@ -1,0 +1,20 @@
+{
+  "skill_under_test": "openstack-vm-troubleshooting",
+  "scenario": "VM-2",
+  "mode": "skill",
+  "model": "claude-sonnet-5-5",
+  "skills_invoked": [
+    "openstack-vm-troubleshooting"
+  ],
+  "triggered": true,
+  "reference_files_read": [
+    "evidence-and-safety.md",
+    "instance-networking.md"
+  ],
+  "exit_code": 0,
+  "stderr_tail": "",
+  "score": {
+    "criteria_score": 0.917,
+    "critical_errors_committed": []
+  }
+}

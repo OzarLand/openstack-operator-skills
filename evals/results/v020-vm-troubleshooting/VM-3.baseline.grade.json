@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Explains reset-state is record-only",
+      "verdict": "pass",
+      "evidence": "\"`reset-state` only edits the Cinder database. It doesn't touch the backend, so it can leave things behind on the LVM/iSCSI side.\""
+    },
+    {
+      "criterion": "Raises the two-writer data risk",
+      "verdict": "pass",
+      "evidence": "\"the VM or its iSCSI session could still exist on the old compute node... Writing to the volume from two places can corrupt it.\" It also warns that a stale export could \"leave the old host's initiator with access.\""
+    },
+    {
+      "criterion": "Checks attachments and the compute side before changing anything",
+      "verdict": "pass",
+      "evidence": "Under 'Check first': runs `virsh list --all`, `iscsiadm -m session` and `multipath -ll` on the old compute, plus `openstack volume show` and `cinder attachment-list --volume-id`, all before any change."
+    },
+    {
+      "criterion": "Prefers the attachment API path over reset-state",
+      "verdict": "pass",
+      "evidence": "\"Try the clean path first... `cinder attachment-delete <attachment-id>`\". reset-state is used only \"If the attachment delete fails or there's no attachment record\", and is called \"your last step, not your first.\""
+    },
+    {
+      "criterion": "Requires backup or owner agreement",
+      "verdict": "fail",
+      "evidence": "Backups, snapshots and owner/user agreement are never mentioned before the destructive steps (attachment-delete, reset-state, removing stale targets). The only nearby advice is a post-fix fsck or read-only mount."
+    },
+    {
+      "criterion": "Defines verification",
+      "verdict": "partial",
+      "evidence": "After reset-state it checks: volume_attachment rows gone, backend export gone (tgtadm/targetcli), status available/detached, then attach. However, these checks are tied to the reset-state path only, not to the attachment-delete path. It also never confirms after the fix that no iSCSI session is left on the old compute, or that the new attach worked."
+    },
+    {
+      "criterion": "Scopes the evidence to the LVM/iSCSI backend",
+      "verdict": "pass",
+      "evidence": "Uses iSCSI-specific checks and cleanup: `iscsiadm -m session`, `tgtadm --lld iscsi --op show --mode target` for tgt, `targetcli ls` for LIO, and the initiator ACL."
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends reset-state as the first step without checking the compute side",
+      "committed": false,
+      "evidence": "The response opens \"Yes, it usually works\", but immediately says \"it should be your last step, not your first\". It puts the compute-side and attachment checks, and attachment-delete, before reset-state."
+    },
+    {
+      "error": "ignores the risk of two hosts writing to the same volume",
+      "committed": false,
+      "evidence": "It says explicitly: \"Writing to the volume from two places can corrupt it.\""
+    },
+    {
+      "error": "recommends deleting the volume",
+      "committed": false,
+      "evidence": "Volume deletion is never suggested. Only the attachment record and stale targets are removed."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is solid. It says reset-state is record-only, warns that two writers can corrupt the volume, runs read-only checks on both the compute and Cinder sides first, prefers attachment-delete, keeps reset-state as a last resort, and uses LVM/iSCSI-specific tools. Its weaknesses: it never asks for a backup or owner agreement before destructive steps, and it doesn't name an approver or give a risk for each option. Its verification covers only the reset-state path and doesn't recheck the old compute's iSCSI session after the fix. It also never asks whether the delete happened while nova-compute was down. It commits none of the critical errors."
+}

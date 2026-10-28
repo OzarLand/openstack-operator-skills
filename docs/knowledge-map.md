@@ -285,3 +285,16 @@ for v1.3); the skills follow the same wording.
 | Book statement | Upstream behaviour | Where handled |
 |---|---|---|
 | Instances with SR-IOV direct ports cannot be live-migrated (Ch. 20 technical note) | Live-migratable with the libvirt driver since Train: the port is unplugged and re-plugged, so the guest loses that interface briefly. vGPU instances are live-migratable since 2024.1 with recent libvirt, QEMU and kernel. | `openstack-maintenance-planning` (SKILL.md step 3, `host-maintenance-mechanics.md`) |
+
+### Lab findings that qualify the book (0.2.0)
+
+Not contradictions of the book, which records versions-unknown field cases,
+but results from lab runs (OzarLand, OpenStack 2026.1, Kolla-Ansible,
+RabbitMQ 4.2 with Khepri) that change how its procedures must be applied
+today. Each is tagged where it appears.
+
+| Book statement | Lab finding | Where handled |
+|---|---|---|
+| The field incident stopped the APIs, purged queues and restarted RabbitMQ, then the database (Ch. 19) | Reported from one lab run whose executor is not recorded (so tagged unverified): with Khepri, `force_reset` is refused and `kolla-ansible rabbitmq-reset-state` failed, leaving one node outside the cluster; a rejoined node held no quorum-queue or stream replicas until they were added; stopping Placement with the other APIs made conductor and scheduler exit at restart (IA-CP-05, IA-CP-07) | `openstack-incident-analysis` (hard rules, `failure-patterns.md` P1, `control-plane-recovery.md`) |
+| RabbitMQ partition handling as a setting to check (Ch. 10 technical note) | With Khepri, a partition showed no "Network Partitions" entry and the minority did not pause; it healed by itself once the network returned (IA-CP-02) | `openstack-incident-analysis` |
+| Live migration keeps critical workloads running (Ch. 20) | It does, but connectivity gaps of 1.8 to 8.6 s were measured at switch-over on a lab, and once a pause of about five minutes (MP-MECH-01) | `openstack-maintenance-planning` |

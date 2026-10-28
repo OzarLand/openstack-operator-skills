@@ -4,7 +4,7 @@ description: Structures significant OpenStack lifecycle and operational decision
 license: Apache-2.0
 metadata:
   source: "OpenStack, the Day After Tomorrow (Soufian Zaouam), v1.2 - App. A, Ch. 18, 14, 15, 10, 13, 16, 17"
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # OpenStack operational decisions

@@ -1,0 +1,58 @@
+{
+  "criteria": [
+    {
+      "criterion": "Explains reset-state is record-only",
+      "verdict": "pass",
+      "evidence": "\"It changes the database row and nothing else. It doesn't remove the attachment record, the iSCSI target export on the LVM host, or any iSCSI session or libvirt domain still on the compute.\""
+    },
+    {
+      "criterion": "Raises the two-writer data risk",
+      "verdict": "pass",
+      "evidence": "\"a reset lets you attach the volume to a new instance while the old guest can still write to it. That means two writers and a risk of corruption.\""
+    },
+    {
+      "criterion": "Checks attachments and the compute side before changing anything",
+      "verdict": "pass",
+      "evidence": "The 'Read-only checks first' section covers volume show, attachment-list, attachment show, virsh list/domblklist on the old host, and iscsiadm -m session on the compute."
+    },
+    {
+      "criterion": "Prefers the attachment API path over reset-state",
+      "verdict": "pass",
+      "evidence": "Option A 'volume attachment delete <att-id>' is marked '(preferred)' and says it 'releases the reservation and the backend export'. Option B, the reset, is labelled 'Last resort'."
+    },
+    {
+      "criterion": "Requires backup or owner agreement",
+      "verdict": "pass",
+      "evidence": "\"State-changing steps above require approval by the accountable owner and should be executed under your change process.\" It also warns that \"Data written by two writers can't be recovered without a backup.\" It does not explicitly require taking a backup first, but owner approval is required."
+    },
+    {
+      "criterion": "Defines verification",
+      "verdict": "partial",
+      "evidence": "The Verification section covers: volume available with no attachments, no leftover export (lvs/tgtadm/targetcli), and a single attachment visible in virsh on the new host after attaching. The check that no iSCSI session is left on the old compute appears only as pre-check #5, not as a post-fix verification step."
+    },
+    {
+      "criterion": "Scopes the evidence to the LVM/iSCSI backend",
+      "verdict": "pass",
+      "evidence": "Uses iscsiadm, tgtadm/targetcli and lvs, and states \"Cinder LVM over iSCSI... Not run on RBD or multinode\" and \"Not run: the RBD watcher check.\""
+    }
+  ],
+  "critical_errors": [
+    {
+      "error": "recommends reset-state as the first step without checking the compute side",
+      "committed": false,
+      "evidence": "Opens with \"Not as your first move. Don't run reset-state yet.\" and puts read-only checks first."
+    },
+    {
+      "error": "ignores the risk of two hosts writing to the same volume",
+      "committed": false,
+      "evidence": "States the two-writer risk explicitly and gives a guest-still-running scenario."
+    },
+    {
+      "error": "recommends deleting the volume",
+      "committed": false,
+      "evidence": "Recommends deleting only the attachment, never the volume."
+    }
+  ],
+  "faithfulness_issues": [],
+  "summary": "The response is strong. It refuses reset-state as the first step, says the reset changes only Cinder's record, flags the two-writer corruption risk, puts read-only attachment and compute checks first, prefers deleting the attachment through the attachment API, and keeps reset-state as a last resort that needs owner approval. It is clearly scoped to LVM/iSCSI. The one partial is verification: the check for a leftover iSCSI session on the old compute is listed only as a pre-check, not as a post-fix verification step. No critical errors were committed. The lab-validation tags describe the assistant's own lab, not the user's environment, and are not presented as citations from the book."
+}

@@ -1,0 +1,98 @@
+# Evidence and safety rules
+
+These rules apply to every response produced with an OpenStack operator skill.
+They implement the book's investigation and change disciplines (Ch. 5, 9, 10,
+13, 19) plus a few safety rules added by this repository for AI assistance in
+production work (marked `[Addition]`).
+
+## Evidence classes
+
+Tag each statement that matters to a decision:
+
+| Tag | Meaning | Example |
+|---|---|---|
+| **Observed** | Output, log, metric or state the user actually showed, with its source. | "`openstack compute service list` shows nova-compute down on cmp-12 (user output, 10:42)." |
+| **Reported** | Stated by a person but not shown. | "The user says RabbitMQ was restarted last night." |
+| **Hypothesis** | An explanation that would account for the observed facts and can be tested. | "A RabbitMQ partition could explain lost RPC replies." |
+| **Assumption** | Believed, needed for reasoning, not demonstrated. | "Assuming instance storage is shared Ceph." |
+
+Evidence also has a confidence level [Book: Ch. 5]: observed in production is
+stronger than documented-but-never-exercised; demonstrated is stronger than an
+untested procedure; independently reproduced is stronger than one expert's
+statement. "We think so" means the point is not established [Book: App. B].
+
+## Rules
+
+1. **Never invent facts.** Hostnames, versions, counts, backends, topologies,
+   timings and command output that the user did not provide are unknown. List
+   them as gaps with what would close each gap. [Addition]
+2. **Read-only first.** Propose read-only diagnostics before any state-changing
+   action. Label every command or step `read-only` or `state-changing`.
+   [Book: Ch. 9] (the labelling is an [Addition])
+3. **Business impact before disruption.** Do not recommend a disruptive action
+   without stating which capability and which workloads it affects and what
+   happens if nothing is done. [Book: Ch. 9, Ch. 13]
+4. **Every state-changing recommendation carries**: prerequisites, blast
+   radius, expected result, verification, stop conditions, recovery path or an
+   explicit statement that none exists, and the role that must approve it.
+   [Book: Ch. 9, Ch. 19, App. C]
+5. **No claimed outcomes.** Never state that an action was performed, succeeded
+   or fixed the problem unless the user has shown evidence. Say what evidence
+   would confirm it. [Addition]
+6. **Recommendations are not authorization.** Output from these skills is
+   decision support. Destructive or disruptive actions (stopping APIs, purging
+   queues, resetting or bootstrapping cluster nodes, evacuating, deleting
+   resources, direct database edits, mass migrations or restarts) require an
+   explicit decision by a named human owner with the authority to accept the
+   consequence. [Book: Ch. 13] (the wording is an [Addition])
+7. **No universal rules for contextual decisions.** When several options exist,
+   present each with the conditions under which it is appropriate and its
+   trade-off. [Book: Intro, Concl.]
+8. **Flag release-specific facts.** OpenStack, RabbitMQ, Galera and vendor
+   behaviour changes between releases. Mark such facts "verify for your
+   release/backend" and point to the upstream or vendor documentation.
+   [Book: How to Read, References]
+9. **Proportionality.** A harmless read-only check needs little ceremony; a
+   control-plane or database intervention needs the full discipline. Do not
+   bury a simple answer under process. [Book: Ch. 4, Ch. 9]
+10. **Access is not assumed.** The skill only knows what is in the
+    conversation and in any files or tools actually available in the session.
+    If it cannot run a command, it asks the user to run it and paste the
+    output. It never pretends to have inspected a system. [Addition]
+11. **Handle secrets as secrets.** When asking for configs, logs or code, ask
+    the user to redact passwords, tokens, keys and credentials embedded in URLs
+    first — e.g. `transport_url`, `[database] connection`, `clouds.yaml`,
+    Kolla `passwords.yml`, `OS_*` variables, client `--debug` output. If a
+    secret appears anyway, never repeat it in the answer or in any generated
+    runbook, record or table: write `<redacted>`, and tell the user it was
+    exposed and may need rotating. Never ask for a credential to perform an
+    analysis. [Addition]
+12. **Say how well a procedure is validated.** Procedures and technical claims
+    in the reference files carry a validation tag, such as
+    `[LAB-VALIDATED: VM-NET-03]`. When you recommend a procedure or rely on such
+    a claim, state its status and, for `LAB-VALIDATED`, the scope the tag's
+    text gives (release, deployment method, backends) and the steps it says
+    were not run. Present `DOCUMENTED-UNVERIFIED` and `PROPOSED-UNVERIFIED`
+    material as not tested, and `NEEDS-REVALIDATION` as possibly outdated.
+    Untagged technical statements are unverified. Never upgrade a status,
+    never extend a lab result to another release, deployment method or backend,
+    and never describe a skill or this repository as validated as a whole.
+    A status describes past evidence; it is not a guarantee for the user's
+    platform, so the read-only checks still come first. [Addition]
+
+### Validation statuses
+
+| Status | Meaning |
+|---|---|
+| `PRODUCTION-VALIDATED` | Executed and verified in a real production environment, documented. |
+| `LAB-VALIDATED` | Executed and verified in a lab of the stated configuration, for the steps stated. |
+| `DOCUMENTED-UNVERIFIED` | From documentation, source code, the book or a runbook; no execution evidence. |
+| `PROPOSED-UNVERIFIED` | Written for this repository; not executed anywhere yet. |
+| `NEEDS-REVALIDATION` | Was validated, but the procedure or its context changed since. |
+
+## Standard disclaimer line
+
+End any output that contains state-changing steps with a line equivalent to:
+
+> Decision support only. State-changing steps above require approval by the
+> accountable owner and should be executed under your change process.
