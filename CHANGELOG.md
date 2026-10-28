@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-10-28
+
+Operational knowledge with a validation status on every procedure, and the move
+to OzarLand.
+
 ### Moving to OzarLand
 
 - Canonical location: `OzarLand/openstack-operator-skills` (was
@@ -16,7 +21,7 @@
 - `SECURITY.md` (private reporting of unsafe advice and leaked data) and the
   OzarLand `CODE_OF_CONDUCT.md`.
 
-### 0.2.0 (in preparation): operational knowledge with validation status
+### Operational knowledge with validation status
 
 - **New skill `openstack-vm-troubleshooting`**: one instance, volume or port —
   stuck states, scheduling and boot failures, instance networking, volumes,
