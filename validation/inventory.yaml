@@ -868,13 +868,14 @@ items:
     path: recovery/compute-host-failure-fence-before-evacuate.md
   - book: Ch. 10
   validation:
-    environment: 'lab: kolla-ansible multinode (1 controller, 2 computes); topology as recorded: any multinode'
+    environment: 'lab, per the page body: 3 controllers and 2 computes nested in an OpenStack cloud, Docker, Ubuntu
+      24.04 (the confirmed_by record says 1 controller and 2 computes; see limitations)'
     openstack_release: '2026.1'
-    deployment: kolla-ansible multinode (1 controller, 2 computes)
+    deployment: kolla-ansible 22.2.0 multinode (3 controllers, 2 computes, per the page body)
     network_backend: ml2/ovs
     storage_backend: local instance disks, no Cinder (per the page body)
     executed_by: agent:lab-reviewer
-    date: '2026-10-23'
+    date: '2026-10-13'
     observed: compute-2 powered off at once (fenced by construction); service set --down; server evacuate with microversion
       2.29, scheduler chose compute-1, instance ACTIVE there in about 15 s, rebuilt from its image (local disk)
       keeping port and floating IP; on power-on nova-compute cleaned up (libvirt empty); service set --up. Same
@@ -892,7 +893,7 @@ items:
   revalidate_when: Nova release change; evacuation microversion behaviour change; storage backend change.
   limitations: The source page's confirmed_by (1 controller, boot-from-volume kept, microversion 2.103, 2026-10-23)
     disagrees with its body (3 controllers, no Cinder, microversion 2.29, last run 2026-10-13); the narrower body
-    version is used here.
+    version is used here, including its topology and date (last of three lab builds).
 - id: IA-FP-04
   claim: Fence a failed host through out-of-band management or switch isolation and confirm its power state before
     evacuating.
@@ -1313,13 +1314,13 @@ items:
   - repo: openstack-vm-runbooks
     path: recovery/compute-host-failure-fence-before-evacuate.md
   validation:
-    environment: 'lab: kolla-ansible multinode (1 controller, 2 computes); topology as recorded: any multinode'
+    environment: 'lab, per the source page body: 3 controllers and 2 computes, local instance disks, no Cinder (the confirmed_by record says 1 controller and 2 computes)'
     openstack_release: '2026.1'
-    deployment: kolla-ansible multinode (1 controller, 2 computes)
+    deployment: 'kolla-ansible 22.2.0 multinode (3 controllers, 2 computes, per the source page body)'
     network_backend: ml2/ovs
     storage_backend: local instance disks, no Cinder (per the source body)
     executed_by: agent:lab-reviewer
-    date: '2026-10-23'
+    date: '2026-10-13'
     observed: 'One instance with a local disk evacuated: rebuilt from its image on the other compute, kept its port
       and floating IP.'
     not_observed: Boot from volume; Ceph RBD instance disks; shared storage.
@@ -4083,13 +4084,13 @@ items:
   - repo: openstack-vm-runbooks
     path: recovery/nova-compute-down-host-alive-ssh-refused.md
   validation:
-    environment: 'lab: kolla-ansible all-in-one; topology as recorded: multinode, 3 controllers, 2 computes'
+    environment: 'lab; topology uncertain: page body 3 controllers + 2 computes, confirmed_by all-in-one'
     openstack_release: '2026.1'
-    deployment: kolla-ansible all-in-one
+    deployment: 'kolla-ansible 22.2.0, Docker, Ubuntu 24.04; the page body describes 3 controllers + 2 computes, its confirmed_by record says all-in-one (sources disagree, see limitations)'
     network_backend: ml2/ovs (VXLAN)
     storage_backend: local instance disks, no Cinder
     executed_by: agent:lab-reviewer
-    date: '2026-10-22'
+    date: '2026-10-13'
     observed: nova_compute container stopped on purpose while instances ran; Exited (137); compute service down
       about a minute later; 1 then 2 domains running in virsh; instance ACTIVE, power state Running, in Nova (related
       SSH run); unit failed (related SSH run). Three builds.
@@ -4137,13 +4138,13 @@ items:
   - repo: openstack-vm-runbooks
     path: recovery/nova-compute-down-instances-still-running.md
   validation:
-    environment: 'lab: kolla-ansible all-in-one; topology as recorded: multinode, 3 controllers, 2 computes'
+    environment: 'lab; topology uncertain: page body 3 controllers + 2 computes, confirmed_by all-in-one'
     openstack_release: '2026.1'
-    deployment: kolla-ansible all-in-one
+    deployment: 'kolla-ansible 22.2.0, Docker, Ubuntu 24.04; the page body describes 3 controllers + 2 computes, its confirmed_by record says all-in-one (sources disagree, see limitations)'
     network_backend: ml2/ovs (VXLAN)
     storage_backend: local instance disks, no Cinder
     executed_by: agent:lab-reviewer
-    date: '2026-10-22'
+    date: '2026-10-13'
     observed: systemctl start of kolla-nova_compute-container.service brought the service up; instances kept running;
       the whole undo including the wait for up and a test-instance delete took 34 s on the first build.
     not_observed: The Any (systemctl start nova-compute) command; the agent's cleanup of instances deleted or evacuated
@@ -4204,13 +4205,13 @@ items:
   - repo: openstack-vm-runbooks
     path: recovery/nova-compute-down-host-alive-ssh-refused.md
   validation:
-    environment: 'lab: kolla-ansible all-in-one; topology as recorded: multinode, 3 controllers, 2 computes'
+    environment: 'lab; topology uncertain: page body 3 controllers + 2 computes, confirmed_by all-in-one'
     openstack_release: '2026.1'
-    deployment: kolla-ansible all-in-one
+    deployment: 'kolla-ansible 22.2.0, Docker, Ubuntu 24.04; the page body describes 3 controllers + 2 computes, its confirmed_by record says all-in-one (sources disagree, see limitations)'
     network_backend: ml2/ovs (VXLAN)
     storage_backend: local instance disks, no Cinder
     executed_by: agent:lab-reviewer
-    date: '2026-10-23'
+    date: '2026-10-14'
     observed: DenyUsers drop-in for one monitoring user plus nova_compute stopped; login exit 255 with `Permission
       denied (publickey).` on that host only; `denyusers` in sshd -T; the DenyUsers journal message; instance ACTIVE/Running;
       one run.
@@ -4256,13 +4257,13 @@ items:
   - repo: openstack-vm-runbooks
     path: recovery/nova-compute-down-host-alive-ssh-refused.md
   validation:
-    environment: 'lab: kolla-ansible all-in-one; topology as recorded: multinode, 3 controllers, 2 computes'
+    environment: 'lab; topology uncertain: page body 3 controllers + 2 computes, confirmed_by all-in-one'
     openstack_release: '2026.1'
-    deployment: kolla-ansible all-in-one
+    deployment: 'kolla-ansible 22.2.0, Docker, Ubuntu 24.04; the page body describes 3 controllers + 2 computes, its confirmed_by record says all-in-one (sources disagree, see limitations)'
     network_backend: ml2/ovs (VXLAN)
     storage_backend: local instance disks, no Cinder
     executed_by: agent:lab-reviewer
-    date: '2026-10-23'
+    date: '2026-10-14'
     observed: Drop-in removed, sshd -t, reload of ssh.service, nova_compute started through its unit; the monitoring
       user accepted on all hosts and the compute service up.
     not_observed: A rule in /etc/ssh/sshd_config itself; the Any command for nova-compute; other OpenSSH versions.
@@ -4431,19 +4432,15 @@ items:
   - repo: openstack-vm-runbooks
     path: lifecycle/restarting-nova-libvirt-does-not-stop-instances.md
   validation:
-    environment: 'lab: kolla-ansible all-in-one; topology as recorded: multinode, 3 controllers, 2 computes'
+    environment: 'lab; topology uncertain: page body 3 controllers + 2 computes, confirmed_by all-in-one'
     openstack_release: '2026.1'
-    deployment: kolla-ansible all-in-one
+    deployment: 'kolla-ansible 22.2.0, Docker, Ubuntu 24.04; the page body describes 3 controllers + 2 computes, its confirmed_by record says all-in-one (sources disagree, see limitations)'
     network_backend: ml2/ovs (VXLAN)
     storage_backend: local ephemeral disk, no Cinder
     executed_by: agent:lab-reviewer
     date: '2026-10-22'
-    observed: Unit restarted on one compute with one instance; 174 requests in the 60 s after and 339 in the next
-      60 s, 0 lost; domain kept ID 1; ACTIVE/running in Nova. A stop requested during the restart completed (confirmed_by
-      note).
-    not_observed: Quick checks 2 and 3; the qemu PID comparison after the restart; a stuck libvirtd; the Any commands;
-      a live migration during the restart; non-host PID namespace; Podman; Cinder volumes, PCI passthrough, vGPU;
-      interruptions shorter than 0.5 s.
+    observed: 'Unit restarted on one compute with one instance; 174 requests in the 60 s after and 339 in the next 60 s, 0 lost; domain kept ID 1; ACTIVE/running in Nova.'
+    not_observed: 'Quick checks 2 and 3; the qemu PID comparison after the restart; a stuck libvirtd; a libvirt operation (stop, start, migration) during the restart (the confirmed_by note says a stop completed, the Validity section says no libvirt operation was run: narrower kept); the Any: commands; a non-host PID namespace; Podman; Cinder volumes, PCI passthrough, vGPU; production scale.'
     evidence:
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/22
     - https://github.com/OzarLand/openstack-vm-runbooks/pull/2
@@ -5181,10 +5178,9 @@ items:
   - repo: openstack-vm-runbooks
     path: lifecycle/compute-disk-full-instance-paused.md
   validation:
-    environment: 'lab: kolla-ansible multinode (1 controller, 2 computes); topology as recorded: multinode, 3 controllers,
-      2 computes'
+    environment: 'lab; several builds: see deployment'
     openstack_release: '2026.1'
-    deployment: kolla-ansible multinode (1 controller, 2 computes)
+    deployment: 'kolla-ansible 22.2.0, Docker, Ubuntu 24.04; body runs on 3 controllers + 2 computes (2026-10-09 and 2026-10-13), confirmed_by run on 1 controller + 2 computes (2026-10-23)'
     network_backend: ml2/ovs (VXLAN)
     storage_backend: local qcow2 instance disks; store on the root file system or on its own ext4 file system; no
       Cinder
@@ -5219,10 +5215,9 @@ items:
   - repo: openstack-vm-runbooks
     path: lifecycle/compute-disk-full-instance-paused.md
   validation:
-    environment: 'lab: kolla-ansible multinode (1 controller, 2 computes); topology as recorded: multinode, 3 controllers,
-      2 computes'
+    environment: 'lab; several builds: see deployment'
     openstack_release: '2026.1'
-    deployment: kolla-ansible multinode (1 controller, 2 computes)
+    deployment: 'kolla-ansible 22.2.0, Docker, Ubuntu 24.04; body runs on 3 controllers + 2 computes (2026-10-09 and 2026-10-13), confirmed_by run on 1 controller + 2 computes (2026-10-23)'
     network_backend: ml2/ovs (VXLAN)
     storage_backend: local qcow2 instance disks; dedicated store filled by a stray file
     executed_by: agent:lab-reviewer
@@ -7154,9 +7149,10 @@ items:
   - repo: openstack-vm-runbooks
     path: networking/restarting-the-ovs-agent-does-not-cut-instances.md
   validation:
-    environment: 'lab: kolla-ansible all-in-one; topology as recorded: multinode, 3 controllers, 2 computes'
+    environment: 'two lab runs: a multinode build (3 controllers, 2 computes) recorded in the page body, and an
+      all-in-one review recorded in confirmed_by (2026-10-22)'
     openstack_release: '2026.1'
-    deployment: kolla-ansible all-in-one
+    deployment: kolla-ansible 22.2.0, Docker, Ubuntu 24.04; multinode build and all-in-one review
     network_backend: ml2/ovs (VXLAN)
     storage_backend: local ephemeral disk on the computes, no Cinder
     executed_by: agent:lab-reviewer
@@ -7179,7 +7175,7 @@ items:
     restart changes.
   limitations: 'Source inconsistency: the lab confirmed_by note says the procedure ran twice including a stuck agent
     and a new instance became ACTIVE after about 80 s during the restart, but Validity lists the stuck-agent restart
-    and instance creation during the restart as not run. Treated as not run.'
+    and instance creation during the restart as not run. Treated as not run. The date is the all-in-one review''s; the page body does not date the multinode build.'
   production_reports:
   - '@soufian-zaouam (type: operator), 2026-10-24: behaviour observed in the owner''s production operations on Kolla-Ansible
     2024.x or earlier (exact release not recorded), multinode; matches the page; the page''s steps were not re-run

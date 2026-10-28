@@ -461,6 +461,13 @@ models as above (model under test `claude-sonnet-5-5`, grader
 `claude-opus-5-5`), all nine skills installed. Raw outputs and grades:
 `evals/results/v020-*`. One run per cell.
 
+How to check the numbers: each `*.grade.json` stores the grader's verdict per
+criterion, not a number; the score is pass = 1, partial = 0.5, fail = 0,
+averaged over the criteria (`score()` in `tools/run_behavioral.py`), and each
+run's `summary.json` holds the computed score per cell
+(`python3 tools/summarize_results.py 'v020-*'` aggregates them). The means
+below were recomputed from the grade files after the run and match.
+
 ### New skills, with and without skills
 
 | Scenario | With skills | Skill loaded | Baseline | Baseline critical error |
