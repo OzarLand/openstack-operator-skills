@@ -198,9 +198,9 @@ def coverage_tables(items):
         share = (100.0 * counts[status] / total) if total else 0.0
         lines.append(f"| `{status}` | {counts[status]} | {share:.0f} % |")
     lines.append(f"| **Total in scope** | **{total}** | |")
-    summary = (f"{validated} of {total} items in scope ({pct:.0f} %) are validated: "
-               f"{counts['PRODUCTION-VALIDATED']} in production, {counts['LAB-VALIDATED']} in a lab. "
-               f"{total - validated} are not validated yet.")
+    summary = (f"{validated} of {total} items in scope ({pct:.0f} %) have a recorded execution: "
+               f"{counts['PRODUCTION-VALIDATED']} in production, {counts['LAB-VALIDATED']} in a lab "
+               f"(lab-verified in OzarLand's page statuses). {total - validated} have none yet.")
     per_skill = defaultdict(Counter)
     for i in items:
         per_skill[i.get("skill")][i.get("status")] += 1

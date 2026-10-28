@@ -100,7 +100,7 @@ Details and caveats: [docs/installation.md](docs/installation.md).
 
 | Claude Code | claude.ai | Claude API | Agent SDK |
 |:-:|:-:|:-:|:-:|
-| ✅ tested | ✅ tested | expected, not tested yet | expected, not tested yet |
+| ✅ tested | ✅ tested with the 0.1.0 skills; the two 0.2.0 skills not yet | expected, not tested yet | expected, not tested yet |
 
 ## 🧰 Pick a skill
 
@@ -195,9 +195,13 @@ confidently wrong exactly where production OpenStack punishes you.
 >
 > A lab result is never presented as a production result, and reading or
 > reviewing a procedure is not validation.
+>
+> In OzarLand's page statuses, `LAB-VALIDATED` is **lab-verified** (run on a
+> lab by an automated agent), and nothing here is *validated* by an operator
+> yet ([mapping](docs/knowledge-validation-policy.md#2-statuses)).
 
 **How a procedure earns its status.** Each one carries a tag such as
-`[LAB-VALIDATED: VM-NET-03]`, and Claude tells you that status, and what the
+`[LAB-VALIDATED: VM-NET-04]`, and Claude tells you that status, and what the
 test did not cover, when it recommends the procedure.
 
 ```mermaid
@@ -229,7 +233,7 @@ item in scope is. Generated from
   <img src="https://img.shields.io/badge/not%20validated%20yet-189%20of%20352-9ca3af.svg" alt="not validated yet: 189 of 352">
 </p>
 
-163 of 352 items in scope (46 %) are validated: 0 in production, 163 in a lab. 189 are not validated yet.
+163 of 352 items in scope (46 %) have a recorded execution: 0 in production, 163 in a lab (lab-verified in OzarLand's page statuses). 189 have none yet.
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"pie1": "#d1d5db", "pie2": "#16a34a", "pie3": "#6b7280"}}}%%
@@ -321,7 +325,7 @@ policy: [docs/knowledge-validation-policy.md](docs/knowledge-validation-policy.m
 | propose **read-only** diagnostics first and label every step | run anything or touch your infrastructure on their own |
 | attach blast radius, verification, stop conditions, recovery and an approver to every state-changing step | claim something worked without evidence from you |
 | list what is missing instead of inventing it | authorize a production change |
-| redact secrets you paste | replace official OpenStack, RabbitMQ, Galera or vendor docs |
+| never repeat a secret you paste, and tell you to rotate it (ask you to redact first: what you paste reaches the model) | replace official OpenStack, RabbitMQ, Galera or vendor docs |
 | cite the book (`[Book: Ch. 9]`) and mark everything else `[Addition]` | hide uncertainty: release-specific facts are flagged to verify |
 | state the validation status of each procedure, and what its lab run did not cover | present an untested procedure as tested, or a lab result as valid everywhere |
 
@@ -348,7 +352,8 @@ model against a rubric:
   without, 8/8 loaded, no critical error with the skills (2 without);
   incident analysis still loads on all 6 of its scenarios.
 - **Also checked:** Haiku triggering, an end-to-end plugin install from
-  GitHub, and the zips uploaded to claude.ai.
+  GitHub, and the zips uploaded to claude.ai (0.1.0 skills; not repeated
+  with the two 0.2.0 skills).
 
 Grading is by a model, so read it as a direction more than an exact effect
 size. These runs measure reasoning, not whether a procedure works on

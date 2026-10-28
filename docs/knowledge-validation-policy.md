@@ -68,6 +68,21 @@ is a lab execution; whether a human operator independently checked it is
 recorded separately (`independent_human_check`), because it strengthens the
 evidence without changing the status.
 
+**How these statuses map to OzarLand's page statuses.** The runbook and
+deployment-pattern pages use four statuses of their own
+([knowledge lifecycle](https://github.com/OzarLand/ozarland/blob/main/docs/knowledge-lifecycle.md#page-statuses)).
+The same evidence is named differently:
+
+| Here | In OzarLand pages | Note |
+|---|---|---|
+| `LAB-VALIDATED` | `lab-verified` | Ran on a lab, today by an automated lab agent. **Not** "validated" in OzarLand's sense. |
+| `PRODUCTION-VALIDATED` | `validated` | Only when a human operator other than the author confirmed it on a real platform. |
+| `DOCUMENTED-UNVERIFIED`, `PROPOSED-UNVERIFIED` | `draft` | No execution recorded. |
+| `NEEDS-REVALIDATION` | `experimental` | Possibly outdated. |
+
+When you talk about this repository outside it, use OzarLand's words: an item
+here is *lab-verified*, never *validated*, until an operator confirms it.
+
 ## 3. What is in scope, and what is not
 
 The **declared knowledge scope** for technical validation is every item that
@@ -174,7 +189,7 @@ Skills must be uploadable on their own, so the status travels inside the
 skill text as a tag next to the procedure or claim:
 
 ```text
-[LAB-VALIDATED: VM-NET-03]
+[LAB-VALIDATED: VM-NET-04]
 [DOCUMENTED-UNVERIFIED: KA-OPS-04]
 ```
 

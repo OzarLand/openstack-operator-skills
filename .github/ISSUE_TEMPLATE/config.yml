@@ -3,3 +3,6 @@ contact_links:
   - name: The book
     url: https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow
     about: Questions about the book itself go to its repository.
+  - name: Ask a question (OzarLand Discussions)
+    url: https://github.com/OzarLand/ozarland/discussions/categories/q-a
+    about: Questions about the skills or about OpenStack operations; this repository has no Discussions of its own.

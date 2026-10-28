@@ -50,7 +50,7 @@ Read [docs/knowledge-validation-policy.md](docs/knowledge-validation-policy.md).
 In short:
 
 1. Every procedure or technical claim an operator could act on gets a status
-   tag in the skill text, such as `[LAB-VALIDATED: VM-NET-03]`, and one entry
+   tag in the skill text, such as `[LAB-VALIDATED: VM-NET-04]`, and one entry
    in `validation/inventory.yaml`
    ([template](docs/templates/validation-record.yaml)).
 2. A validated status needs a recorded execution: environment, release,
