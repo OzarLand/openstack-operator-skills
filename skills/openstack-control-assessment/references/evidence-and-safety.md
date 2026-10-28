@@ -5,6 +5,13 @@ They implement the book's investigation and change disciplines (Ch. 5, 9, 10,
 13, 19) plus a few safety rules added by this repository for AI assistance in
 production work (marked `[Addition]`).
 
+## Contents
+
+- Evidence classes
+- Rules (rule 12: validation status of every recommended step)
+- Validation summary line
+- Standard disclaimer line
+
 ## Evidence classes
 
 Tag each statement that matters to a decision:
@@ -74,7 +81,11 @@ statement. "We think so" means the point is not established [Book: App. B].
     text gives (release, deployment method, backends) and the steps it says
     were not run. Present `DOCUMENTED-UNVERIFIED` and `PROPOSED-UNVERIFIED`
     material as not tested, and `NEEDS-REVALIDATION` as possibly outdated.
-    Untagged technical statements are unverified. Never upgrade a status,
+    Untagged technical statements are unverified. **Label every step you
+    recommend, tested or not:** never state the status of the tested steps
+    and leave the untested ones beside them unlabelled, because the user will
+    read silence as tested. When an answer recommends procedures or steps,
+    end it with the validation summary line below. Never upgrade a status,
     never extend a lab result to another release, deployment method or backend,
     and never describe a skill or this repository as validated as a whole.
     A status describes past evidence; it is not a guarantee for the user's
@@ -89,6 +100,20 @@ statement. "We think so" means the point is not established [Book: App. B].
 | `DOCUMENTED-UNVERIFIED` | From documentation, source code, the book or a runbook; no execution evidence. |
 | `PROPOSED-UNVERIFIED` | Written for this repository; not executed anywhere yet. |
 | `NEEDS-REVALIDATION` | Was validated, but the procedure or its context changed since. |
+
+## Validation summary line
+
+When an answer recommends procedures or steps, end it (before the disclaimer
+line, if any) with one line naming every recommended step under its status,
+in the user's language, for example:
+
+> Validation: lab-tested (2026.1, Kolla-Ansible, ML2/OVS): steps 1 and 2.
+> Not tested: steps 3 and 4 (from documentation). Nothing here is validated
+> in production.
+
+Use the step numbers or names of the answer. Leave out a status no step has;
+keep the last sentence while no recommended step is `PRODUCTION-VALIDATED`.
+[Addition]
 
 ## Standard disclaimer line
 

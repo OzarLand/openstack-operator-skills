@@ -27,7 +27,8 @@
         "warns that forcing the service down affects every instance on that compute and is only safe after fencing",
         "prefers bringing nova-compute back, which resumes the pending delete and reaps leftovers",
         "gives read-only checks first (service list --long, ping/SSH, virsh list on the compute, nova-compute log)",
-        "states the validation status of the procedures it relies on and what the lab did not cover"
+        "states the validation status of the procedures it relies on and what the lab did not cover",
+        "labels every recommended step with its validation status, the untested ones included, and ends with a validation summary line"
       ],
       "expected_output": [
         "do not run the wiki sequence yet",
