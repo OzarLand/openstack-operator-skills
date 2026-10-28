@@ -103,7 +103,7 @@ on any command as a missing module, filter or plugin
 (`couldn't resolve module/action`) or unknown syntax; that wording varies by
 `ansible-core` version.
 
-[LAB-VALIDATED: KA-ERR-02] Recognition, quick checks and causes 1-2 below.
+[LAB-VALIDATED: KA-ERR-02] (source page still `draft`) Recognition, quick checks and causes 1-2 below.
 Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, deploy host on the node,
 backend not relevant; not run: cause 3, the missing-module and syntax forms.
 
@@ -137,7 +137,7 @@ showed it as `openstack.kolla 1.0.0`, which does not name the branch.
    (read your release's `requirements.txt`). Without PyPI access it fails with
    `ERROR: No matching distribution found for ansible-core!=2.19.0,<2.21,>=2.19`;
    the lab copied the wheel of 2.20.10 and ran `pip install --no-deps <wheel file>`.
-   [LAB-VALIDATED: KA-ERR-03] Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one;
+   [LAB-VALIDATED: KA-ERR-03] (source page still `draft`) Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one;
    venv activation and the offline wheel install were run, then `prechecks`
    passed (`failed=0`). Not run: the `pip install` from PyPI.
 3. Cause 3. *State-changing* (reinstalls the user's collections with
@@ -170,7 +170,7 @@ Impact on a running platform: the VIP down or held by several hosts, every
 API and service call through it failing or flapping; instances keep running,
 but metadata requests (cloud-init) of instances booting meanwhile fail.
 
-[LAB-VALIDATED: KA-ERR-05] Recognition, quick checks and identification of
+[LAB-VALIDATED: KA-ERR-05] (source page still `draft`) Recognition, quick checks and identification of
 cause 4. Lab: 2026.1, Kolla-Ansible 22.2.0, 3 controllers (loadbalancer
 group, keepalived unicast, ProxySQL) + 2 computes nested in an OpenStack
 cloud, failure triggered by `reconfigure --tags loadbalancer` changing
@@ -210,7 +210,7 @@ pairs; not run: causes 1-3, the multicast mode, `tcpdump`.
    restarting anything, and the next `reconfigure` passed. Undo:
    `openstack port unset --allowed-address ip-address=<internal-vip>,mac-address=<port-mac> <port-id>`
    (without `mac-address`, `Port does not contain allowed-address-pair`).
-   [LAB-VALIDATED: KA-ERR-07] Lab: 2026.1, Kolla-Ansible 22.2.0, 3
+   [LAB-VALIDATED: KA-ERR-07] (source page still `draft`) Lab: 2026.1, Kolla-Ansible 22.2.0, 3
    controllers nested in an OpenStack cloud, unicast; `port set`, the undo
    form and the verification were run. Not run: the wrong-subnet variant.
 2. Causes 1-3 and the wrong subnet. [DOCUMENTED-UNVERIFIED: KA-ERR-08]
@@ -466,7 +466,7 @@ and `discover_hosts` run once per batch on its first compute: if that one
 failed, discovery is skipped for every new compute of the run. A compute that
 registered earlier and is now `down` does not produce this error.
 
-[LAB-VALIDATED: KA-ERR-21] Recognition, quick checks and the cause 3 rename
+[LAB-VALIDATED: KA-ERR-21] (source page still `draft`) Recognition, quick checks and the cause 3 rename
 variant. Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one, ML2/OVS (`host =`
 injected in `/etc/kolla/config/nova/nova-compute.conf` after deleting the
 host's instance and compute service; run failed after 20 retries, 9 min);
@@ -497,7 +497,7 @@ Placement statement (from the order of `Service.start()`; not run).
 discovery).
 1. Cause 3: remove the `host =` override and deploy again. *State-changing*
    (restarts the compute containers and registers the host).
-   [LAB-VALIDATED: KA-ERR-23] Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one,
+   [LAB-VALIDATED: KA-ERR-23] (source page still `draft`) Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one,
    ML2/OVS; override removed, `deploy --tags nova` (no `--limit` on an
    all-in-one): `Discover nova hosts` ran, `failed=0`, 5 min. Not run: a
    fact-cache clear, deleting a wrongly named record, `--limit <compute>`.
@@ -645,8 +645,9 @@ sudo docker exec rabbitmq bash -c 'rabbitmqctl force_reset || rabbitmqctl reset'
 sudo docker exec rabbitmq rabbitmqctl start_app
 sudo docker exec rabbitmq rabbitmqctl await_online_nodes <number of rabbitmq hosts>
 ```
-(`force_reset` first as Kolla's `reset-state.yml` does; it does not exist with
-Khepri, the default from RabbitMQ 4.2.) A controller renamed or replaced
+(`force_reset` first as Kolla's `reset-state.yml` does; with Khepri, the
+default from RabbitMQ 4.2, it is refused (`Forced reset is unsupported with
+Khepri`) and `reset` runs.) A controller renamed or replaced
 **under a new name**, still listed as stopped: *Destructive* (queues whose only
 replica was on it are lost; the old node must be gone for good and not
 running; no undo), from one healthy node:

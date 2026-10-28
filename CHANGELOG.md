@@ -8,6 +8,19 @@
   recorded VM-1 and KA-4 answers, which labelled the lab-tested step and left
   untested steps beside it unlabelled. VM-1 and KA-4 gain a grading criterion
   for it; not re-run yet.
+- Draft source pages disclosed next to 47 `LAB-VALIDATED` tags (43 items),
+  as the validation policy requires; no status changed.
+- `tools/check_sources.py`: reports cited source pages that are missing or
+  `draft` without disclosure, given local checkouts of the source
+  repositories (not in CI).
+- Aligned with the current sources: the 2026.1 `--verbose` failure hits
+  `archive_deleted_rows`; `force_reset` is refused with Khepri. Source defects
+  list updated (`logs/README.md` fixed upstream).
+- README: open Agent Skills format and plain-Markdown references; the skills
+  were written with AI agents and reviewed by the author; the shared
+  "Part of OzarLand" block. CONTRIBUTING: operational corrections go to the
+  source runbook or pattern first. Policy: why risk is written as words, not
+  ⚠️ / 🛑. Evaluation report title covers 0.1.0 and 0.2.0.
 
 ## [0.2.0] — 2026-10-28
 

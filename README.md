@@ -29,6 +29,10 @@
 **Nine [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)
 that make Claude reason like a senior OpenStack operator** during incidents,
 changes, maintenance and troubleshooting.
+They use the open Agent Skills format, and every `references/` file is plain
+Markdown that people and other assistants can read as it is.
+The skills themselves, not only the lab runs, were written with AI agents from
+Soufian Zaouam's book and the OzarLand pages, and reviewed by him.
 
 - **For** people who run OpenStack in production: operators, SREs, platform
   engineers and their leads.
@@ -100,7 +104,7 @@ Details and caveats: [docs/installation.md](docs/installation.md).
 
 | Claude Code | claude.ai | Claude API | Agent SDK |
 |:-:|:-:|:-:|:-:|
-| ✅ tested | ✅ tested | expected, not tested yet | expected, not tested yet |
+| ✅ tested | ✅ tested with the 0.1.0 skills; the two 0.2.0 skills not yet | expected, not tested yet | expected, not tested yet |
 
 ## 🧰 Pick a skill
 
@@ -195,9 +199,13 @@ confidently wrong exactly where production OpenStack punishes you.
 >
 > A lab result is never presented as a production result, and reading or
 > reviewing a procedure is not validation.
+>
+> In OzarLand's page statuses, `LAB-VALIDATED` is **lab-verified** (run on a
+> lab by an automated agent), and nothing here is *validated* by an operator
+> yet ([mapping](docs/knowledge-validation-policy.md#2-statuses)).
 
 **How a procedure earns its status.** Each one carries a tag such as
-`[LAB-VALIDATED: VM-NET-03]`, and Claude tells you that status, and what the
+`[LAB-VALIDATED: VM-NET-04]`, and Claude tells you that status, and what the
 test did not cover, when it recommends the procedure.
 
 ```mermaid
@@ -229,7 +237,7 @@ item in scope is. Generated from
   <img src="https://img.shields.io/badge/not%20validated%20yet-189%20of%20352-9ca3af.svg" alt="not validated yet: 189 of 352">
 </p>
 
-163 of 352 items in scope (46 %) are validated: 0 in production, 163 in a lab. 189 are not validated yet.
+163 of 352 items in scope (46 %) have a recorded execution: 0 in production, 163 in a lab (lab-verified in OzarLand's page statuses). 189 have none yet.
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"pie1": "#d1d5db", "pie2": "#16a34a", "pie3": "#6b7280"}}}%%
@@ -321,7 +329,7 @@ policy: [docs/knowledge-validation-policy.md](docs/knowledge-validation-policy.m
 | propose **read-only** diagnostics first and label every step | run anything or touch your infrastructure on their own |
 | attach blast radius, verification, stop conditions, recovery and an approver to every state-changing step | claim something worked without evidence from you |
 | list what is missing instead of inventing it | authorize a production change |
-| redact secrets you paste | replace official OpenStack, RabbitMQ, Galera or vendor docs |
+| never repeat a secret you paste, and tell you to rotate it (ask you to redact first: what you paste reaches the model) | replace official OpenStack, RabbitMQ, Galera or vendor docs |
 | cite the book (`[Book: Ch. 9]`) and mark everything else `[Addition]` | hide uncertainty: release-specific facts are flagged to verify |
 | state the validation status of each procedure, and what its lab run did not cover | present an untested procedure as tested, or a lab result as valid everywhere |
 
@@ -348,22 +356,16 @@ model against a rubric:
   without, 8/8 loaded, no critical error with the skills (2 without);
   incident analysis still loads on all 6 of its scenarios.
 - **Also checked:** Haiku triggering, an end-to-end plugin install from
-  GitHub, and the zips uploaded to claude.ai.
+  GitHub, and the zips uploaded to claude.ai (0.1.0 skills; not repeated
+  with the two 0.2.0 skills).
 
 Grading is by a model, so read it as a direction more than an exact effect
 size. These runs measure reasoning, not whether a procedure works on
 OpenStack. [Full evaluation report →](docs/evaluation-report.md)
 
-## 🌍 Part of OzarLand
+## 🧬 Where the knowledge comes from
 
-**[OzarLand](https://github.com/OzarLand/ozarland): a shared land for better
-OpenStack operations.** It started as a personal initiative by Soufian Zaouam
-to share practical OpenStack operational knowledge, and it is meant to grow
-into a space where operators exchange experience, document solutions and help
-each other run more reliable platforms. It is open to everyone: your
-knowledge, questions and corrections are welcome.
-
-The skills draw on its knowledge and keep its validation status attached:
+The skills draw on OzarLand's knowledge and keep its validation status attached:
 
 ```mermaid
 flowchart LR
@@ -373,14 +375,6 @@ flowchart LR
     QL["openstack-quick-lab<br/>disposable lab"] -.->|practise the runbooks| RB
     SK["openstack-operator-skills<br/>(here)"] --> C["Claude"]
 ```
-
-| Repository | Role |
-|---|---|
-| [ozarland](https://github.com/OzarLand/ozarland) | Community home: principles, conventions, how pages are reviewed and validated |
-| [openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) | Symptom-driven runbooks for instance problems; source of most lab evidence here |
-| [kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns) | Kolla-Ansible deployment choices and their trade-offs, compared rather than prescribed |
-| [openstack-quick-lab](https://github.com/OzarLand/openstack-quick-lab) | A disposable lab to try OpenStack and practise the runbooks |
-| openstack-operator-skills (here) | Claude skills that apply this knowledge and an operating method, and say how well each procedure was tested |
 
 A correction to a procedure belongs first in the runbook or pattern it comes
 from; the skill then picks it up ([docs/source-mapping.md](docs/source-mapping.md)).
@@ -431,6 +425,21 @@ assets/                         images used in this README
 ```
 
 </details>
+
+## 🌍 Part of OzarLand
+
+**OzarLand: a shared land for better OpenStack operations.** It started as a personal initiative by Soufian Zaouam
+to share practical OpenStack operational knowledge, and it is meant to grow into a space where operators exchange
+experience, document solutions and help each other run more reliable platforms. It is open to everyone: your
+knowledge, questions and corrections are welcome.
+
+| | Repository | What it holds |
+|:-:|---|---|
+| | [ozarland](https://github.com/OzarLand/ozarland) | Start here: newcomer path, community rules, [Discussions](https://github.com/OzarLand/ozarland/discussions) |
+| 🔧 | [openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) | Symptom-driven runbooks for instance problems |
+| 🏗️ | [kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns) | Ways to deploy with Kolla-Ansible, compared |
+| 🧪 | [openstack-quick-lab](https://github.com/OzarLand/openstack-quick-lab) | A disposable OpenStack lab to practise on |
+| 🤖 | `openstack-operator-skills` **(you are here)** | Claude skills that apply this knowledge |
 
 ## 📚 The book, licence and citation
 

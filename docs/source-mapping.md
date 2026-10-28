@@ -138,9 +138,12 @@ the new.
 
 ## 7. Defects found in the sources
 
-Reported here so they can be fixed upstream; each affects the narrower claim
-this repository uses. "confirmed_by vs body" means the page's frontmatter
-lab record and its own text disagree on what was run.
+Reported here and to the source repositories' owner so they can be fixed
+upstream (`tools/check_sources.py` reports missing pages and undisclosed
+draft status mechanically); each affects the narrower claim this repository uses. Rows marked
+*Fixed upstream* stay for the record. "confirmed_by vs body" means the page's
+frontmatter lab record and its own text disagree on what was run. Last
+checked against both repositories' `main` on 2026-10-28.
 
 | Page | Problem |
 |---|---|
@@ -156,9 +159,9 @@ lab record and its own text disagree on what was run.
 | vm `scheduling/instance-fails-to-boot-from-volume.md` | cinder-volume down listed as a cause of `error`; the lab showed `creating` |
 | vm `diagnostics/expired-certificates-...` vs `recovery/keystone-401-...` | Disagree on whether Keystone must be restarted after fixing keys |
 | vm `recovery/database-too-many-connections-...`, `volumes/extend-in-use-...`, several `logs/` pages | Lab runs in the body, empty `confirmed_by` |
-| vm `logs/README.md` | Lists lab-verified pages as `draft` |
-| kolla `deployment-errors/pull-fails-http-response-to-https-client-insecure-registry.md` | Frontmatter is invalid YAML (unquoted colon in `title`) |
-| kolla `operations/replacing-a-failed-controller.md` vs `deployment-errors/rabbitmq-nodes-do-not-form-a-cluster.md` | `forget_cluster_node` when the replacement reuses the old name: one does it, the other forbids it |
+| vm `logs/README.md` | *Fixed upstream* (openstack-vm-runbooks #144): listed lab-verified pages as `draft`; the index now follows each page's front matter |
+| kolla `deployment-errors/pull-fails-http-response-to-https-client-insecure-registry.md` | Frontmatter is invalid YAML (unquoted colon in `title`); still fails to parse with PyYAML on `main`; reported to the owner |
+| kolla `operations/replacing-a-failed-controller.md` vs `deployment-errors/rabbitmq-nodes-do-not-form-a-cluster.md` | `forget_cluster_node` when the replacement reuses the old name: one does it (step 4, for either name), the other forbids it; still open on `main`, reported to the owner |
 | kolla `operations/adding-a-compute-node.md` vs `deployment-errors/nova-compute-services-failed-to-register.md` | Disagree on whether Placement errors cause the registration failure |
 | kolla `operations/mariadb-backup-and-restore-with-mariabackup.md` vs the mariadb-recovery page | Joiner wait about 11 min vs about 1 min |
 | kolla `services/external-ceph-for-glance-cinder-and-nova.md` | confirmed_by records a read-only check; body says nothing was run |

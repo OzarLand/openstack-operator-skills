@@ -10,7 +10,7 @@ the inventory is consistent, not that a procedure works.
 
 ## Summary
 
-163 of 352 items in scope (46 %) are validated: 0 in production, 163 in a lab. 189 are not validated yet.
+163 of 352 items in scope (46 %) have a recorded execution: 0 in production, 163 in a lab (lab-verified in OzarLand's page statuses). 189 have none yet.
 
 | Status | Items | Share |
 |---|---:|---:|

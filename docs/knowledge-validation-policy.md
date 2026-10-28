@@ -68,6 +68,21 @@ is a lab execution; whether a human operator independently checked it is
 recorded separately (`independent_human_check`), because it strengthens the
 evidence without changing the status.
 
+**How these statuses map to OzarLand's page statuses.** The runbook and
+deployment-pattern pages use four statuses of their own
+([knowledge lifecycle](https://github.com/OzarLand/ozarland/blob/main/docs/knowledge-lifecycle.md#page-statuses)).
+The same evidence is named differently:
+
+| Here | In OzarLand pages | Note |
+|---|---|---|
+| `LAB-VALIDATED` | `lab-verified` | Ran on a lab, today by an automated lab agent. **Not** "validated" in OzarLand's sense. |
+| `PRODUCTION-VALIDATED` | `validated` | Only when a human operator other than the author confirmed it on a real platform. |
+| `DOCUMENTED-UNVERIFIED`, `PROPOSED-UNVERIFIED` | `draft` | No execution recorded. |
+| `NEEDS-REVALIDATION` | `experimental` | Possibly outdated. |
+
+When you talk about this repository outside it, use OzarLand's words: an item
+here is *lab-verified*, never *validated*, until an operator confirms it.
+
 ## 3. What is in scope, and what is not
 
 The **declared knowledge scope** for technical validation is every item that
@@ -174,7 +189,7 @@ Skills must be uploadable on their own, so the status travels inside the
 skill text as a tag next to the procedure or claim:
 
 ```text
-[LAB-VALIDATED: VM-NET-03]
+[LAB-VALIDATED: VM-NET-04]
 [DOCUMENTED-UNVERIFIED: KA-OPS-04]
 ```
 
@@ -192,6 +207,11 @@ Conventions:
 - Provenance tags stay as they are: `[Book: Ch. N]` for the book,
   `[Addition]` for everything else. Provenance says where a statement comes
   from; the validation tag says whether it was executed.
+- Risk is written as plain-text labels, `read-only`, `state-changing` and
+  `Destructive` (*State-changing* and *Destructive* in italics next to a
+  step), where the OzarLand pages use the markers ⚠️ (state-changing) and 🛑
+  (destructive). The skill text is read by a model and quoted back to an
+  operator, so a word survives where an emoji can be dropped or misread.
 
 ## 7. Revalidation
 
@@ -208,6 +228,18 @@ Set `NEEDS-REVALIDATION` (keeping the old evidence) when:
 
 Each validated item lists its own `revalidate_when`. Anyone can request a
 revalidation with the issue template; a maintainer sets the status.
+
+Source drift is checked with `tools/check_sources.py`, given local checkouts
+of the source repositories (not run in CI, since it needs them). It reads the
+front matter `status:` of every page the inventory cites and reports pages
+that are missing (moved or deleted) and `LAB-VALIDATED` items whose source
+page is `draft` without that being disclosed next to the tag (section 4). It
+only reports; a maintainer decides what changes:
+
+```
+python3 tools/check_sources.py --repo openstack-vm-runbooks=<path> \
+    --repo kolla-ansible-deployment-patterns=<path> --ref origin/main
+```
 
 ## 8. Contributing knowledge and evidence
 

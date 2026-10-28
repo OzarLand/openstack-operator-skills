@@ -222,7 +222,7 @@ upgrade. 2026.1 moved `cinder-volume`/`cinder-backup` to the `cinder` group
 (controllers); LVM needs them on the VG hosts (`cinder-volume-lvm`).
 [DOCUMENTED-UNVERIFIED: KA-ARCH-10] Ceph and NFS columns not applied.
 
-Settings that do not do what they seem [LAB-VALIDATED: KA-ARCH-11]:
+Settings that do not do what they seem [LAB-VALIDATED: KA-ARCH-11] (source page still `draft`):
 `enable_cinder_backend_lvm` without `enable_cinder: "yes"` (2026.1 default
 `false`) deploys no Cinder and reports `failed=0`; `cinder_backup_driver:
 "nfs"` without `cinder_backup_share` deploys `cinder-backup` `down` from the
@@ -249,20 +249,20 @@ backups stay; no new backup until a backup service runs): Kolla-Ansible:
 | Live migration | copies the disks (block migration; not with config drives) | no copy | no copy |
 | Capacity | per compute: one can be full while others have room | one pool | Cinder quotas |
 
-[LAB-VALIDATED: KA-ARCH-13] Local store location and format, and a
+[LAB-VALIDATED: KA-ARCH-13] (source page still `draft`) Local store location and format, and a
 boot-from-volume root disk on Cinder LVM/iSCSI, read on a lab. Lab: 2026.1,
 Kolla-Ansible all-in-one, ML2/OVS, local store and LVM; not run: Nova on Ceph
 RBD, migration.
 
 Evacuation with the local store rebuilds the root disk from its image: data
-written in the instance is lost. [LAB-VALIDATED: KA-ARCH-14] Lab: 2026.1,
+written in the instance is lost. [LAB-VALIDATED: KA-ARCH-14] (source page still `draft`) Lab: 2026.1,
 Kolla-Ansible 22.2.0, ML2/OVS, local instance disks, no Cinder; not run: boot
 from volume, Ceph RBD instance disks. A boot-from-volume instance keeps its
 disk through an evacuation [DOCUMENTED-UNVERIFIED: KA-ARCH-31] (the source's
 frontmatter says it was seen, its body says boot from volume was not run). A full instance store pauses the instances that write while
 Nova still shows them `ACTIVE`; `df` on the Docker volume path needs `sudo`.
 Monitor each compute's store, and give it its own file system, or it fills
-the root file system with Docker and logs. [LAB-VALIDATED: KA-ARCH-15] Lab:
+the root file system with Docker and logs. [LAB-VALIDATED: KA-ARCH-15] (source page still `draft`) Lab:
 2026.1, Kolla-Ansible multinode (1 controller, 2 computes), dedicated 5 GB
 store; not run: Ceph, boot from volume on a full host.
 
@@ -346,7 +346,7 @@ its host. `enable_fluentd_systemd` shipped 0 journal documents (Permission
 denied, nothing in `fluentd.log`). Retention: indices closed after 30 days,
 deleted after 60; Kolla-Ansible does not update an existing policy. Without
 HAProxy, Dashboards answered on 5601 without credentials.
-[LAB-VALIDATED: KA-ARCH-21] Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one,
+[LAB-VALIDATED: KA-ARCH-21] (source page still `draft`) Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one,
 ML2/OVS, `enable_haproxy: "no"`, one OpenSearch node; not run: HAProxy
 frontends, a three-node cluster, a retention change, Dashboards UI.
 
@@ -366,7 +366,7 @@ delete the two unit files under `/etc/systemd/system/`,
 `sudo systemctl daemon-reload` — after `docker rm -f` alone the units stayed
 in `auto-restart`. Undo: `enable_central_logging: "yes"` and the deploy.
 Removing the `opensearch` volume deletes the logs: no undo.
-[LAB-VALIDATED: KA-ARCH-23] Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one,
+[LAB-VALIDATED: KA-ARCH-23] (source page still `draft`) Lab: 2026.1, Kolla-Ansible 22.2.0 all-in-one,
 ML2/OVS, no HAProxy; not run: the HAProxy part below, volume removal.
 
 **Dropping the frontends** (central logging, monitoring, Designate),
@@ -411,7 +411,7 @@ MariaDB exits with `Bind on TCP/IP port. Got error: 98: Address already in
 use`, `deploy` hangs on `Wait for first MariaDB service port liveness`, and a
 `haproxy` container runs despite `enable_haproxy: "no"`. During a first
 deploy, `fatal: ... Timeout when waiting for search string MariaDB` followed by
-`...ignoring` is expected; read the `PLAY RECAP`. [LAB-VALIDATED: KA-ARCH-26]
+`...ignoring` is expected; read the `PLAY RECAP`. [LAB-VALIDATED: KA-ARCH-26] (source page being returned to `draft` upstream)
 Lab: 2026.1, Kolla-Ansible 22.2.0, all-in-one nested, ML2/OVS, local disk;
 not run: any multinode or HAProxy setup. The pages disagree on when ProxySQL
 became the default: the all-in-one page says 2026.1, the version notes say
@@ -477,5 +477,5 @@ Everything that went wrong came before `upgrade`:
   `docker rmi` by tag freed 7 GB (*State-changing*: removes the quickest way
   back).
 
-[LAB-VALIDATED: KA-ARCH-30] Lab: same run; not run: `bootstrap-servers` during
+[LAB-VALIDATED: KA-ARCH-30] (source page still `draft`) Lab: same run; not run: `bootstrap-servers` during
 the upgrade, Podman.
