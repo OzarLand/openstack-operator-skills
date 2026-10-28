@@ -645,8 +645,9 @@ sudo docker exec rabbitmq bash -c 'rabbitmqctl force_reset || rabbitmqctl reset'
 sudo docker exec rabbitmq rabbitmqctl start_app
 sudo docker exec rabbitmq rabbitmqctl await_online_nodes <number of rabbitmq hosts>
 ```
-(`force_reset` first as Kolla's `reset-state.yml` does; it does not exist with
-Khepri, the default from RabbitMQ 4.2.) A controller renamed or replaced
+(`force_reset` first as Kolla's `reset-state.yml` does; with Khepri, the
+default from RabbitMQ 4.2, it is refused (`Forced reset is unsupported with
+Khepri`) and `reset` runs.) A controller renamed or replaced
 **under a new name**, still listed as stopped: *Destructive* (queues whose only
 replica was on it are lost; the old node must be gone for good and not
 running; no undo), from one healthy node:

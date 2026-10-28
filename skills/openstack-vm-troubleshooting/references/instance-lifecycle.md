@@ -702,10 +702,12 @@ database edits: never run on a lab.
 4. Archive and purge (*Destructive*): loses the history of deleted resources
    that audits, billing and incident reviews may need; precondition: a
    database backup and retention checked (`--before <date>`); no undo without
-   the backup. The page reports a 2026.1 failure when `--all-cells` is
-   combined with `--verbose`, without making clear which command it hits:
-   do not add `--verbose`, and check `nova-manage --help` on the platform
-   (flags change between releases).
+   the backup. The page reports that on 2026.1 `nova-manage db
+   archive_deleted_rows --all-cells --verbose` archives the rows, then fails
+   printing the summary (`ValueError: not enough values to unpack`, exit code
+   1 although rows were archived): leave `--verbose` off that command, and
+   check `nova-manage --help` on the platform (flags change between
+   releases).
 5. Direct database edits: last resort, only when no API or `*-manage`
    command covers the case; full backup, one row by UUID at a time, verified
    after each, recorded in the change record.
