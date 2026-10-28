@@ -3,12 +3,12 @@
 <img src="assets/banner.svg" alt="OpenStack Operator Skills: senior-operator judgement for Claude" width="100%">
 
 <p>
-  <a href="https://github.com/soufian-zaouam/openstack-operator-skills/actions/workflows/validate.yml"><img src="https://github.com/soufian-zaouam/openstack-operator-skills/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <a href="https://github.com/OzarLand/openstack-operator-skills/actions/workflows/validate.yml"><img src="https://github.com/OzarLand/openstack-operator-skills/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License: Apache-2.0"></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.0-informational.svg" alt="Version 0.2.0"></a>
   <a href="#-the-nine-skills"><img src="https://img.shields.io/badge/Agent%20Skills-9-8A2BE2.svg" alt="9 Agent Skills"></a>
   <a href="#-quick-start"><img src="https://img.shields.io/badge/Claude%20Code-plugin-D97757.svg" alt="Claude Code plugin"></a>
-  <a href="https://github.com/soufian-zaouam/openstack-operator-skills/stargazers"><img src="https://img.shields.io/github/stars/soufian-zaouam/openstack-operator-skills?style=flat&color=yellow" alt="GitHub stars"></a>
+  <a href="https://github.com/OzarLand/openstack-operator-skills/stargazers"><img src="https://img.shields.io/github/stars/OzarLand/openstack-operator-skills?style=flat&color=yellow" alt="GitHub stars"></a>
 </p>
 
 <p>
@@ -48,7 +48,7 @@ validated: on a lab, in production, or not yet.
 In Claude Code:
 
 ```text
-/plugin marketplace add soufian-zaouam/openstack-operator-skills
+/plugin marketplace add OzarLand/openstack-operator-skills
 /plugin install openstack-operations@openstack-operator-skills
 ```
 
@@ -64,7 +64,7 @@ for permission to read them: allow it.
 **Copy into Claude Code** (personal or per project):
 
 ```bash
-git clone https://github.com/soufian-zaouam/openstack-operator-skills
+git clone https://github.com/OzarLand/openstack-operator-skills
 cp -r openstack-operator-skills/skills/* ~/.claude/skills/        # all projects
 # or: mkdir -p .claude/skills && cp -r openstack-operator-skills/skills/* .claude/skills/
 ```
@@ -215,6 +215,24 @@ that status when it recommends the procedure:
 | `PROPOSED-UNVERIFIED` | written here, not executed yet |
 | `NEEDS-REVALIDATION` | was validated; the procedure or its context has changed |
 
+**All procedures presented as validated in this knowledge base have been
+successfully tested either in production or, at minimum, in a laboratory
+environment. Procedures without sufficient execution evidence are explicitly
+identified as unvalidated or experimental.** A lab result is never presented
+as a production result, and reading or reviewing a procedure is not
+validation.
+
+In the terms commonly used for operational knowledge:
+
+| Classification | Status used here |
+|---|---|
+| Production-validated | `PRODUCTION-VALIDATED` |
+| Lab-validated | `LAB-VALIDATED`, for the steps and configuration recorded |
+| Partially validated | each `LAB-VALIDATED` entry records the steps *not* observed; per skill, see the table below |
+| Unvalidated | `DOCUMENTED-UNVERIFIED`: from documentation, the book or a runbook, never executed here |
+| Experimental | `PROPOSED-UNVERIFIED`: written here, not executed |
+| Possibly outdated | `NEEDS-REVALIDATION` |
+
 **The knowledge base is undergoing validation.** It is not fully validated,
 and no repository-wide validation claim will be made until every item in the
 declared scope is production- or lab-validated. Current coverage, generated
@@ -231,6 +249,18 @@ from the inventory:
 | `PROPOSED-UNVERIFIED` | 1 | 0 % |
 | `NEEDS-REVALIDATION` | 0 | 0 % |
 | **Total in scope** | **352** | |
+
+| Skill | Validation status | Environment | Software version | Evidence | Known limitations |
+|---|---|---|---|---|---|
+| `openstack-automation-review` | Unvalidated: 0 of 2 items | Unknown (no execution recorded) | Unknown (no execution recorded) | None recorded; [details](docs/validation-coverage.md) | All 2 items unverified |
+| `openstack-change-review` | Unvalidated: 0 of 4 items | Unknown (no execution recorded) | Unknown (no execution recorded) | None recorded; [details](docs/validation-coverage.md) | All 4 items unverified |
+| `openstack-control-assessment` | No inventory items: a reasoning method from the book | n/a | n/a | Behavioural evaluation only (reasoning, not execution) | Commands quoted in its examples are untagged, so unverified |
+| `openstack-incident-analysis` | Partially lab-validated: 18 of 39 items | Kolla-Ansible labs | OpenStack 2026.1 | 18 lab records, 2026-10-13 to 2026-10-27; [details](docs/validation-coverage.md) | No production evidence; runs by an automated lab agent, no independent human check; 21 items unverified |
+| `openstack-kolla-ansible-operations` | Partially lab-validated: 42 of 126 items | Kolla-Ansible labs | OpenStack 2025.1 to 2026.1, 2026.1 | 42 lab records, 2026-10-13 to 2026-10-27; [details](docs/validation-coverage.md) | No production evidence; runs by an automated lab agent, no independent human check; 84 items unverified |
+| `openstack-maintenance-planning` | Partially lab-validated: 2 of 7 items | Kolla-Ansible labs | OpenStack 2026.1 | 2 lab records, 2026-10-24 to 2026-10-25; [details](docs/validation-coverage.md) | No production evidence; runs by an automated lab agent, no independent human check; 5 items unverified |
+| `openstack-operational-decisions` | No inventory items: a reasoning method from the book | n/a | n/a | Behavioural evaluation only (reasoning, not execution) | Commands quoted in its examples are untagged, so unverified |
+| `openstack-runbook-authoring` | No inventory items: a reasoning method from the book | n/a | n/a | Behavioural evaluation only (reasoning, not execution) | Commands quoted in its examples are untagged, so unverified |
+| `openstack-vm-troubleshooting` | Partially lab-validated: 101 of 174 items | Kolla-Ansible labs | OpenStack 2026.1 | 101 lab records, 2026-10-13 to 2026-10-27; [details](docs/validation-coverage.md) | No production evidence; runs by an automated lab agent, no independent human check; 73 items unverified |
 <!-- validation-coverage:end -->
 
 What the lab evidence covers: OpenStack 2026.1 deployed with Kolla-Ansible
@@ -295,20 +325,38 @@ assets/                         images used in this README
 
 </details>
 
+## 🏝️ Part of OzarLand
+
+[OzarLand](https://github.com/OzarLand/ozarland) is an early-stage, independent
+space where OpenStack operators share what they learn running it. This
+repository is the AI-assisted part: the skills read the same knowledge that
+operators can read directly, and keep its validation status attached.
+
+| Repository | Role |
+|---|---|
+| [ozarland](https://github.com/OzarLand/ozarland) | Community home: principles, conventions, how pages are reviewed and validated |
+| [openstack-vm-runbooks](https://github.com/OzarLand/openstack-vm-runbooks) | Symptom-driven runbooks for instance problems; source of most lab evidence here |
+| [kolla-ansible-deployment-patterns](https://github.com/OzarLand/kolla-ansible-deployment-patterns) | Kolla-Ansible deployment choices and their trade-offs, compared rather than prescribed |
+| [openstack-quick-lab](https://github.com/OzarLand/openstack-quick-lab) | A disposable lab to try OpenStack and practise the runbooks |
+| openstack-operator-skills (here) | Claude skills that apply this knowledge and an operating method, and say how well each procedure was tested |
+
+A correction to a procedure belongs first in the runbook or pattern it comes
+from; the skill then picks it up ([docs/source-mapping.md](docs/source-mapping.md)).
+
 ## 🤝 Contributing
 
 The most valuable contribution is operational experience: a case where a skill
 gave unsafe or unhelpful advice, a missing decision point, a technical note
 that has aged. No code needed:
 
-- 🐛 [Report unsafe or wrong advice](https://github.com/soufian-zaouam/openstack-operator-skills/issues/new?template=unsafe-or-wrong-advice.yml)
-- ✏️ [Suggest an improvement or correction](https://github.com/soufian-zaouam/openstack-operator-skills/issues/new?template=improvement.yml)
+- 🐛 [Report unsafe or wrong advice](https://github.com/OzarLand/openstack-operator-skills/issues/new?template=unsafe-or-wrong-advice.yml)
+- ✏️ [Suggest an improvement or correction](https://github.com/OzarLand/openstack-operator-skills/issues/new?template=improvement.yml)
 - 📘 Read [CONTRIBUTING.md](CONTRIBUTING.md) to send a pull request
 
 Six corrections from the first community review are already in 0.1.0.
 
-<a href="https://github.com/soufian-zaouam/openstack-operator-skills/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=soufian-zaouam/openstack-operator-skills" alt="Contributors">
+<a href="https://github.com/OzarLand/openstack-operator-skills/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=OzarLand/openstack-operator-skills" alt="Contributors">
 </a>
 
 ## 📚 The book, licence and citation
@@ -326,8 +374,8 @@ https://github.com/soufian-zaouam/openstack-the-day-after-tomorrow
 
 ## ⭐ Star history
 
-<a href="https://star-history.com/#soufian-zaouam/openstack-operator-skills&Date">
-  <img src="https://api.star-history.com/svg?repos=soufian-zaouam/openstack-operator-skills&type=Date" alt="Star history" width="600">
+<a href="https://star-history.com/#OzarLand/openstack-operator-skills&Date">
+  <img src="https://api.star-history.com/svg?repos=OzarLand/openstack-operator-skills&type=Date" alt="Star history" width="600">
 </a>
 
 ---
