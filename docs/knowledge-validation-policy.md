@@ -129,7 +129,15 @@ A lab run described in a source page's text, without a named executor
 evidence: the item stays unverified and the run is summarised under
 `limitations`, so its findings, especially failures, still reach the
 operator as warnings. When a source's `confirmed_by` record and its own text
-disagree about what was run, the narrower account is used.
+disagree about what was run, the narrower account is used, including for the
+recorded topology and date.
+
+What decides is whether the executor is named, not where the record sits:
+a draft page or experience report whose provenance names who ran the lab
+(for example KA-ARCH-29, written by the lab agent that ran the upgrade) can
+support `LAB-VALIDATED`, with its draft status disclosed in the skill text;
+a page that describes a run without naming who ran it (for example IA-CP-05)
+cannot.
 
 Never put in evidence: credentials, tokens, real hostnames or addresses,
 customer or person names, unredacted logs.
